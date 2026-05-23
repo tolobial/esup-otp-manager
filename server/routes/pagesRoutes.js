@@ -163,5 +163,21 @@ export function routing(router, passport) {
                 );
             });
         }
+    } else if (properties.authentication.name == 'dev') {
+        router.get('/login', function(req, res, next) {
+            const user = {
+                uid: process.env.DEV_UID || 'devuser',
+                name: 'Dev User',
+                attributes: {},
+            };
+            logUser(req, res, next, user);
+        });
+
+        router.get('/logout', function(req, res, next) {
+            req.logout(function(err) {
+                if (err) { return next(err); }
+                res.redirect('/');
+            });
+        });
     }
 }

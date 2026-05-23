@@ -95,14 +95,23 @@ export default async function(_passport) {
     });
 
     const authenticationName = properties.esup.authentication || "CAS";
-    const authenticationProperties = properties.esup[authenticationName];
-    if (!authenticationProperties) {
-        throw new Error("No authentication backend defined in esup.properties");
+    if (process.env.DEV_AUTH !== 'true') {
+        const authenticationProperties = properties.esup[authenticationName];
+        if (!authenticationProperties) {
+            throw new Error("No authentication backend defined in esup.properties");
+        }
+        const { default: authentication } = await import(`./authentication/${authenticationName}.js`);
+        properties.authentication = await authentication(authenticationProperties);
+        passport.use(properties.authentication.strategy);
+    } else {
+        if (process.env.NODE_ENV === 'production') {
+            throw new Error("FATAL: DEV_AUTH cannot be enabled in production environment. Aborting.");
+        }
+        logger.warn("====================================================");
+        logger.warn(" DEV AUTH STUB ENABLED — DO NOT USE IN PRODUCTION");
+        logger.warn("====================================================");
+        properties.authentication = { name: 'dev' };
     }
-    const { default: authentication } = await import(`./authentication/${authenticationName}.js`);
-    properties.authentication = await authentication(authenticationProperties);
-
-    passport.use(properties.authentication.strategy);
 
     routing();
 
