@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<!--
+  error-pages.html — Pages d'erreur 403 et 500
+  ============================================
+  Ce fichier contient 2 écrans empilés verticalement, séparés par un <hr>.
+  PAS de sidebar — utilisateur probablement non authentifié.
+  COMPOSANTS EXTRACTIBLES EN PUG :
+    +error-page(code, title, message, actions)
+
+  UTILISATION :
+    - Écran 403 : refus d'accès (droits insuffisants)
+    - Écran 500 : erreur serveur générique (message paramétrable)
+-->
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Erreur — Université des Antilles</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,400;0,600;0,700;1,400&family=Barlow+Condensed:wght@700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'ua-blue': '#00A0DC', 'ua-navy': '#202E56',
+            'ua-indigo': '#1107A0', 'ua-orange': '#CC5717', 'ua-crimson': '#9B1E21',
+          },
+          fontFamily: {
+            display: ['"Barlow Condensed"', 'Impact', 'system-ui', 'sans-serif'],
+            sans:    ['"Open Sans"', 'system-ui', 'sans-serif'],
+          },
+          borderRadius: {
+            none: '0px', sm: '1px', DEFAULT: '2px',
+            md: '2px', lg: '2px', xl: '2px', '2xl': '2px', full: '9999px',
+          },
+        }
+      }
+    }
+  </script>
+  <style>
+    body { -webkit-font-smoothing: antialiased; }
+  </style>
+</head>
+<body class="font-sans bg-white text-ua-navy">
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- ÉCRAN 403 — Accès refusé                               -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<section class="min-h-screen flex flex-col items-center justify-center px-6 bg-white">
+
+  <!-- Logo UA -->
+  <div class="mb-8">
+    <svg viewBox="0 0 44 44" width="48" height="48" aria-label="Université des Antilles" role="img">
+      <circle cx="22" cy="22" r="20" fill="white" stroke="#202E56" stroke-width="2"/>
+      <path d="M22 3 A19 19 0 0 1 40 29" fill="none" stroke="#00A0DC" stroke-width="2.5" stroke-linecap="round"/>
+      <circle cx="33" cy="19" r="3" fill="#CC5717"/>
+      <circle cx="33" cy="26" r="3" fill="#9B1E21"/>
+      <text x="17.5" y="27" font-family="'Barlow Condensed',Impact,sans-serif" font-weight="800" font-size="12" fill="#202E56" text-anchor="middle">UA</text>
+    </svg>
+  </div>
+
+  <!-- Code erreur -->
+  <p class="font-display font-bold text-ua-orange text-center" style="font-size: 8rem; line-height: 1;">403</p>
+
+  <!-- Titre -->
+  <h1 class="font-display font-bold text-2xl text-ua-navy uppercase tracking-wide text-center mt-2">
+    Accès refusé
+  </h1>
+
+  <!-- Message -->
+  <p class="text-gray-500 text-base text-center mt-3 max-w-md leading-relaxed">
+    Vous n'avez pas les droits nécessaires pour accéder à cette page. Si vous pensez qu'il s'agit d'une erreur, contactez votre administrateur.
+  </p>
+
+  <!-- CTA primaire -->
+  <a href="home.html"
+     class="mt-6 bg-ua-navy text-white px-4 py-2 text-sm font-semibold hover:bg-ua-indigo transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue">
+    Retour à l'accueil
+  </a>
+
+  <!-- Lien support -->
+  <a href="mailto:dsi@univ-antilles.fr"
+     class="mt-3 text-sm text-ua-blue hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue">
+    Contacter le support
+  </a>
+
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- ÉCRAN 500 — Erreur serveur générique                   -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div style="border-top: 2px dashed #e5e7eb; margin: 2rem 0;"></div>
+
+<section class="min-h-screen flex flex-col items-center justify-center px-6 bg-white">
+
+  <!-- Logo UA -->
+  <div class="mb-8">
+    <svg viewBox="0 0 44 44" width="48" height="48" aria-label="Université des Antilles" role="img">
+      <circle cx="22" cy="22" r="20" fill="white" stroke="#202E56" stroke-width="2"/>
+      <path d="M22 3 A19 19 0 0 1 40 29" fill="none" stroke="#00A0DC" stroke-width="2.5" stroke-linecap="round"/>
+      <circle cx="33" cy="19" r="3" fill="#CC5717"/>
+      <circle cx="33" cy="26" r="3" fill="#9B1E21"/>
+      <text x="17.5" y="27" font-family="'Barlow Condensed',Impact,sans-serif" font-weight="800" font-size="12" fill="#202E56" text-anchor="middle">UA</text>
+    </svg>
+  </div>
+
+  <!-- Mot erreur -->
+  <p class="font-display font-bold text-ua-crimson text-center" style="font-size: 7rem; line-height: 1;">Erreur</p>
+
+  <!-- Titre -->
+  <h1 class="font-display font-bold text-2xl text-ua-navy uppercase tracking-wide text-center mt-2">
+    Une erreur est survenue
+  </h1>
+
+  <!-- Message -->
+  <p class="text-gray-500 text-base text-center mt-3 max-w-md leading-relaxed">
+    Le serveur a rencontré un problème inattendu. Veuillez réessayer dans quelques instants. Si le problème persiste, contactez le support technique.
+  </p>
+
+  <!-- Encart technique repliable -->
+  <div class="mt-4 max-w-md w-full bg-gray-50 border border-gray-200 px-4 py-2">
+    <details class="text-sm">
+      <summary class="cursor-pointer font-semibold text-gray-600 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue">
+        Détails techniques
+      </summary>
+      <pre class="mt-2 text-xs font-mono text-gray-500 overflow-auto whitespace-pre-wrap">Error: ECONNREFUSED — Service OTP indisponible
+at OTPService.verify (/opt/esup-otp/services/otp.js:142:12)
+at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Reference: ERR-20260524-0847-X2K9</pre>
+    </details>
+  </div>
+
+  <!-- Boutons -->
+  <div class="mt-6 flex flex-col sm:flex-row gap-3 items-center">
+    <a href="#" onclick="window.location.reload(); return false;"
+       class="bg-ua-navy text-white px-4 py-2 text-sm font-semibold hover:bg-ua-indigo transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue">
+      Réessayer
+    </a>
+    <a href="mailto:dsi@univ-antilles.fr"
+       class="text-sm text-ua-blue hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue">
+      Contacter le support
+    </a>
+  </div>
+
+  <!-- Pied de page -->
+  <p class="fixed bottom-4 left-0 right-0 text-xs text-gray-400 text-center pointer-events-none">
+    Université des Antilles — Support : dsi@univ-antilles.fr
+  </p>
+
+</section>
+
+</body>
+</html>

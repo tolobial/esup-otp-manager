@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<!--
+  method-bypass.html — Codes de secours
+  ======================================
+  COMPOSANTS EXTRACTIBLES EN PUG :
+    +sidebar('methodes')
+    +topbar(['Accueil', 'Mes méthodes', 'Codes de secours'])
+    +bypass-code-grid(codes, usedCount)
+    +confirm-modal('regenerate-codes')
+    +confirm-modal('disable-bypass')
+    +toast(type, message)
+-->
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Codes de secours — Université des Antilles</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,400;0,600;0,700;1,400&family=Barlow+Condensed:wght@700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'ua-blue': '#00A0DC', 'ua-navy': '#202E56',
+            'ua-indigo': '#1107A0', 'ua-orange': '#CC5717', 'ua-crimson': '#9B1E21',
+          },
+          fontFamily: {
+            display: ['"Barlow Condensed"', 'Impact', 'system-ui', 'sans-serif'],
+            sans:    ['"Open Sans"', 'system-ui', 'sans-serif'],
+          },
+          borderRadius: {
+            none: '0px', sm: '1px', DEFAULT: '2px',
+            md: '2px', lg: '2px', xl: '2px', '2xl': '2px', full: '9999px',
+          },
+        }
+      }
+    }
+  </script>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <style>
+    body { -webkit-font-smoothing: antialiased; }
+    @keyframes slide-in { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
+    .toast-enter { animation: slide-in 0.2s ease; }
+  </style>
+</head>
+<body class="font-sans bg-gray-50 text-ua-navy">
+
+<!-- ─── LIEN D'ÉVITEMENT ────────────────────────────────────────────────── -->
+<a href="#content"
+   class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50
+          focus:bg-ua-navy focus:text-white focus:px-4 focus:py-2 focus:text-sm focus:font-semibold">
+  Aller au contenu
+</a>
+
+<div id="app">
+
+  <!-- ─── SIDEBAR ────────────────────────────────────────────────────────── -->
+  <aside class="hidden lg:flex fixed inset-y-0 left-0 w-64 bg-ua-navy flex-col z-20 print:hidden"
+         aria-label="Navigation principale">
+
+    <div class="flex items-center gap-3 px-5 py-4 border-b-2 border-ua-blue flex-shrink-0">
+      <svg viewBox="0 0 44 44" width="42" height="42" aria-hidden="true" focusable="false">
+        <circle cx="22" cy="22" r="20" fill="white"/>
+        <path d="M22 3 A19 19 0 0 1 40 29" fill="none" stroke="#00A0DC" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cx="33" cy="19" r="3" fill="#CC5717"/>
+        <circle cx="33" cy="26" r="3" fill="#9B1E21"/>
+        <text x="17.5" y="27" font-family="'Barlow Condensed',Impact,sans-serif"
+              font-weight="800" font-size="12" fill="#202E56" text-anchor="middle">UA</text>
+      </svg>
+      <div class="overflow-hidden">
+        <p class="font-display font-bold text-white text-sm leading-tight uppercase tracking-wide">Université des Antilles</p>
+        <p class="text-ua-blue text-xs font-semibold uppercase tracking-wider truncate">Authentification MFA</p>
+      </div>
+    </div>
+
+    <nav class="flex-1 overflow-y-auto py-3 px-3" aria-label="Navigation principale">
+      <ul class="space-y-0.5" role="list">
+        <li>
+          <a href="home.html" class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium transition-colors text-white/70 hover:text-white hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue focus-visible:ring-inset">
+            <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"/></svg>
+            Accueil
+          </a>
+        </li>
+        <li>
+          <a href="home.html" aria-current="page" class="flex items-center gap-3 px-3 py-2.5 text-sm font-semibold transition-colors border-l-2 border-ua-blue bg-white/10 text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue focus-visible:ring-inset">
+            <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z"/></svg>
+            Mes méthodes
+          </a>
+        </li>
+        <li>
+          <a href="manager-dashboard.html" class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium transition-colors text-white/70 hover:text-white hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue focus-visible:ring-inset">
+            <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z"/></svg>
+            Espace manager
+          </a>
+        </li>
+        <li>
+          <a href="admin-dashboard.html" class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium transition-colors text-white/70 hover:text-white hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue focus-visible:ring-inset">
+            <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 0 1 0 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 0 1 0-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg>
+            Administration
+          </a>
+        </li>
+        <li>
+          <a href="stats-dashboard.html" class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium transition-colors text-white/70 hover:text-white hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue focus-visible:ring-inset">
+            <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v11.25A2.25 2.25 0 0 0 6 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0 1 18 16.5h-2.25m-7.5 0h7.5m-7.5 0-1 3m8.5-3 1 3m0 0 .5 1.5m-.5-1.5h-9.5m0 0-.5 1.5M9 11.25v1.5M12 9v3.75m3-6v6"/></svg>
+            Statistiques
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <div class="px-5 py-3 border-t border-white/10 flex-shrink-0">
+      <p class="text-white/40 text-xs italic">« Être formés ici, c'est briller partout »</p>
+    </div>
+    <div class="px-4 py-3 border-t border-white/20 flex items-center gap-3 flex-shrink-0">
+      <div class="w-8 h-8 rounded-full bg-ua-blue flex items-center justify-center flex-shrink-0" aria-hidden="true">
+        <span class="text-ua-navy font-display font-bold text-xs">PP</span>
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="text-white text-xs font-semibold truncate">Patrick Placide</p>
+        <p class="text-white/50 text-xs truncate">p.placide@univ-antilles.fr</p>
+      </div>
+      <a href="index.html" class="text-white/50 hover:text-ua-crimson transition-colors p-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue" aria-label="Se déconnecter">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9"/></svg>
+      </a>
+    </div>
+  </aside>
+
+  <!-- ─── ZONE PRINCIPALE ─────────────────────────────────────────────────── -->
+  <div class="lg:ml-64 flex flex-col min-h-screen">
+
+    <!-- Topbar -->
+    <header class="h-12 bg-white border-b border-gray-200 flex items-center px-6 justify-between flex-shrink-0 print:hidden">
+      <nav aria-label="Fil d'Ariane">
+        <ol class="flex items-center gap-1.5 text-sm" role="list">
+          <li><a href="home.html" class="text-gray-400 hover:text-ua-navy transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue">Accueil</a></li>
+          <li aria-hidden="true"><svg class="w-3.5 h-3.5 text-gray-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg></li>
+          <li><a href="home.html" class="text-gray-400 hover:text-ua-navy transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue">Mes méthodes</a></li>
+          <li aria-hidden="true"><svg class="w-3.5 h-3.5 text-gray-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg></li>
+          <li><span class="text-ua-navy font-semibold" aria-current="page">Codes de secours</span></li>
+        </ol>
+      </nav>
+      <div class="flex items-center gap-3">
+        <button class="relative text-gray-400 hover:text-ua-navy transition-colors p-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue" aria-label="Notifications">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0"/></svg>
+          <span class="absolute top-0 right-0 w-2 h-2 bg-ua-orange rounded-full" aria-hidden="true"></span>
+        </button>
+        <div class="h-4 w-px bg-gray-200" aria-hidden="true"></div>
+        <span class="text-sm text-gray-600">Patrick Placide</span>
+      </div>
+    </header>
+
+    <!-- Contenu -->
+    <main id="content" class="flex-1 p-6 lg:p-8" tabindex="-1">
+
+      <!-- En-tête page -->
+      <div class="mb-6">
+        <h1 class="font-display font-bold text-2xl text-ua-navy uppercase tracking-wide">
+          Codes de secours
+        </h1>
+        <p class="text-gray-500 text-sm mt-1">
+          Utilisez ces codes si vous n'avez pas accès à votre méthode principale.
+        </p>
+      </div>
+
+      <!-- Carte principale -->
+      <div class="max-w-3xl mx-auto bg-white border border-gray-200">
+
+        <!-- En-tête carte -->
+        <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between gap-4">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-blue-50 flex items-center justify-center flex-shrink-0" aria-hidden="true">
+              <!-- Lifebuoy icon -->
+              <svg class="w-5 h-5 text-ua-blue" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16.712 4.33a9.027 9.027 0 0 1 1.652 1.306c.51.51.944 1.064 1.306 1.652M16.712 4.33l-3.448 4.138m3.448-4.138a9.014 9.014 0 0 0-9.424 0M19.67 7.288l-4.138 3.448m4.138-3.448a9.014 9.014 0 0 1 0 9.424m-4.138-5.976a3.736 3.736 0 0 0-.88-1.388 3.737 3.737 0 0 0-1.388-.88m2.268 2.268a3.765 3.765 0 0 1 0 2.528m-2.268-4.796a3.765 3.765 0 0 0-2.528 0m4.796 4.796c-.181.506-.475.982-.88 1.388a3.736 3.736 0 0 1-1.388.88m2.268-2.268 4.138 3.448m0 0a9.027 9.027 0 0 1-1.306 1.652c-.51.51-1.064.944-1.652 1.306m0 0-3.448-4.138m3.448 4.138a9.014 9.014 0 0 1-9.424 0m5.976-4.138a3.765 3.765 0 0 1-2.528 0m0 0a3.736 3.736 0 0 1-1.388-.88 3.737 3.737 0 0 1-.88-1.388m2.268 2.268L7.288 19.67m0 0a9.024 9.024 0 0 1-1.652-1.306 9.027 9.027 0 0 1-1.306-1.652m0 0 4.138-3.448M4.33 16.712a9.014 9.014 0 0 1 0-9.424m4.138 5.976a3.765 3.765 0 0 1 0-2.528m0 0c.181-.506.475-.982.88-1.388a3.736 3.736 0 0 1 1.388-.88m-2.268 2.268L4.33 7.288m6.406-1.396a9.014 9.014 0 0 0-2.864 1.396"/>
+              </svg>
+            </div>
+            <div>
+              <h2 class="font-semibold text-ua-navy text-sm">Codes de secours</h2>
+              <p class="text-gray-400 text-xs mt-0.5">Accès d'urgence</p>
+            </div>
+            <span class="text-xs font-semibold px-2 py-0.5"
+                  :class="isActive ? 'bg-blue-50 text-ua-navy' : 'bg-slate-100 text-slate-600'"
+                  :aria-label="isActive ? 'Méthode activée' : 'Méthode désactivée'">
+              {{ isActive ? 'Actif' : 'Inactif' }}
+            </span>
+          </div>
+
+          <!-- Toggle -->
+          <button role="switch"
+                  :aria-checked="isActive.toString()"
+                  :aria-label="isActive ? 'Désactiver les codes de secours' : 'Activer les codes de secours'"
+                  @click="requestToggle()"
+                  class="relative inline-flex items-center h-5 w-10 flex-shrink-0 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue focus-visible:ring-offset-2"
+                  :class="isActive ? 'bg-ua-blue' : 'bg-gray-300'">
+            <span class="sr-only">{{ isActive ? 'Désactiver' : 'Activer' }} les codes de secours</span>
+            <span class="inline-block w-4 h-4 bg-white shadow transition-transform"
+                  :class="isActive ? 'translate-x-5' : 'translate-x-1'"></span>
+          </button>
+        </div>
+
+        <!-- Corps actif -->
+        <div v-show="isActive" class="p-6">
+
+          <!-- Alerte rouge -->
+          <div class="bg-red-50 border border-ua-crimson px-4 py-3 flex gap-3 text-sm" role="alert">
+            <svg class="w-5 h-5 text-ua-crimson flex-shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"/>
+            </svg>
+            <p class="text-gray-700 leading-relaxed">
+              Ces codes sont à <strong class="font-semibold text-ua-crimson">usage unique</strong>. Une fois générés, <span class="font-semibold">imprimez-les</span> et conservez-les <span class="font-semibold">en lieu sûr</span>. Vous ne pourrez pas les récupérer ultérieurement. La génération de nouveaux codes <strong class="font-semibold">invalide automatiquement tous les anciens codes</strong>.
+            </p>
+          </div>
+
+          <!-- Stats inline -->
+          <div class="mt-4 flex gap-6 text-sm text-gray-600">
+            <span>Codes restants : <strong class="font-bold text-ua-navy">{{ remainingCount }}</strong></span>
+            <span>Codes utilisés : <strong class="font-bold text-ua-navy">{{ usedCount }}</strong></span>
+          </div>
+
+          <!-- Barre d'actions -->
+          <div class="mt-4 flex items-center justify-between">
+            <p class="font-semibold text-ua-navy text-sm">Vos codes de secours</p>
+            <div class="flex items-center gap-2">
+              <!-- Bouton ghost imprimer -->
+              <button @click="window.print()"
+                      class="flex items-center gap-1.5 text-ua-navy px-3 py-1.5 text-sm font-medium hover:bg-gray-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue"
+                      aria-label="Imprimer les codes de secours">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0 1 10.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0 .229 2.523a1.125 1.125 0 0 1-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0 0 21 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 0 0-1.913-.247M6.34 18H5.25A2.25 2.25 0 0 1 3 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 0 1 1.913-.247m10.5 0a48.536 48.536 0 0 0-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5Zm-3 0h.008v.008H15V10.5Z"/>
+                </svg>
+                Imprimer
+              </button>
+              <!-- Bouton danger régénérer -->
+              <button @click="showRegenerateModal = true"
+                      class="bg-ua-crimson text-white px-4 py-2 text-sm font-semibold hover:opacity-90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-crimson">
+                Régénérer les codes
+              </button>
+            </div>
+          </div>
+
+          <!-- Grille 2 colonnes des codes -->
+          <div class="mt-3 grid grid-cols-2 gap-2" role="list" aria-label="Codes de secours">
+            <div v-for="(code, index) in codes" :key="code"
+                 role="listitem"
+                 class="px-4 py-2.5 text-center text-sm font-mono"
+                 :class="index >= (codes.length - usedCount)
+                   ? 'bg-gray-50 text-gray-400 line-through'
+                   : 'bg-gray-100 text-gray-700'"
+                 :aria-label="index >= (codes.length - usedCount) ? code + ' (utilisé)' : code">
+              {{ code }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Corps inactif -->
+        <div v-show="!isActive" class="py-8 text-center text-gray-400 text-sm" aria-live="polite">
+          Activez les codes de secours pour générer vos codes.
+        </div>
+
+      </div><!-- /carte principale -->
+    </main>
+  </div>
+
+  <!-- ─── MODALE DÉSACTIVATION ─────────────────────────────────────────────── -->
+  <div v-if="showModal"
+       class="fixed inset-0 z-50 flex items-center justify-center p-4"
+       role="dialog"
+       aria-modal="true"
+       aria-labelledby="modal-disable-title"
+       @keydown.esc="cancelModal()">
+    <div class="absolute inset-0 bg-black/40" @click="cancelModal()" aria-hidden="true"></div>
+    <div class="relative bg-white border border-gray-200 shadow-lg w-full max-w-sm p-6 z-10">
+      <div class="flex items-start gap-4 mb-4">
+        <div class="w-10 h-10 bg-red-50 flex items-center justify-center flex-shrink-0" aria-hidden="true">
+          <svg class="w-5 h-5 text-ua-crimson" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"/>
+          </svg>
+        </div>
+        <div>
+          <h2 id="modal-disable-title" class="font-semibold text-ua-navy text-sm">Désactiver les codes de secours</h2>
+          <p class="text-gray-500 text-xs mt-1 leading-relaxed">
+            Les codes existants ne seront plus utilisables pour l'authentification. Vous pourrez les réactiver à tout moment.
+          </p>
+        </div>
+      </div>
+      <div class="flex gap-2 justify-end">
+        <button @click="cancelModal()"
+                class="text-ua-navy px-3 py-1.5 text-sm font-medium hover:bg-gray-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue">
+          Annuler
+        </button>
+        <button @click="confirmModal()" ref="confirmDisableBtn"
+                class="bg-ua-crimson text-white px-4 py-2 text-sm font-semibold hover:opacity-90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-crimson">
+          Désactiver
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── MODALE RÉGÉNÉRATION ──────────────────────────────────────────────── -->
+  <div v-if="showRegenerateModal"
+       class="fixed inset-0 z-50 flex items-center justify-center p-4"
+       role="dialog"
+       aria-modal="true"
+       aria-labelledby="modal-regen-title"
+       @keydown.esc="cancelRegenerate()">
+    <div class="absolute inset-0 bg-black/40" @click="cancelRegenerate()" aria-hidden="true"></div>
+    <div class="relative bg-white border border-gray-200 shadow-lg w-full max-w-sm p-6 z-10">
+      <div class="flex items-start gap-4 mb-4">
+        <div class="w-10 h-10 bg-orange-50 flex items-center justify-center flex-shrink-0" aria-hidden="true">
+          <svg class="w-5 h-5 text-ua-orange" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"/>
+          </svg>
+        </div>
+        <div>
+          <h2 id="modal-regen-title" class="font-semibold text-ua-navy text-sm">Régénérer les codes de secours</h2>
+          <p class="text-gray-500 text-xs mt-1 leading-relaxed">
+            <strong class="font-semibold text-ua-navy">Attention :</strong> La régénération invalidera les {{ remainingCount }} codes restants. De nouveaux codes seront générés. <strong class="font-semibold text-ua-crimson">Cette action est irréversible.</strong>
+          </p>
+        </div>
+      </div>
+      <div class="flex gap-2 justify-end">
+        <button @click="cancelRegenerate()"
+                class="text-ua-navy px-3 py-1.5 text-sm font-medium hover:bg-gray-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue">
+          Annuler
+        </button>
+        <button @click="regenerate()" ref="confirmRegenBtn"
+                class="bg-ua-crimson text-white px-4 py-2 text-sm font-semibold hover:opacity-90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-crimson">
+          Régénérer
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── TOAST ─────────────────────────────────────────────────────────────── -->
+  <div aria-live="polite" aria-atomic="true" class="fixed bottom-4 right-4 z-50 pointer-events-none">
+    <div v-if="toast"
+         class="toast-enter pointer-events-auto flex items-center gap-3 px-4 py-3 shadow-lg text-sm font-medium text-white max-w-xs"
+         :class="{
+           'bg-ua-navy': toast.type === 'success' || toast.type === 'info',
+           'bg-ua-crimson': toast.type === 'error',
+           'bg-ua-orange': toast.type === 'warning'
+         }">
+      <svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path v-if="toast.type === 'success'" stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/>
+        <path v-else-if="toast.type === 'info'" stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z"/>
+        <path v-else stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/>
+      </svg>
+      {{ toast.msg }}
+    </div>
+  </div>
+
+</div><!-- #app -->
+
+<script>
+const app = Vue.createApp({
+  data() {
+    return {
+      isActive: true,
+      toast: null,
+      showModal: false,
+      showRegenerateModal: false,
+      codes: ['A2B3-C4D5','E6F7-G8H9','J1K2-L3M4','N5P6-Q7R8','S9T1-U2V3','W4X5-Y6Z7','A8B9-C1D2','E3F4-G5H6','J7K8-L9M1','N2P3-Q4R5'],
+      usedCount: 2
+    }
+  },
+  computed: {
+    remainingCount() { return this.codes.length - this.usedCount; }
+  },
+  methods: {
+    requestToggle() {
+      if (this.isActive) {
+        this.showModal = true;
+        this.$nextTick(() => this.$refs.confirmDisableBtn?.focus());
+      } else {
+        this.isActive = true;
+        this.showToast('success', 'Codes de secours activés.');
+      }
+    },
+    confirmModal() {
+      this.isActive = false;
+      this.showToast('info', 'Codes de secours désactivés.');
+      this.showModal = false;
+    },
+    cancelModal() { this.showModal = false; },
+    regenerate() {
+      this.usedCount = 0;
+      this.codes = ['B3C4-D5E6','F7G8-H9J1','K2L3-M4N5','P6Q7-R8S9','T1U2-V3W4','X5Y6-Z7A8','B9C1-D2E3','F4G5-H6J7','K8L9-M1N2','P3Q4-R5S6'];
+      this.showRegenerateModal = false;
+      this.showToast('success', '10 nouveaux codes de secours générés. Imprimez-les maintenant.');
+    },
+    cancelRegenerate() { this.showRegenerateModal = false; },
+    showToast(type, msg) {
+      this.toast = { type, msg };
+      setTimeout(() => { this.toast = null; }, 5000);
+    }
+  }
+});
+app.mount('#app');
+</script>
+</body>
+</html>

@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<!--
+  manager-dashboard.html — Espace Manager (Helpdesk)
+  ===================================================
+  COMPOSANTS EXTRACTIBLES EN PUG :
+    +sidebar('manager')
+    +topbar(['Espace manager'])
+    +search-bar(placeholder, onSearch)
+    +kpi-inline(stats)
+    +recent-searches-table(rows)
+    +quick-actions(actions)
+    +confirm-modal('quick-action')
+    +toast(type, message)
+
+  STYLE J : densité analytique, tables, KPI inline.
+-->
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Espace Manager — Université des Antilles</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,400;0,600;0,700;1,400&family=Barlow+Condensed:wght@700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'ua-blue': '#00A0DC', 'ua-navy': '#202E56',
+            'ua-indigo': '#1107A0', 'ua-orange': '#CC5717', 'ua-crimson': '#9B1E21',
+          },
+          fontFamily: {
+            display: ['"Barlow Condensed"', 'Impact', 'system-ui', 'sans-serif'],
+            sans:    ['"Open Sans"', 'system-ui', 'sans-serif'],
+          },
+          borderRadius: {
+            none: '0px', sm: '1px', DEFAULT: '2px',
+            md: '2px', lg: '2px', xl: '2px', '2xl': '2px', full: '9999px',
+          },
+        }
+      }
+    }
+  </script>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <style>
+    body { -webkit-font-smoothing: antialiased; }
+    @keyframes slide-in { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
+    .toast-enter { animation: slide-in 0.2s ease; }
+  </style>
+</head>
+<body class="font-sans bg-gray-50 text-ua-navy">
+
+<!-- ─── LIEN D'ÉVITEMENT ────────────────────────────────────────────────── -->
+<a href="#content"
+   class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50
+          focus:bg-ua-navy focus:text-white focus:px-4 focus:py-2 focus:text-sm focus:font-semibold">
+  Aller au contenu
+</a>
+
+<div id="app">
+
+  <!-- ─── SIDEBAR ────────────────────────────────────────────────────────── -->
+  <aside class="hidden lg:flex fixed inset-y-0 left-0 w-64 bg-ua-navy flex-col z-20 print:hidden"
+         aria-label="Navigation principale">
+
+    <div class="flex items-center gap-3 px-5 py-4 border-b-2 border-ua-blue flex-shrink-0">
+      <svg viewBox="0 0 44 44" width="42" height="42" aria-hidden="true" focusable="false">
+        <circle cx="22" cy="22" r="20" fill="white"/>
+        <path d="M22 3 A19 19 0 0 1 40 29" fill="none" stroke="#00A0DC" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cx="33" cy="19" r="3" fill="#CC5717"/>
+        <circle cx="33" cy="26" r="3" fill="#9B1E21"/>
+        <text x="17.5" y="27" font-family="'Barlow Condensed',Impact,sans-serif"
+              font-weight="800" font-size="12" fill="#202E56" text-anchor="middle">UA</text>
+      </svg>
+      <div class="overflow-hidden">
+        <p class="font-display font-bold text-white text-sm leading-tight uppercase tracking-wide">Université des Antilles</p>
+        <p class="text-ua-blue text-xs font-semibold uppercase tracking-wider truncate">Authentification MFA</p>
+      </div>
+    </div>
+
+    <nav class="flex-1 overflow-y-auto py-3 px-3" aria-label="Navigation principale">
+      <ul class="space-y-0.5" role="list">
+        <li>
+          <a href="home.html" class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium transition-colors text-white/70 hover:text-white hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue focus-visible:ring-inset">
+            <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"/></svg>
+            Accueil
+          </a>
+        </li>
+        <li>
+          <a href="home.html" class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium transition-colors text-white/70 hover:text-white hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue focus-visible:ring-inset">
+            <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z"/></svg>
+            Mes méthodes
+          </a>
+        </li>
+        <li>
+          <a href="manager-dashboard.html" aria-current="page" class="flex items-center gap-3 px-3 py-2.5 text-sm font-semibold transition-colors border-l-2 border-ua-blue bg-white/10 text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue focus-visible:ring-inset">
+            <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z"/></svg>
+            Espace manager
+          </a>
+        </li>
+        <li>
+          <a href="admin-dashboard.html" class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium transition-colors text-white/70 hover:text-white hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue focus-visible:ring-inset">
+            <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 0 1 0 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 0 1 0-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg>
+            Administration
+          </a>
+        </li>
+        <li>
+          <a href="stats-dashboard.html" class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium transition-colors text-white/70 hover:text-white hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue focus-visible:ring-inset">
+            <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v11.25A2.25 2.25 0 0 0 6 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0 1 18 16.5h-2.25m-7.5 0h7.5m-7.5 0-1 3m8.5-3 1 3m0 0 .5 1.5m-.5-1.5h-9.5m0 0-.5 1.5M9 11.25v1.5M12 9v3.75m3-6v6"/></svg>
+            Statistiques
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <div class="px-5 py-3 border-t border-white/10 flex-shrink-0">
+      <p class="text-white/40 text-xs italic">« Être formés ici, c'est briller partout »</p>
+    </div>
+    <div class="px-4 py-3 border-t border-white/20 flex items-center gap-3 flex-shrink-0">
+      <div class="w-8 h-8 rounded-full bg-ua-blue flex items-center justify-center flex-shrink-0" aria-hidden="true">
+        <span class="text-ua-navy font-display font-bold text-xs">PP</span>
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="text-white text-xs font-semibold truncate">Patrick Placide</p>
+        <p class="text-white/50 text-xs truncate">p.placide@univ-antilles.fr</p>
+      </div>
+      <a href="index.html" class="text-white/50 hover:text-ua-crimson transition-colors p-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue" aria-label="Se déconnecter">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9"/></svg>
+      </a>
+    </div>
+  </aside>
+
+  <!-- ─── ZONE PRINCIPALE ─────────────────────────────────────────────────── -->
+  <div class="lg:ml-64 flex flex-col min-h-screen">
+
+    <!-- Topbar -->
+    <header class="h-12 bg-white border-b border-gray-200 flex items-center px-6 justify-between flex-shrink-0 print:hidden">
+      <nav aria-label="Fil d'Ariane">
+        <ol class="flex items-center gap-1.5 text-sm" role="list">
+          <li><span class="text-ua-navy font-semibold" aria-current="page">Espace manager</span></li>
+        </ol>
+      </nav>
+      <div class="flex items-center gap-3">
+        <button class="relative text-gray-400 hover:text-ua-navy transition-colors p-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue" aria-label="Notifications">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0"/></svg>
+          <span class="absolute top-0 right-0 w-2 h-2 bg-ua-orange rounded-full" aria-hidden="true"></span>
+        </button>
+        <div class="h-4 w-px bg-gray-200" aria-hidden="true"></div>
+        <span class="text-sm text-gray-600">Patrick Placide</span>
+      </div>
+    </header>
+
+    <!-- Contenu -->
+    <main id="content" class="flex-1 p-6 lg:p-8" tabindex="-1">
+
+      <!-- En-tête page -->
+      <div class="mb-6">
+        <h1 class="font-display font-bold text-2xl text-ua-navy uppercase tracking-wide">
+          Espace Manager
+        </h1>
+        <p class="text-gray-500 text-sm mt-1">
+          Recherche et gestion des comptes utilisateurs. Toutes les actions sont tracées dans le journal d'audit.
+        </p>
+      </div>
+
+      <!-- Section 1 : Barre de recherche -->
+      <section aria-labelledby="search-title">
+        <h2 id="search-title" class="sr-only">Recherche d'utilisateur</h2>
+        <div class="flex gap-2">
+          <label for="search-input" class="sr-only">Rechercher un utilisateur</label>
+          <input id="search-input"
+                 type="search"
+                 v-model="searchQuery"
+                 @keyup.enter="search()"
+                 placeholder="Rechercher un utilisateur par login, nom ou adresse email…"
+                 class="px-4 py-3 text-sm border border-gray-300 w-full focus:outline-none focus:ring-2 focus:ring-ua-blue focus:border-transparent"
+                 aria-label="Rechercher un utilisateur par login, nom ou adresse email"/>
+          <button @click="search()"
+                  class="bg-ua-navy text-white px-4 py-2 text-sm font-semibold hover:bg-ua-indigo transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue flex-shrink-0">
+            Rechercher
+          </button>
+        </div>
+      </section>
+
+      <!-- Section 2 : KPI inline -->
+      <section class="mt-6" aria-labelledby="kpi-title">
+        <h2 id="kpi-title" class="sr-only">Indicateurs clés</h2>
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+
+          <div class="bg-white border border-gray-200 px-4 py-3">
+            <p class="font-display font-bold text-2xl text-ua-navy leading-none">12</p>
+            <p class="text-xs text-gray-500 uppercase tracking-wide mt-1">Utilisateurs traités aujourd'hui</p>
+          </div>
+
+          <div class="bg-white border border-gray-200 px-4 py-3">
+            <p class="font-display font-bold text-2xl text-ua-navy leading-none">3</p>
+            <p class="text-xs text-gray-500 uppercase tracking-wide mt-1">Comptes en attente</p>
+          </div>
+
+          <div class="bg-white border border-gray-200 px-4 py-3">
+            <p class="font-display font-bold text-2xl text-ua-navy leading-none">28</p>
+            <p class="text-xs text-gray-500 uppercase tracking-wide mt-1">Réinitialisations (7 jours)</p>
+          </div>
+
+          <div class="bg-white border border-gray-200 px-4 py-3">
+            <p class="font-display font-bold text-2xl text-ua-navy leading-none">5</p>
+            <p class="text-xs text-gray-500 uppercase tracking-wide mt-1">Tickets ouverts</p>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- Section 3 : Tableau des recherches récentes -->
+      <section class="mt-6" aria-labelledby="recent-title">
+        <h2 id="recent-title" class="font-display font-bold text-lg text-ua-navy uppercase tracking-wide mb-3">
+          Recherches récentes
+        </h2>
+        <div class="w-full bg-white border border-gray-200 overflow-x-auto">
+          <table class="w-full" aria-label="Recherches récentes et résultats utilisateurs">
+            <thead>
+              <tr>
+                <th scope="col" class="bg-gray-50 text-xs font-bold uppercase tracking-wider text-gray-500 px-4 py-2.5 border-b border-gray-200 text-left">Login</th>
+                <th scope="col" class="bg-gray-50 text-xs font-bold uppercase tracking-wider text-gray-500 px-4 py-2.5 border-b border-gray-200 text-left">Nom complet</th>
+                <th scope="col" class="bg-gray-50 text-xs font-bold uppercase tracking-wider text-gray-500 px-4 py-2.5 border-b border-gray-200 text-left">Dernière action</th>
+                <th scope="col" class="bg-gray-50 text-xs font-bold uppercase tracking-wider text-gray-500 px-4 py-2.5 border-b border-gray-200 text-left">Méthodes actives</th>
+                <th scope="col" class="bg-gray-50 text-xs font-bold uppercase tracking-wider text-gray-500 px-4 py-2.5 border-b border-gray-200 text-left"><span class="sr-only">Action</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Ligne 1 -->
+              <tr class="hover:bg-gray-50 transition-colors">
+                <td class="px-4 py-3 text-sm border-b border-gray-100 font-mono text-ua-navy font-medium">cthéas</td>
+                <td class="px-4 py-3 text-sm border-b border-gray-100 text-gray-700">Chantal Théas</td>
+                <td class="px-4 py-3 text-sm border-b border-gray-100 text-gray-500">Activation TOTP · il y a 2h</td>
+                <td class="px-4 py-3 text-sm border-b border-gray-100">
+                  <span class="inline-block px-2 py-0.5 text-xs font-semibold bg-blue-50 text-ua-blue" aria-label="2 méthodes actives sur 6">2/6</span>
+                </td>
+                <td class="px-4 py-3 text-sm border-b border-gray-100 text-right">
+                  <button @click="openFiche('cthéas')"
+                          class="text-ua-blue hover:text-ua-navy text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue px-2 py-1">
+                    Ouvrir la fiche →
+                  </button>
+                </td>
+              </tr>
+              <!-- Ligne 2 -->
+              <tr class="hover:bg-gray-50 transition-colors">
+                <td class="px-4 py-3 text-sm border-b border-gray-100 font-mono text-ua-navy font-medium">mlaurent</td>
+                <td class="px-4 py-3 text-sm border-b border-gray-100 text-gray-700">Martin Laurent</td>
+                <td class="px-4 py-3 text-sm border-b border-gray-100 text-gray-500">Réinitialisation codes</td>
+                <td class="px-4 py-3 text-sm border-b border-gray-100">
+                  <span class="inline-block px-2 py-0.5 text-xs font-semibold bg-blue-50 text-ua-blue" aria-label="4 méthodes actives sur 6">4/6</span>
+                </td>
+                <td class="px-4 py-3 text-sm border-b border-gray-100 text-right">
+                  <button @click="openFiche('mlaurent')"
+                          class="text-ua-blue hover:text-ua-navy text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue px-2 py-1">
+                    Ouvrir la fiche →
+                  </button>
+                </td>
+              </tr>
+              <!-- Ligne 3 -->
+              <tr class="hover:bg-gray-50 transition-colors">
+                <td class="px-4 py-3 text-sm border-b border-gray-100 font-mono text-ua-navy font-medium">jdupont</td>
+                <td class="px-4 py-3 text-sm border-b border-gray-100 text-gray-700">Jean Dupont</td>
+                <td class="px-4 py-3 text-sm border-b border-gray-100 text-gray-500">Connexion réussie · hier</td>
+                <td class="px-4 py-3 text-sm border-b border-gray-100">
+                  <span class="inline-block px-2 py-0.5 text-xs font-semibold bg-blue-50 text-ua-blue" aria-label="1 méthode active sur 6">1/6</span>
+                </td>
+                <td class="px-4 py-3 text-sm border-b border-gray-100 text-right">
+                  <button @click="openFiche('jdupont')"
+                          class="text-ua-blue hover:text-ua-navy text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue px-2 py-1">
+                    Ouvrir la fiche →
+                  </button>
+                </td>
+              </tr>
+              <!-- Ligne 4 -->
+              <tr class="hover:bg-gray-50 transition-colors">
+                <td class="px-4 py-3 text-sm border-b border-gray-100 font-mono text-ua-navy font-medium">abonhomme</td>
+                <td class="px-4 py-3 text-sm border-b border-gray-100 text-gray-700">Alice Bonhomme</td>
+                <td class="px-4 py-3 text-sm border-b border-gray-100 text-gray-500">Désactivation SMS · hier</td>
+                <td class="px-4 py-3 text-sm border-b border-gray-100">
+                  <span class="inline-block px-2 py-0.5 text-xs font-semibold bg-blue-50 text-ua-blue" aria-label="3 méthodes actives sur 6">3/6</span>
+                </td>
+                <td class="px-4 py-3 text-sm border-b border-gray-100 text-right">
+                  <button @click="openFiche('abonhomme')"
+                          class="text-ua-blue hover:text-ua-navy text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue px-2 py-1">
+                    Ouvrir la fiche →
+                  </button>
+                </td>
+              </tr>
+              <!-- Ligne 5 -->
+              <tr class="hover:bg-gray-50 transition-colors">
+                <td class="px-4 py-3 text-sm border-b border-gray-100 font-mono text-ua-navy font-medium">pplacide</td>
+                <td class="px-4 py-3 text-sm border-b border-gray-100 text-gray-700">Patrick Placide</td>
+                <td class="px-4 py-3 text-sm border-b border-gray-100 text-gray-400 italic">Aucune action</td>
+                <td class="px-4 py-3 text-sm border-b border-gray-100">
+                  <span class="inline-block px-2 py-0.5 text-xs font-semibold bg-slate-100 text-slate-500" aria-label="0 méthode active sur 6">0/6</span>
+                </td>
+                <td class="px-4 py-3 text-sm border-b border-gray-100 text-right">
+                  <button @click="openFiche('pplacide')"
+                          class="text-ua-blue hover:text-ua-navy text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue px-2 py-1">
+                    Ouvrir la fiche →
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Section 4 : Actions rapides -->
+      <section class="mt-6" aria-labelledby="quickactions-title">
+        <h2 id="quickactions-title" class="font-display font-bold text-lg text-ua-navy uppercase tracking-wide mb-3">
+          Actions rapides
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+          <!-- Carte 1 : Activer un compte -->
+          <div class="bg-white border border-gray-200 p-5 flex flex-col gap-3">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 bg-blue-50 flex items-center justify-center flex-shrink-0" aria-hidden="true">
+                <!-- user-plus icon -->
+                <svg class="w-5 h-5 text-ua-blue" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M18 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0ZM3 19.235v-.11a6.375 6.375 0 0 1 12.75 0v.109A12.318 12.318 0 0 1 9.374 21c-2.331 0-4.512-.645-6.374-1.766Z"/>
+                </svg>
+              </div>
+              <h3 class="font-semibold text-ua-navy text-sm">Activer un compte</h3>
+            </div>
+            <p class="text-xs text-gray-500 leading-relaxed flex-1">
+              Activer ou réactiver le compte d'un utilisateur après vérification d'identité.
+            </p>
+            <button @click="confirmAction('Activer un compte', 'Vous êtes sur le point d\'activer un compte utilisateur. Cette action sera enregistrée dans le journal d\'audit.')"
+                    class="bg-ua-navy text-white px-4 py-2 text-sm font-semibold hover:bg-ua-indigo transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue">
+              Activer un compte
+            </button>
+          </div>
+
+          <!-- Carte 2 : Codes de secours -->
+          <div class="bg-white border border-gray-200 p-5 flex flex-col gap-3">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 bg-blue-50 flex items-center justify-center flex-shrink-0" aria-hidden="true">
+                <!-- key icon -->
+                <svg class="w-5 h-5 text-ua-blue" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 0 1 3 3m3 0a6 6 0 0 1-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 0 1 21.75 8.25Z"/>
+                </svg>
+              </div>
+              <h3 class="font-semibold text-ua-navy text-sm">Codes de secours</h3>
+            </div>
+            <p class="text-xs text-gray-500 leading-relaxed flex-1">
+              Générer des codes de secours pour un utilisateur bloqué.
+            </p>
+            <button @click="confirmAction('Générer des codes de secours', 'Vous êtes sur le point de générer des codes de secours pour un utilisateur. Les anciens codes seront invalidés.')"
+                    class="bg-ua-navy text-white px-4 py-2 text-sm font-semibold hover:bg-ua-indigo transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue">
+              Générer des codes
+            </button>
+          </div>
+
+          <!-- Carte 3 : Vider une session -->
+          <div class="bg-white border border-gray-200 p-5 flex flex-col gap-3">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 bg-red-50 flex items-center justify-center flex-shrink-0" aria-hidden="true">
+                <!-- trash icon -->
+                <svg class="w-5 h-5 text-ua-crimson" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"/>
+                </svg>
+              </div>
+              <h3 class="font-semibold text-ua-navy text-sm">Vider une session</h3>
+            </div>
+            <p class="text-xs text-gray-500 leading-relaxed flex-1">
+              Invalider toutes les sessions actives d'un utilisateur.
+            </p>
+            <button @click="confirmAction('Vider la session utilisateur', 'Vous êtes sur le point d\'invalider toutes les sessions actives d\'un utilisateur. Cette action est immédiate et irréversible.')"
+                    class="bg-ua-crimson text-white px-4 py-2 text-sm font-semibold hover:opacity-90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-crimson">
+              Vider la session
+            </button>
+          </div>
+
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ─── MODALE CONFIRMATION ACTION RAPIDE ───────────────────────────────── -->
+  <div v-if="showModal"
+       class="fixed inset-0 z-50 flex items-center justify-center p-4"
+       role="dialog"
+       aria-modal="true"
+       aria-labelledby="modal-action-title"
+       @keydown.esc="cancelModal()">
+    <div class="absolute inset-0 bg-black/40" @click="cancelModal()" aria-hidden="true"></div>
+    <div class="relative bg-white border border-gray-200 shadow-lg w-full max-w-sm p-6 z-10">
+      <div class="flex items-start gap-4 mb-4">
+        <div class="w-10 h-10 bg-orange-50 flex items-center justify-center flex-shrink-0" aria-hidden="true">
+          <svg class="w-5 h-5 text-ua-orange" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"/>
+          </svg>
+        </div>
+        <div>
+          <h2 id="modal-action-title" class="font-semibold text-ua-navy text-sm">{{ modalTitle }}</h2>
+          <p class="text-gray-500 text-xs mt-1 leading-relaxed">{{ modalMessage }}</p>
+        </div>
+      </div>
+      <div class="flex gap-2 justify-end">
+        <button @click="cancelModal()"
+                class="text-ua-navy px-3 py-1.5 text-sm font-medium hover:bg-gray-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue">
+          Annuler
+        </button>
+        <button @click="confirmModal()" ref="confirmActionBtn"
+                class="bg-ua-navy text-white px-4 py-2 text-sm font-semibold hover:bg-ua-indigo transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue">
+          Confirmer
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── TOAST ─────────────────────────────────────────────────────────────── -->
+  <div aria-live="polite" aria-atomic="true" class="fixed bottom-4 right-4 z-50 pointer-events-none">
+    <div v-if="toast"
+         class="toast-enter pointer-events-auto flex items-center gap-3 px-4 py-3 shadow-lg text-sm font-medium text-white max-w-xs"
+         :class="{
+           'bg-ua-navy': toast.type === 'success' || toast.type === 'info',
+           'bg-ua-crimson': toast.type === 'error',
+           'bg-ua-orange': toast.type === 'warning'
+         }">
+      <svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path v-if="toast.type === 'success'" stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/>
+        <path v-else-if="toast.type === 'info'" stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z"/>
+        <path v-else stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/>
+      </svg>
+      {{ toast.msg }}
+    </div>
+  </div>
+
+</div><!-- #app -->
+
+<script>
+const app = Vue.createApp({
+  data() {
+    return {
+      searchQuery: '',
+      toast: null,
+      showModal: false,
+      modalTitle: '',
+      modalMessage: ''
+    }
+  },
+  methods: {
+    search() {
+      if (this.searchQuery.trim()) {
+        this.showToast('info', `Recherche en cours pour "${this.searchQuery}"…`);
+      }
+    },
+    openFiche(login) {
+      if (login === 'cthéas') {
+        window.location.href = 'user-view.html';
+      } else {
+        this.showToast('info', `Ouverture de la fiche ${login}…`);
+      }
+    },
+    confirmAction(title, message) {
+      this.modalTitle = title;
+      this.modalMessage = message;
+      this.showModal = true;
+      this.$nextTick(() => this.$refs.confirmActionBtn?.focus());
+    },
+    confirmModal() {
+      this.showToast('success', 'Action effectuée et tracée dans le journal.');
+      this.showModal = false;
+    },
+    cancelModal() { this.showModal = false; },
+    showToast(type, msg) {
+      this.toast = { type, msg };
+      setTimeout(() => { this.toast = null; }, 4000);
+    }
+  }
+});
+app.mount('#app');
+</script>
+</body>
+</html>

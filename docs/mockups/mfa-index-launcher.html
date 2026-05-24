@@ -1,0 +1,354 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Maquettes MFA — Université des Antilles</title>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&family=Barlow+Condensed:wght@700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: { extend: { colors: { ua: { blue: '#00A0DC', navy: '#202E56', orange: '#CC5717', crimson: '#9B1E21' } }, fontFamily: { display: ['"Barlow Condensed"', 'system-ui'], sans: ['"Open Sans"', 'system-ui'] } } }
+    }
+  </script>
+</head>
+<body class="bg-slate-100 font-sans text-ua-navy min-h-screen">
+  <header class="bg-ua-navy border-b-4 border-ua-blue px-8 py-6">
+    <div class="max-w-5xl mx-auto flex items-center gap-5">
+      <svg viewBox="0 0 56 56" width="52" height="52">
+        <circle cx="28" cy="28" r="26" fill="white" stroke="#202E56" stroke-width="2.5"/>
+        <path d="M 28 4 A 24 24 0 0 1 50 36" fill="none" stroke="#00A0DC" stroke-width="3" stroke-linecap="round"/>
+        <circle cx="40" cy="23" r="3.5" fill="#CC5717"/>
+        <circle cx="40" cy="31" r="3.5" fill="#9B1E21"/>
+        <text x="22" y="34" font-family="Barlow Condensed" font-weight="800" font-size="14" fill="#202E56" text-anchor="middle">UA</text>
+      </svg>
+      <div>
+        <p class="font-display font-bold text-white text-2xl tracking-wide uppercase leading-tight">Université des Antilles</p>
+        <p class="text-white/50 text-sm">Redesign MFA — 10 maquettes + 8 écrans fonctionnels</p>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-5xl mx-auto px-4 lg:px-8 py-12">
+    <section class="mb-12">
+      <h2 class="font-display font-bold text-2xl uppercase tracking-wide text-ua-navy mb-6">Tokens extraits de la charte</h2>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-white border border-gray-200 shadow-sm p-6">
+          <h3 class="font-bold text-ua-navy text-sm uppercase tracking-widest mb-4">Palette officielle</h3>
+          <div class="space-y-3">
+            <div class="flex items-center gap-3"><div class="w-10 h-10 flex-shrink-0 border border-gray-200" style="background:#00A0DC"></div><div><p class="font-bold text-sm">#00A0DC — Bleu UA (Pantone 299 C)</p><p class="text-xs text-gray-500">Actions primaires, toggles, liens</p></div></div>
+            <div class="flex items-center gap-3"><div class="w-10 h-10 flex-shrink-0 border border-gray-200" style="background:#202E56"></div><div><p class="font-bold text-sm">#202E56 — Marine institutionnel</p><p class="text-xs text-gray-500">Sidebar, titres, texte principal</p></div></div>
+            <div class="flex items-center gap-3"><div class="w-10 h-10 flex-shrink-0 border border-gray-200" style="background:#1107A0"></div><div><p class="font-bold text-sm">#1107A0 — Indigo profond</p><p class="text-xs text-gray-500">Variante bleue secondaire</p></div></div>
+            <div class="flex items-center gap-3"><div class="w-10 h-10 flex-shrink-0 border border-gray-200" style="background:#CC5717"></div><div><p class="font-bold text-sm">#CC5717 — Orange (Pantone 152 C)</p><p class="text-xs text-gray-500">Point 1 du logo — avertissements</p></div></div>
+            <div class="flex items-center gap-3"><div class="w-10 h-10 flex-shrink-0 border border-gray-200" style="background:#9B1E21"></div><div><p class="font-bold text-sm">#9B1E21 — Bordeaux</p><p class="text-xs text-gray-500">Point 2 du logo — danger/destructif</p></div></div>
+          </div>
+        </div>
+        <div class="bg-white border border-gray-200 shadow-sm p-6">
+          <h3 class="font-bold text-ua-navy text-sm uppercase tracking-widest mb-4">Typographie &amp; posture</h3>
+          <div class="space-y-4">
+            <div><p class="text-xs text-gray-400 font-semibold uppercase tracking-wider mb-1">Sublima (display) → Barlow Condensed</p><p class="font-display font-bold text-2xl text-ua-navy tracking-wide uppercase">TITRES UA</p><p class="text-xs text-gray-500">Police propriétaire FontFabric · Substitut web fourni</p></div>
+            <div><p class="text-xs text-gray-400 font-semibold uppercase tracking-wider mb-1">Open Sans (corps)</p><p class="text-base text-gray-700">Regular · Bold · Light · BoldItalic</p><p class="text-xs text-gray-500">Disponible Google Fonts — utilisée dans le PDF</p></div>
+            <div class="border-t border-gray-100 pt-3 text-sm text-gray-600 space-y-1">
+              <p>→ Angles francs (0–2px de rayon)</p>
+              <p>→ Bleu #00A0DC dominant, orange & bordeaux parcimonieux</p>
+              <p>→ Espace blanc généreux</p>
+              <p>→ Devise présente : <em>Être formés ici, c'est briller partout</em></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2 class="font-display font-bold text-2xl uppercase tracking-wide text-ua-navy mb-2">6 maquettes comparatives</h2>
+      <p class="text-gray-500 text-sm mb-8">Ouvrir chaque fichier HTML depuis le panneau fichiers à gauche.</p>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-white border border-gray-200 shadow-sm">
+          <div class="h-3 bg-ua-navy"></div>
+          <div class="p-6">
+            <span class="text-xs font-bold text-ua-blue uppercase tracking-widest">Version A</span>
+            <h3 class="font-display font-bold text-ua-navy text-xl uppercase tracking-wide mt-0.5 mb-2">Sobre &amp; Institutionnelle</h3>
+            <p class="text-gray-500 text-sm leading-relaxed mb-4">Sidebar #202E56, fond blanc, liste à séparateurs. Open Sans Bold. Aucune carte. Espace généreux. Modale de confirmation.</p>
+            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Fichier : <code class="font-mono">mfa-v-a-institutionnel.html</code></p>
+          </div>
+        </div>
+        <div class="bg-white border border-gray-200 shadow-sm">
+          <div class="h-3 bg-gradient-to-r from-ua-navy to-ua-blue"></div>
+          <div class="p-6">
+            <span class="text-xs font-bold text-ua-blue uppercase tracking-widest">Version B</span>
+            <h3 class="font-display font-bold text-ua-navy text-xl uppercase tracking-wide mt-0.5 mb-2">Moderne &amp; Cards</h3>
+            <p class="text-gray-500 text-sm leading-relaxed mb-4">SaaS contemporain. Fond gris, cartes blanches, ombres. Icônes colorées par méthode. Score sécurité. Dark mode.</p>
+            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Fichier : <code class="font-mono">mfa-v-b-moderne.html</code></p>
+          </div>
+        </div>
+        <div class="bg-white border border-gray-200 shadow-sm">
+          <div class="h-3 bg-ua-blue"></div>
+          <div class="p-6">
+            <span class="text-xs font-bold text-ua-blue uppercase tracking-widest">Version C</span>
+            <h3 class="font-display font-bold text-ua-navy text-xl uppercase tracking-wide mt-0.5 mb-2">Mobile-first &amp; Guidée</h3>
+            <p class="text-gray-500 text-sm leading-relaxed mb-4">Pensée smartphone. Arc SVG animé. Accordéon. Bottom sheet. Navigation basse. Cibles ≥ 44px.</p>
+            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Fichier : <code class="font-mono">mfa-v-c-mobile.html</code></p>
+          </div>
+        </div>
+        <div class="bg-white border-2 border-ua-blue shadow-sm">
+          <div class="h-3 bg-ua-blue"></div>
+          <div class="p-6">
+            <span class="text-xs font-bold text-ua-blue uppercase tracking-widest">Version D — Recommandée</span>
+            <h3 class="font-display font-bold text-ua-navy text-xl uppercase tracking-wide mt-0.5 mb-2">Stricte Charte UA</h3>
+            <p class="text-gray-500 text-sm leading-relaxed mb-4">Couleurs exactes du PDF. Commentée ligne par ligne. Barlow Condensed = Sublima. Logo fidèle. Angles francs.</p>
+            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Fichier : <code class="font-mono">mfa-v-d-charte.html</code></p>
+          </div>
+        </div>
+
+        <!-- Version E — Tesla -->
+        <div class="bg-white border border-gray-200 shadow-sm" style="border-top: 3px solid #E82127">
+          <div class="h-3" style="background:#000"></div>
+          <div class="p-6">
+            <span class="text-xs font-bold uppercase tracking-widest" style="color:#E82127">Version E — Nouveau</span>
+            <h3 class="font-display font-bold text-xl uppercase tracking-wide mt-0.5 mb-2" style="color:#1a1a1a">Tesla Design System</h3>
+            <p class="text-gray-500 text-sm leading-relaxed mb-4">Fond noir pur #000. Rouge #E82127 unique accent. Inter 300–600. Rangées précises, angles droits 0px. Barre de progression horizontale.</p>
+            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Fichier : <code class="font-mono">mfa-v-e-tesla.html</code></p>
+          </div>
+        </div>
+
+        <!-- Version F — BMW -->
+        <div class="bg-white border border-gray-200 shadow-sm" style="border-top: 3px solid #1C69D4">
+          <div class="h-3" style="background:linear-gradient(90deg,#1A1A1A 33%,#1C69D4 33%,#1C69D4 66%,#8C8C8C 66%)"></div>
+          <div class="p-6">
+            <span class="text-xs font-bold uppercase tracking-widest" style="color:#1C69D4">Version F — Nouveau</span>
+            <h3 class="font-display font-bold text-xl uppercase tracking-wide mt-0.5 mb-2" style="color:#1A1A1A">BMW Design System</h3>
+            <p class="text-gray-500 text-sm leading-relaxed mb-4">Fond clair premium #F4F4F4. Bleu BMW #1C69D4. Raleway display + Inter corps. Cartes bordure-gauche active. Progression circulaire.</p>
+            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Fichier : <code class="font-mono">mfa-v-f-bmw.html</code></p>
+          </div>
+        </div>
+      </div>
+
+      <h2 class="font-display font-bold text-2xl uppercase tracking-wide text-ua-navy mt-12 mb-2">4 nouvelles propositions — Carte blanche</h2>
+      <p class="text-gray-500 text-sm mb-8">Quatre directions inédites pour inspirer votre choix final.</p>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+        <!-- G - DSFR -->
+        <div class="bg-white border border-gray-200 shadow-sm">
+          <div class="h-3 flex">
+            <div class="flex-1 bg-[#003189]"></div>
+            <div class="flex-1 bg-white border-y border-gray-200"></div>
+            <div class="flex-1 bg-[#e1000f]"></div>
+          </div>
+          <div class="p-6">
+            <span class="text-xs font-bold text-[#003189] uppercase tracking-widest">Version G</span>
+            <h3 class="font-display font-bold text-ua-navy text-xl uppercase tracking-wide mt-0.5 mb-2">DSFR — État Français</h3>
+            <p class="text-gray-500 text-sm leading-relaxed mb-4">Inspiré du Design Système de l'État (gov.fr). Bleu RF #003189, bandeau tricolore, fil d'Ariane, badges DSFR. Légitimité institutionnelle maximale — le plus proche du standard attendu par les DSI françaises.</p>
+            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Fichier : <code class="font-mono">mfa-v-g-dsfr.html</code></p>
+          </div>
+        </div>
+
+        <!-- H - Dark Vault -->
+        <div class="bg-white border border-gray-200 shadow-sm">
+          <div class="h-3" style="background:linear-gradient(90deg,#4A9EFF,#22D3A5)"></div>
+          <div class="p-6">
+            <span class="text-xs font-bold text-[#4A9EFF] uppercase tracking-widest">Version H</span>
+            <h3 class="font-display font-bold text-ua-navy text-xl uppercase tracking-wide mt-0.5 mb-2">Dark Security Vault</h3>
+            <p class="text-gray-500 text-sm leading-relaxed mb-4">Thème sombre #0F1117 inspiré de 1Password et Bitwarden. Score de sécurité en anneau SVG animé. Toggles dégradé bleu-vert. Esthétique "coffre-fort numérique" qui rassure immédiatement sur la sécurité.</p>
+            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Fichier : <code class="font-mono">mfa-v-h-vault.html</code></p>
+          </div>
+        </div>
+
+        <!-- I - Material 3 -->
+        <div class="bg-white border border-gray-200 shadow-sm">
+          <div class="h-3 bg-[#6750A4]"></div>
+          <div class="p-6">
+            <span class="text-xs font-bold text-[#6750A4] uppercase tracking-widest">Version I</span>
+            <h3 class="font-display font-bold text-ua-navy text-xl uppercase tracking-wide mt-0.5 mb-2">Material Design 3</h3>
+            <p class="text-gray-500 text-sm leading-relaxed mb-4">Système Google Material You. Violet #6750A4, cards 28px radius, navigation drawer, switches M3 animés, chips de statut. Familier pour les étudiants Android — réduit la friction d'adoption du MFA.</p>
+            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Fichier : <code class="font-mono">mfa-v-i-material.html</code></p>
+          </div>
+        </div>
+
+        <!-- J - Dashboard -->
+        <div class="bg-white border-2 border-ua-blue shadow-sm">
+          <div class="h-3 bg-ua-navy"></div>
+          <div class="p-6">
+            <span class="text-xs font-bold text-ua-blue uppercase tracking-widest">Version J — Data-first</span>
+            <h3 class="font-display font-bold text-ua-navy text-xl uppercase tracking-wide mt-0.5 mb-2">Analytics Dashboard UA</h3>
+            <p class="text-gray-500 text-sm leading-relaxed mb-4">Sidebar UA navy #202E56, table des méthodes avec barres de force, stats en temps réel, journal de connexions, mini-graphique d'usage. Vue admin-ready, couleurs UA exactes. Idéal si l'app cible aussi les gestionnaires.</p>
+            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Fichier : <code class="font-mono">mfa-v-j-dashboard.html</code></p>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <!-- ADDENDUM — 8 écrans fonctionnels (design system D+J unifié)        -->
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <section class="mt-16">
+      <div class="border-t-4 border-ua-blue pt-10 mb-2">
+        <h2 class="font-display font-bold text-2xl uppercase tracking-wide text-ua-navy">Addendum — Écrans fonctionnels</h2>
+      </div>
+      <p class="text-gray-500 text-sm mb-8">Design system D+J unifié. Même sidebar, mêmes tokens, mêmes composants. Vue 3 interactif, WCAG AA, Tailwind CDN.</p>
+
+      <!-- Bloc 1 : Méthodes utilisateur -->
+      <h3 class="font-display font-bold text-lg uppercase tracking-wide text-ua-navy mb-4 mt-8">Bloc 1 — Activation des méthodes (vue utilisateur)</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-10">
+
+        <a href="method-totp.html" class="block bg-white border border-gray-200 hover:border-ua-blue transition-colors group">
+          <div class="h-1.5 bg-ua-blue"></div>
+          <div class="p-5">
+            <div class="flex items-center gap-2 mb-2">
+              <div class="w-8 h-8 bg-blue-50 flex items-center justify-center flex-shrink-0">
+                <svg class="w-4 h-4 text-ua-blue" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+              </div>
+              <span class="text-xs font-bold text-ua-blue uppercase tracking-widest">TOTP</span>
+            </div>
+            <h4 class="font-display font-bold text-ua-navy text-base uppercase tracking-wide mb-1 group-hover:text-ua-blue transition-colors">Application authentificateur</h4>
+            <p class="text-gray-500 text-xs leading-relaxed mb-3">QR code · clé secrète copiable · vérification 6 chiffres · modale désactivation.</p>
+            <code class="text-xs font-mono text-gray-400">method-totp.html</code>
+          </div>
+        </a>
+
+        <a href="method-push.html" class="block bg-white border border-gray-200 hover:border-ua-blue transition-colors group">
+          <div class="h-1.5 bg-ua-blue"></div>
+          <div class="p-5">
+            <div class="flex items-center gap-2 mb-2">
+              <div class="w-8 h-8 bg-blue-50 flex items-center justify-center flex-shrink-0">
+                <svg class="w-4 h-4 text-ua-blue" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 0 0 6 3.75v16.5a2.25 2.25 0 0 0 2.25 2.25h7.5A2.25 2.25 0 0 0 18 20.25V3.75a2.25 2.25 0 0 0-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 8.25h3"/></svg>
+              </div>
+              <span class="text-xs font-bold text-ua-blue uppercase tracking-widest">Push</span>
+            </div>
+            <h4 class="font-display font-bold text-ua-navy text-base uppercase tracking-wide mb-1 group-hover:text-ua-blue transition-colors">Notification Esup Auth</h4>
+            <p class="text-gray-500 text-xs leading-relaxed mb-3">QR code · code d'activation · serveur · badges Google Play + App Store.</p>
+            <code class="text-xs font-mono text-gray-400">method-push.html</code>
+          </div>
+        </a>
+
+        <a href="method-email.html" class="block bg-white border border-gray-200 hover:border-ua-blue transition-colors group">
+          <div class="h-1.5 bg-ua-blue"></div>
+          <div class="p-5">
+            <div class="flex items-center gap-2 mb-2">
+              <div class="w-8 h-8 bg-blue-50 flex items-center justify-center flex-shrink-0">
+                <svg class="w-4 h-4 text-ua-blue" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75"/></svg>
+              </div>
+              <span class="text-xs font-bold text-ua-blue uppercase tracking-widest">Courriel</span>
+            </div>
+            <h4 class="font-display font-bold text-ua-navy text-base uppercase tracking-wide mb-1 group-hover:text-ua-blue transition-colors">Code par courriel</h4>
+            <p class="text-gray-500 text-xs leading-relaxed mb-3">Saisie email · enregistrement avec/sans confirmation · note info.</p>
+            <code class="text-xs font-mono text-gray-400">method-email.html</code>
+          </div>
+        </a>
+
+        <a href="method-webauthn.html" class="block bg-white border border-gray-200 hover:border-ua-blue transition-colors group">
+          <div class="h-1.5 bg-ua-blue"></div>
+          <div class="p-5">
+            <div class="flex items-center gap-2 mb-2">
+              <div class="w-8 h-8 bg-blue-50 flex items-center justify-center flex-shrink-0">
+                <svg class="w-4 h-4 text-ua-blue" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12H3m18 0h-1.5m-15 3.75H3m18 0h-1.5M8.25 19.5V21M12 3v1.5m0 15V21m3.75-18v1.5m0 15V21m-9-1.5h10.5a2.25 2.25 0 0 0 2.25-2.25V6.75a2.25 2.25 0 0 0-2.25-2.25H6.75A2.25 2.25 0 0 0 4.5 6.75v10.5a2.25 2.25 0 0 0 2.25 2.25Zm.75-12h9v9h-9v-9Z"/></svg>
+              </div>
+              <span class="text-xs font-bold text-ua-blue uppercase tracking-widest">WebAuthn</span>
+            </div>
+            <h4 class="font-display font-bold text-ua-navy text-base uppercase tracking-wide mb-1 group-hover:text-ua-blue transition-colors">Facteur physique (YubiKey)</h4>
+            <p class="text-gray-500 text-xs leading-relaxed mb-3">Table clés · ajout via modale pédagogique · suppression par clé · 2 états (vide / peuplé).</p>
+            <code class="text-xs font-mono text-gray-400">method-webauthn.html</code>
+          </div>
+        </a>
+
+        <a href="method-bypass.html" class="block bg-white border border-gray-200 hover:border-ua-blue transition-colors group">
+          <div class="h-1.5 bg-ua-crimson"></div>
+          <div class="p-5">
+            <div class="flex items-center gap-2 mb-2">
+              <div class="w-8 h-8 bg-red-50 flex items-center justify-center flex-shrink-0">
+                <svg class="w-4 h-4 text-ua-crimson" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z"/></svg>
+              </div>
+              <span class="text-xs font-bold text-ua-crimson uppercase tracking-widest">Secours</span>
+            </div>
+            <h4 class="font-display font-bold text-ua-navy text-base uppercase tracking-wide mb-1 group-hover:text-ua-blue transition-colors">Codes de secours</h4>
+            <p class="text-gray-500 text-xs leading-relaxed mb-3">Alerte critique · grille 10 codes mono · régénération avec confirmation · codes usagés barrés.</p>
+            <code class="text-xs font-mono text-gray-400">method-bypass.html</code>
+          </div>
+        </a>
+
+      </div>
+
+      <!-- Bloc 2 : Espace manager -->
+      <h3 class="font-display font-bold text-lg uppercase tracking-wide text-ua-navy mb-4">Bloc 2 — Espace manager (helpdesk)</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
+
+        <a href="manager-dashboard.html" class="block bg-white border border-gray-200 hover:border-ua-blue transition-colors group">
+          <div class="h-1.5 bg-ua-navy"></div>
+          <div class="p-5">
+            <div class="flex items-center gap-2 mb-2">
+              <div class="w-8 h-8 bg-gray-100 flex items-center justify-center flex-shrink-0">
+                <svg class="w-4 h-4 text-ua-navy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"/></svg>
+              </div>
+              <span class="text-xs font-bold text-ua-navy uppercase tracking-widest">Style J</span>
+            </div>
+            <h4 class="font-display font-bold text-ua-navy text-base uppercase tracking-wide mb-1 group-hover:text-ua-blue transition-colors">Recherche utilisateur</h4>
+            <p class="text-gray-500 text-xs leading-relaxed mb-3">Barre recherche · 4 KPI inline · table dense 5 lignes · 3 actions rapides avec modale.</p>
+            <code class="text-xs font-mono text-gray-400">manager-dashboard.html</code>
+          </div>
+        </a>
+
+        <a href="user-view.html" class="block bg-white border border-gray-200 hover:border-ua-blue transition-colors group">
+          <div class="h-1.5" style="background:linear-gradient(90deg,#202E56 50%,#1107A0 50%)"></div>
+          <div class="p-5">
+            <div class="flex items-center gap-2 mb-2">
+              <div class="w-8 h-8 bg-blue-50 flex items-center justify-center flex-shrink-0">
+                <svg class="w-4 h-4 text-ua-indigo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 0 1 3 3m3 0a6 6 0 0 1-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 0 1 21.75 8.25Z"/></svg>
+              </div>
+              <span class="text-xs font-bold uppercase tracking-widest" style="color:#1107A0">Helpdesk · Impersonate</span>
+            </div>
+            <h4 class="font-display font-bold text-ua-navy text-base uppercase tracking-wide mb-1 group-hover:text-ua-blue transition-colors">Fiche utilisateur — cthéas</h4>
+            <p class="text-gray-500 text-xs leading-relaxed mb-3">Score · table 6 méthodes · désactiver/réinitialiser · journal audit · emprunter l'identité (bg-ua-indigo, tracé).</p>
+            <code class="text-xs font-mono text-gray-400">user-view.html</code>
+          </div>
+        </a>
+
+      </div>
+
+      <!-- Bloc 3 : Pages d'erreur -->
+      <h3 class="font-display font-bold text-lg uppercase tracking-wide text-ua-navy mb-4">Bloc 3 — Pages d'erreur</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+        <a href="error-pages.html" class="block bg-white border border-gray-200 hover:border-ua-blue transition-colors group">
+          <div class="h-1.5 flex">
+            <div class="flex-1" style="background:#CC5717"></div>
+            <div class="flex-1" style="background:#9B1E21"></div>
+          </div>
+          <div class="p-5">
+            <div class="flex items-center gap-2 mb-2">
+              <div class="w-8 h-8 bg-orange-50 flex items-center justify-center flex-shrink-0">
+                <svg class="w-4 h-4 text-ua-orange" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"/></svg>
+              </div>
+              <span class="text-xs font-bold text-ua-orange uppercase tracking-widest">403 + 500</span>
+            </div>
+            <h4 class="font-display font-bold text-ua-navy text-base uppercase tracking-wide mb-1 group-hover:text-ua-blue transition-colors">Pages d'erreur</h4>
+            <p class="text-gray-500 text-xs leading-relaxed mb-3">403 Accès refusé (orange) + 500 Erreur serveur (bordeaux). Sans sidebar. Encart technique repliable. Lien support.</p>
+            <code class="text-xs font-mono text-gray-400">error-pages.html</code>
+          </div>
+        </a>
+
+        <!-- Carte récap système de design -->
+        <div class="bg-ua-navy border border-ua-navy p-5 flex flex-col justify-between">
+          <div>
+            <span class="text-xs font-bold text-ua-blue uppercase tracking-widest">Design system</span>
+            <h4 class="font-display font-bold text-white text-base uppercase tracking-wide mt-1 mb-3">Composants réutilisables</h4>
+            <ul class="text-white/60 text-xs space-y-1 font-mono leading-relaxed">
+              <li>+sidebar(activeSection)</li>
+              <li>+topbar(breadcrumbs)</li>
+              <li>+toggle(id, checked) → role="switch"</li>
+              <li>+confirm-modal(id) → focus-trap</li>
+              <li>+toast(type, message) → aria-live</li>
+              <li>+method-card(method)</li>
+              <li>+security-score(active, total)</li>
+              <li>+audit-log-table(rows)</li>
+            </ul>
+          </div>
+          <p class="text-white/30 text-xs mt-4 italic">« Être formés ici, c'est briller partout »</p>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+</body>
+</html>
