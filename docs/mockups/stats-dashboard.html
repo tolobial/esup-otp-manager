@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<!--
+  stats-dashboard.html — Tableau de bord statistiques MFA (Style J)
+  ==================================================================
+  COMPOSANTS EXTRACTIBLES EN PUG :
+    +sidebar('statistiques')        → Shell nav (actif: Statistiques)
+    +topbar(breadcrumbs, user)      → Topbar
+    +kpi-card(label, value, delta, color)  → Carte KPI avec tendance
+    +chart-line(id, data)           → Graphique Chart.js ligne (7 jours)
+    +chart-donut(id, data)          → Graphique Chart.js donut (répartition)
+    +events-table(rows)             → Table dense événements récents
+    +table-filter(options)          → Filtre texte + select
+
+  VUE 3 + CHART.JS :
+    - Chart.js initialisé dans onMounted
+    - Table filtrée par résultat et méthode
+    - Tri par colonne
+-->
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Statistiques MFA — Université des Antilles</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,400;0,600;0,700;1,400&family=Barlow+Condensed:wght@700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'ua-blue': '#00A0DC', 'ua-navy': '#202E56',
+            'ua-indigo': '#1107A0', 'ua-orange': '#CC5717', 'ua-crimson': '#9B1E21',
+          },
+          fontFamily: {
+            display: ['"Barlow Condensed"', 'Impact', 'system-ui', 'sans-serif'],
+            sans:    ['"Open Sans"', 'system-ui', 'sans-serif'],
+          },
+          borderRadius: {
+            none: '0px', sm: '1px', DEFAULT: '2px',
+            md: '2px', lg: '2px', xl: '2px', '2xl': '2px', full: '9999px',
+          },
+        }
+      }
+    }
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <style>
+    body { -webkit-font-smoothing: antialiased; }
+  </style>
+</head>
+<body class="font-sans bg-gray-50 text-ua-navy">
+
+<a href="#content" class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:bg-ua-navy focus:text-white focus:px-4 focus:py-2 focus:text-sm focus:font-semibold">
+  Aller au contenu
+</a>
+
+<div id="app">
+
+  <!-- ─── SIDEBAR (Statistiques active) ───────────────────────────────────── -->
+  <aside class="hidden lg:flex fixed inset-y-0 left-0 w-64 bg-ua-navy flex-col z-20 print:hidden" aria-label="Navigation principale">
+    <div class="flex items-center gap-3 px-5 py-4 border-b-2 border-ua-blue flex-shrink-0">
+      <svg viewBox="0 0 44 44" width="42" height="42" aria-hidden="true" focusable="false">
+        <circle cx="22" cy="22" r="20" fill="white"/>
+        <path d="M22 3 A19 19 0 0 1 40 29" fill="none" stroke="#00A0DC" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cx="33" cy="19" r="3" fill="#CC5717"/>
+        <circle cx="33" cy="26" r="3" fill="#9B1E21"/>
+        <text x="17.5" y="27" font-family="'Barlow Condensed',Impact,sans-serif" font-weight="800" font-size="12" fill="#202E56" text-anchor="middle">UA</text>
+      </svg>
+      <div class="overflow-hidden">
+        <p class="font-display font-bold text-white text-sm leading-tight uppercase tracking-wide">Université des Antilles</p>
+        <p class="text-ua-blue text-xs font-semibold uppercase tracking-wider truncate">Authentification MFA</p>
+      </div>
+    </div>
+    <nav class="flex-1 overflow-y-auto py-3 px-3" aria-label="Navigation principale">
+      <ul class="space-y-0.5" role="list">
+        <li><a href="home.html" class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium transition-colors text-white/70 hover:text-white hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue focus-visible:ring-inset">
+          <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"/></svg>
+          Accueil
+        </a></li>
+        <li><a href="home.html" class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium transition-colors text-white/70 hover:text-white hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue focus-visible:ring-inset">
+          <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z"/></svg>
+          Mes méthodes
+        </a></li>
+        <li><a href="admin-dashboard.html" class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium transition-colors text-white/70 hover:text-white hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue focus-visible:ring-inset">
+          <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z"/></svg>
+          Espace manager
+        </a></li>
+        <li><a href="admin-dashboard.html" class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium transition-colors text-white/70 hover:text-white hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue focus-visible:ring-inset">
+          <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 0 1 0 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 0 1 0-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg>
+          Administration
+        </a></li>
+        <!-- Statistiques — ACTIVE -->
+        <li><a href="stats-dashboard.html" class="flex items-center gap-3 px-3 py-2.5 text-sm font-semibold transition-colors border-l-2 border-ua-blue bg-white/10 text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue focus-visible:ring-inset" aria-current="page">
+          <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v11.25A2.25 2.25 0 0 0 6 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0 1 18 16.5h-2.25m-7.5 0h7.5m-7.5 0-1 3m8.5-3 1 3m0 0 .5 1.5m-.5-1.5h-9.5m0 0-.5 1.5M9 11.25v1.5M12 9v3.75m3-6v6"/></svg>
+          Statistiques
+        </a></li>
+      </ul>
+    </nav>
+    <div class="px-5 py-3 border-t border-white/10 flex-shrink-0">
+      <p class="text-white/40 text-xs italic">« Être formés ici, c'est briller partout »</p>
+    </div>
+    <div class="px-4 py-3 border-t border-white/20 flex items-center gap-3 flex-shrink-0">
+      <div class="w-8 h-8 rounded-full bg-ua-blue flex items-center justify-center flex-shrink-0" aria-hidden="true">
+        <span class="text-ua-navy font-display font-bold text-xs">ML</span>
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="text-white text-xs font-semibold truncate">M. Laurent</p>
+        <p class="text-white/50 text-xs truncate">m.laurent@univ-antilles.fr</p>
+      </div>
+      <a href="index.html" class="text-white/50 hover:text-ua-crimson transition-colors p-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue" aria-label="Se déconnecter">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9"/></svg>
+      </a>
+    </div>
+  </aside>
+
+  <!-- ─── ZONE PRINCIPALE ─────────────────────────────────────────────────── -->
+  <div class="lg:ml-64 flex flex-col min-h-screen">
+
+    <!-- Topbar -->
+    <header class="h-12 bg-white border-b border-gray-200 flex items-center px-6 justify-between flex-shrink-0 print:hidden">
+      <nav aria-label="Fil d'Ariane">
+        <ol class="flex items-center gap-1.5 text-sm" role="list">
+          <li><a href="home.html" class="text-gray-400 hover:text-ua-navy transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue">Accueil</a></li>
+          <li aria-hidden="true"><svg class="w-3.5 h-3.5 text-gray-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg></li>
+          <li><span class="text-ua-navy font-semibold" aria-current="page">Statistiques</span></li>
+        </ol>
+      </nav>
+      <div class="flex items-center gap-3">
+        <!-- Sélecteur de période -->
+        <select v-model="period"
+                class="text-xs border border-gray-200 bg-white px-3 py-1.5 text-ua-navy focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue"
+                aria-label="Période d'analyse">
+          <option value="7">7 derniers jours</option>
+          <option value="30">30 derniers jours</option>
+          <option value="90">90 derniers jours</option>
+        </select>
+        <button class="text-xs font-medium text-ua-navy border border-gray-200 bg-white px-3 py-1.5 hover:bg-gray-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue">
+          Exporter PDF
+        </button>
+      </div>
+    </header>
+
+    <!-- Contenu -->
+    <main id="content" class="flex-1 p-6 lg:p-8" tabindex="-1">
+
+      <!-- En-tête page -->
+      <div class="mb-6 flex items-end justify-between">
+        <div>
+          <h1 class="font-display font-bold text-2xl text-ua-navy uppercase tracking-wide">Statistiques MFA</h1>
+          <p class="text-gray-500 text-sm mt-1">Données agrégées · Mise à jour le 23 mai 2026 à 10:00</p>
+        </div>
+        <span class="text-xs text-gray-400 font-mono tabular-nums">Campus de Fouillole + Troubiran + Schoelcher</span>
+      </div>
+
+      <!-- ── KPI CARDS (4) — Extractable: +kpi-card(label, value, delta, color) -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6" data-od-id="kpi-cards">
+
+        <!-- KPI 1 : Utilisateurs actifs -->
+        <div class="bg-white border border-gray-200 border-l-4 border-l-ua-blue p-5">
+          <div class="flex items-start justify-between mb-3">
+            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider leading-tight">Utilisateurs MFA actifs</p>
+            <svg class="w-4 h-4 text-ua-blue flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z"/></svg>
+          </div>
+          <p class="font-display font-bold text-3xl text-ua-navy leading-none tabular-nums">2 847</p>
+          <div class="flex items-center gap-1.5 mt-2">
+            <span class="text-xs font-semibold text-green-600 flex items-center gap-0.5">
+              <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 15.75 7.5-7.5 7.5 7.5"/></svg>
+              +12,3 %
+            </span>
+            <span class="text-xs text-gray-400">vs mois précédent</span>
+          </div>
+        </div>
+
+        <!-- KPI 2 : Auth réussies 24h -->
+        <div class="bg-white border border-gray-200 border-l-4 border-l-green-500 p-5">
+          <div class="flex items-start justify-between mb-3">
+            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider leading-tight">Auth. réussies (24h)</p>
+            <svg class="w-4 h-4 text-green-500 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+          </div>
+          <p class="font-display font-bold text-3xl text-ua-navy leading-none tabular-nums">12 394</p>
+          <div class="flex items-center gap-1.5 mt-2">
+            <span class="text-xs font-semibold text-green-600 flex items-center gap-0.5">
+              <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 15.75 7.5-7.5 7.5 7.5"/></svg>
+              +8,2 %
+            </span>
+            <span class="text-xs text-gray-400">vs hier</span>
+          </div>
+        </div>
+
+        <!-- KPI 3 : Méthode dominante -->
+        <div class="bg-white border border-gray-200 border-l-4 border-l-ua-indigo p-5">
+          <div class="flex items-start justify-between mb-3">
+            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider leading-tight">Méthode dominante</p>
+            <svg class="w-4 h-4 text-ua-indigo flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 3.75 9.375v-4.5Z"/></svg>
+          </div>
+          <p class="font-display font-bold text-3xl text-ua-navy leading-none">TOTP</p>
+          <div class="flex items-center gap-1.5 mt-2">
+            <span class="text-xs font-semibold text-ua-indigo">68,4 %</span>
+            <span class="text-xs text-gray-400">des authentifications</span>
+          </div>
+        </div>
+
+        <!-- KPI 4 : Taux d'échec -->
+        <div class="bg-white border border-gray-200 border-l-4 border-l-ua-orange p-5">
+          <div class="flex items-start justify-between mb-3">
+            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider leading-tight">Taux d'échec (24h)</p>
+            <svg class="w-4 h-4 text-ua-orange flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+          </div>
+          <p class="font-display font-bold text-3xl text-ua-navy leading-none tabular-nums">2,3 %</p>
+          <div class="flex items-center gap-1.5 mt-2">
+            <span class="text-xs font-semibold text-green-600 flex items-center gap-0.5">
+              <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/></svg>
+              −0,4 pt
+            </span>
+            <span class="text-xs text-gray-400">vs hier</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── GRAPHIQUES — Extractable: +chart-line + +chart-donut ────────── -->
+      <div class="grid grid-cols-1 xl:grid-cols-3 gap-4 mb-6" data-od-id="charts-row">
+
+        <!-- Graphique ligne (2/3) -->
+        <div class="xl:col-span-2 bg-white border border-gray-200 p-5">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h2 class="font-display font-bold text-lg text-ua-navy uppercase tracking-wide">Tendance 7 jours</h2>
+              <p class="text-xs text-gray-400">Authentifications réussies et échecs</p>
+            </div>
+            <div class="flex items-center gap-4 text-xs">
+              <span class="flex items-center gap-1.5 text-gray-600">
+                <span class="w-6 h-0.5 bg-ua-blue inline-block"></span>Réussies
+              </span>
+              <span class="flex items-center gap-1.5 text-gray-600">
+                <span class="w-6 h-0.5 bg-ua-crimson inline-block"></span>Échecs
+              </span>
+            </div>
+          </div>
+          <div class="relative" style="height: 200px;">
+            <canvas id="lineChart" aria-label="Graphique tendance authentifications 7 jours" role="img"></canvas>
+          </div>
+        </div>
+
+        <!-- Graphique donut (1/3) -->
+        <div class="bg-white border border-gray-200 p-5">
+          <div class="mb-4">
+            <h2 class="font-display font-bold text-lg text-ua-navy uppercase tracking-wide">Répartition</h2>
+            <p class="text-xs text-gray-400">Part des méthodes utilisées</p>
+          </div>
+          <div class="relative flex justify-center" style="height: 160px;">
+            <canvas id="donutChart" aria-label="Graphique répartition des méthodes MFA" role="img"></canvas>
+          </div>
+          <!-- Légende donut -->
+          <ul class="mt-4 space-y-1.5 text-xs" aria-hidden="true">
+            <li v-for="item in donutLegend" :key="item.label" class="flex items-center justify-between">
+              <span class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 flex-shrink-0" :style="{ background: item.color }"></span>
+                <span class="text-gray-600">{{ item.label }}</span>
+              </span>
+              <span class="font-semibold font-mono tabular-nums text-ua-navy">{{ item.pct }}%</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- ── TABLE ÉVÉNEMENTS RÉCENTS (Style J) ──────────────────────────── -->
+      <section aria-labelledby="events-title" data-od-id="events-table">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
+          <h2 id="events-title" class="font-display font-bold text-lg text-ua-navy uppercase tracking-wide">
+            Événements récents
+          </h2>
+          <div class="flex items-center gap-2 flex-wrap">
+            <!-- Filtre résultat -->
+            <select v-model="filterResult"
+                    class="text-xs border border-gray-200 bg-white px-3 py-1.5 text-ua-navy focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue"
+                    aria-label="Filtrer par résultat">
+              <option value="">Tous les résultats</option>
+              <option value="Réussi">Réussi</option>
+              <option value="Échoué">Échoué</option>
+            </select>
+            <!-- Filtre méthode -->
+            <select v-model="filterEventMethod"
+                    class="text-xs border border-gray-200 bg-white px-3 py-1.5 text-ua-navy focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue"
+                    aria-label="Filtrer par méthode">
+              <option value="">Toutes les méthodes</option>
+              <option value="TOTP">TOTP</option>
+              <option value="WebAuthn">WebAuthn</option>
+              <option value="Push">Push</option>
+              <option value="Email">Email</option>
+              <option value="Codes secours">Codes de secours</option>
+            </select>
+            <button v-if="filterResult || filterEventMethod"
+                    @click="filterResult = ''; filterEventMethod = ''"
+                    class="text-xs text-ua-crimson hover:text-red-900 underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-crimson px-1">
+              Effacer filtres
+            </button>
+          </div>
+        </div>
+
+        <div class="bg-white border border-gray-200 overflow-x-auto">
+          <table class="w-full text-sm" aria-label="Événements d'authentification récents">
+            <thead>
+              <tr class="bg-gray-50 border-b border-gray-200">
+                <th scope="col" class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap">
+                  <button @click="toggleSort('date')" class="flex items-center gap-1 hover:text-ua-navy transition-colors focus-visible:outline-none">
+                    Horodatage
+                    <svg class="w-3 h-3 opacity-50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15 12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9"/></svg>
+                  </button>
+                </th>
+                <th scope="col" class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Utilisateur</th>
+                <th scope="col" class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Méthode</th>
+                <th scope="col" class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Campus</th>
+                <th scope="col" class="px-4 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Résultat</th>
+                <th scope="col" class="px-4 py-2.5 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Durée</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+              <tr v-if="filteredEvents.length === 0">
+                <td colspan="6" class="px-4 py-8 text-center text-gray-400 text-sm">Aucun événement ne correspond aux filtres.</td>
+              </tr>
+              <tr v-for="event in filteredEvents" :key="event.id"
+                  class="hover:bg-gray-50 transition-colors"
+                  :class="event.result === 'Échoué' ? 'bg-red-50/30' : ''">
+                <td class="px-4 py-2.5 text-xs text-gray-500 font-mono whitespace-nowrap tabular-nums">{{ event.date }}</td>
+                <td class="px-4 py-2.5 text-xs text-ua-navy truncate max-w-[200px]">{{ event.user }}</td>
+                <td class="px-4 py-2.5">
+                  <span class="text-xs font-semibold px-2 py-0.5 bg-slate-100 text-ua-navy">{{ event.method }}</span>
+                </td>
+                <td class="px-4 py-2.5 text-xs text-gray-500 whitespace-nowrap">{{ event.campus }}</td>
+                <td class="px-4 py-2.5 text-center">
+                  <span class="text-xs font-semibold px-2 py-0.5"
+                        :class="event.result === 'Réussi'
+                          ? 'bg-blue-50 text-ua-navy'
+                          : 'bg-red-50 text-ua-crimson'">
+                    {{ event.result }}
+                  </span>
+                </td>
+                <td class="px-4 py-2.5 text-right text-xs text-gray-500 font-mono tabular-nums whitespace-nowrap">{{ event.duration }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="flex items-center justify-between mt-3 text-xs text-gray-500">
+          <span>{{ filteredEvents.length }} événement{{ filteredEvents.length > 1 ? 's' : '' }} affiché{{ filteredEvents.length > 1 ? 's' : '' }}</span>
+          <div class="flex items-center gap-1">
+            <button class="px-2.5 py-1 border border-gray-200 hover:bg-gray-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue" disabled>← Préc.</button>
+            <span class="px-2.5 py-1 border border-ua-navy bg-ua-navy text-white font-semibold">1</span>
+            <button class="px-2.5 py-1 border border-gray-200 hover:bg-gray-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue">Suiv. →</button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+</div><!-- #app -->
+
+<script>
+const { createApp, ref, computed, onMounted } = Vue;
+
+createApp({
+  setup() {
+    const period = ref('7');
+    const filterResult = ref('');
+    const filterEventMethod = ref('');
+    const sortField = ref('date');
+    const sortDir = ref('desc');
+
+    const donutLegend = [
+      { label: 'TOTP',           pct: 68, color: '#00A0DC' },
+      { label: 'WebAuthn',       pct: 15, color: '#202E56' },
+      { label: 'Push',           pct:  9, color: '#1107A0' },
+      { label: 'Email / SMS',    pct:  5, color: '#CC5717' },
+      { label: 'Codes de secours', pct: 3, color: '#9B1E21' },
+    ];
+
+    const events = ref([
+      { id:1,  date:'23/05/26 09:47', user:'p.placide@univ-antilles.fr',  method:'TOTP',          campus:'Fouillole',  result:'Réussi', duration:'0.3s' },
+      { id:2,  date:'23/05/26 09:38', user:'m.vernet@univ-antilles.fr',   method:'WebAuthn',       campus:'Troubiran',  result:'Réussi', duration:'0.2s' },
+      { id:3,  date:'23/05/26 09:21', user:'s.dupuy@univ-antilles.fr',    method:'TOTP',           campus:'Fouillole',  result:'Échoué', duration:'30.0s' },
+      { id:4,  date:'23/05/26 09:14', user:'j.bernard@univ-antilles.fr',  method:'Push',           campus:'Schoelcher', result:'Réussi', duration:'4.2s' },
+      { id:5,  date:'23/05/26 08:59', user:'f.moreau@univ-antilles.fr',   method:'Email',          campus:'Fouillole',  result:'Réussi', duration:'12.1s' },
+      { id:6,  date:'23/05/26 08:47', user:'p.placide@univ-antilles.fr',  method:'Push',           campus:'Fouillole',  result:'Réussi', duration:'3.8s' },
+      { id:7,  date:'23/05/26 08:31', user:'l.petit@univ-antilles.fr',    method:'TOTP',           campus:'Troubiran',  result:'Réussi', duration:'0.4s' },
+      { id:8,  date:'23/05/26 08:14', user:'n.martin@univ-antilles.fr',   method:'Codes secours',  campus:'Schoelcher', result:'Réussi', duration:'0.1s' },
+      { id:9,  date:'23/05/26 07:58', user:'r.lebon@univ-antilles.fr',    method:'TOTP',           campus:'Fouillole',  result:'Échoué', duration:'30.0s' },
+      { id:10, date:'23/05/26 07:42', user:'c.marie@univ-antilles.fr',    method:'WebAuthn',       campus:'Troubiran',  result:'Réussi', duration:'0.2s' },
+    ]);
+
+    const filteredEvents = computed(() => {
+      let rows = events.value;
+      if (filterResult.value)      rows = rows.filter(r => r.result === filterResult.value);
+      if (filterEventMethod.value) rows = rows.filter(r => r.method === filterEventMethod.value);
+      return rows;
+    });
+
+    function toggleSort(field) {
+      if (sortField.value === field) sortDir.value = sortDir.value === 'asc' ? 'desc' : 'asc';
+      else { sortField.value = field; sortDir.value = 'desc'; }
+    }
+
+    onMounted(() => {
+      // Graphique ligne
+      const lineCtx = document.getElementById('lineChart');
+      if (lineCtx) {
+        new Chart(lineCtx, {
+          type: 'line',
+          data: {
+            labels: ['17/05', '18/05', '19/05', '20/05', '21/05', '22/05', '23/05'],
+            datasets: [
+              {
+                label: 'Réussies',
+                data: [8420, 9150, 8890, 11230, 10980, 12394, 11780],
+                borderColor: '#00A0DC',
+                backgroundColor: 'rgba(0,160,220,0.06)',
+                fill: true, tension: 0.35,
+                pointRadius: 3, pointBackgroundColor: '#00A0DC', borderWidth: 2,
+              },
+              {
+                label: 'Échecs',
+                data: [240, 198, 312, 287, 245, 289, 272],
+                borderColor: '#9B1E21',
+                backgroundColor: 'rgba(155,30,33,0.05)',
+                fill: true, tension: 0.35,
+                pointRadius: 3, pointBackgroundColor: '#9B1E21', borderWidth: 2,
+              }
+            ]
+          },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                backgroundColor: '#202E56',
+                titleFont: { family: "'Open Sans', system-ui" },
+                bodyFont: { family: "'Open Sans', system-ui" },
+                padding: 10, cornerRadius: 2,
+              }
+            },
+            scales: {
+              x: {
+                grid: { color: 'rgba(0,0,0,0.04)', drawBorder: false },
+                ticks: { font: { size: 11, family: "'Open Sans', system-ui" }, color: '#6B7280' }
+              },
+              y: {
+                position: 'left',
+                grid: { color: 'rgba(0,0,0,0.04)', drawBorder: false },
+                ticks: {
+                  font: { size: 11, family: "'Open Sans', system-ui" }, color: '#6B7280',
+                  callback: v => v >= 1000 ? (v/1000).toFixed(0)+'k' : v
+                }
+              }
+            }
+          }
+        });
+      }
+
+      // Graphique donut
+      const donutCtx = document.getElementById('donutChart');
+      if (donutCtx) {
+        new Chart(donutCtx, {
+          type: 'doughnut',
+          data: {
+            labels: ['TOTP', 'WebAuthn', 'Push', 'Email / SMS', 'Codes secours'],
+            datasets: [{
+              data: [68, 15, 9, 5, 3],
+              backgroundColor: ['#00A0DC', '#202E56', '#1107A0', '#CC5717', '#9B1E21'],
+              borderWidth: 0, hoverOffset: 4,
+            }]
+          },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            cutout: '68%',
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                backgroundColor: '#202E56',
+                titleFont: { family: "'Open Sans', system-ui" },
+                bodyFont: { family: "'Open Sans', system-ui" },
+                padding: 10, cornerRadius: 2,
+                callbacks: { label: ctx => ` ${ctx.label} : ${ctx.parsed}%` }
+              }
+            }
+          }
+        });
+      }
+    });
+
+    return { period, filterResult, filterEventMethod, sortField, sortDir,
+             donutLegend, events, filteredEvents, toggleSort };
+  }
+}).mount('#app');
+</script>
+</body>
+</html>

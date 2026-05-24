@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<!--
+  admin-dashboard.html — Administration MFA (Style D + tableaux Style J)
+  =======================================================================
+  COMPOSANTS EXTRACTIBLES EN PUG :
+    +sidebar('administration')         → Shell nav (actif: Administration)
+    +topbar(breadcrumbs, user)         → Topbar
+    +method-global-toggle(method)      → Ligne toggle global par méthode (Style D)
+    +admin-actions-table(rows)         → Table dense actions admin (Style J)
+    +table-filter(options)             → Filtre + recherche
+    +confirm-modal(id)                 → Modale confirmation
+
+  SECTIONS :
+    1. Contrôles globaux — activation/désactivation site-wide de chaque méthode
+    2. Journal des actions — table dense filtrée et triable
+-->
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Administration MFA — Université des Antilles</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,400;0,600;0,700;1,400&family=Barlow+Condensed:wght@700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'ua-blue': '#00A0DC', 'ua-navy': '#202E56',
+            'ua-indigo': '#1107A0', 'ua-orange': '#CC5717', 'ua-crimson': '#9B1E21',
+          },
+          fontFamily: {
+            display: ['"Barlow Condensed"', 'Impact', 'system-ui', 'sans-serif'],
+            sans:    ['"Open Sans"', 'system-ui', 'sans-serif'],
+          },
+          borderRadius: {
+            none: '0px', sm: '1px', DEFAULT: '2px',
+            md: '2px', lg: '2px', xl: '2px', '2xl': '2px', full: '9999px',
+          },
+        }
+      }
+    }
+  </script>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <style>
+    body { -webkit-font-smoothing: antialiased; }
+    @keyframes slide-in { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
+    .toast-enter { animation: slide-in 0.2s ease; }
+  </style>
+</head>
+<body class="font-sans bg-gray-50 text-ua-navy">
+
+<a href="#content" class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:bg-ua-navy focus:text-white focus:px-4 focus:py-2 focus:text-sm focus:font-semibold">
+  Aller au contenu
+</a>
+
+<div id="app">
+
+  <!-- ─── SIDEBAR (Administration active) ─────────────────────────────────── -->
+  <aside class="hidden lg:flex fixed inset-y-0 left-0 w-64 bg-ua-navy flex-col z-20 print:hidden" aria-label="Navigation principale">
+    <div class="flex items-center gap-3 px-5 py-4 border-b-2 border-ua-blue flex-shrink-0">
+      <svg viewBox="0 0 44 44" width="42" height="42" aria-hidden="true" focusable="false">
+        <circle cx="22" cy="22" r="20" fill="white"/>
+        <path d="M22 3 A19 19 0 0 1 40 29" fill="none" stroke="#00A0DC" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cx="33" cy="19" r="3" fill="#CC5717"/>
+        <circle cx="33" cy="26" r="3" fill="#9B1E21"/>
+        <text x="17.5" y="27" font-family="'Barlow Condensed',Impact,sans-serif" font-weight="800" font-size="12" fill="#202E56" text-anchor="middle">UA</text>
+      </svg>
+      <div class="overflow-hidden">
+        <p class="font-display font-bold text-white text-sm leading-tight uppercase tracking-wide">Université des Antilles</p>
+        <p class="text-ua-blue text-xs font-semibold uppercase tracking-wider truncate">Authentification MFA</p>
+      </div>
+    </div>
+    <nav class="flex-1 overflow-y-auto py-3 px-3" aria-label="Navigation principale">
+      <ul class="space-y-0.5" role="list">
+        <li><a href="home.html" class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium transition-colors text-white/70 hover:text-white hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue focus-visible:ring-inset">
+          <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"/></svg>
+          Accueil
+        </a></li>
+        <li><a href="home.html" class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium transition-colors text-white/70 hover:text-white hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue focus-visible:ring-inset">
+          <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z"/></svg>
+          Mes méthodes
+        </a></li>
+        <li><a href="admin-dashboard.html" class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium transition-colors text-white/70 hover:text-white hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue focus-visible:ring-inset">
+          <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z"/></svg>
+          Espace manager
+        </a></li>
+        <!-- Administration — ACTIVE -->
+        <li><a href="admin-dashboard.html" class="flex items-center gap-3 px-3 py-2.5 text-sm font-semibold transition-colors border-l-2 border-ua-blue bg-white/10 text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue focus-visible:ring-inset" aria-current="page">
+          <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 0 1 0 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 0 1 0-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg>
+          Administration
+        </a></li>
+        <li><a href="stats-dashboard.html" class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium transition-colors text-white/70 hover:text-white hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue focus-visible:ring-inset">
+          <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v11.25A2.25 2.25 0 0 0 6 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0 1 18 16.5h-2.25m-7.5 0h7.5m-7.5 0-1 3m8.5-3 1 3m0 0 .5 1.5m-.5-1.5h-9.5m0 0-.5 1.5M9 11.25v1.5M12 9v3.75m3-6v6"/></svg>
+          Statistiques
+        </a></li>
+      </ul>
+    </nav>
+    <div class="px-5 py-3 border-t border-white/10 flex-shrink-0">
+      <p class="text-white/40 text-xs italic">« Être formés ici, c'est briller partout »</p>
+    </div>
+    <div class="px-4 py-3 border-t border-white/20 flex items-center gap-3 flex-shrink-0">
+      <div class="w-8 h-8 rounded-full bg-ua-blue flex items-center justify-center flex-shrink-0" aria-hidden="true">
+        <span class="text-ua-navy font-display font-bold text-xs">ML</span>
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="text-white text-xs font-semibold truncate">M. Laurent</p>
+        <p class="text-white/50 text-xs truncate">m.laurent@univ-antilles.fr</p>
+      </div>
+      <a href="index.html" class="text-white/50 hover:text-ua-crimson transition-colors p-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue" aria-label="Se déconnecter">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9"/></svg>
+      </a>
+    </div>
+  </aside>
+
+  <!-- ─── ZONE PRINCIPALE ─────────────────────────────────────────────────── -->
+  <div class="lg:ml-64 flex flex-col min-h-screen">
+
+    <!-- Topbar -->
+    <header class="h-12 bg-white border-b border-gray-200 flex items-center px-6 justify-between flex-shrink-0 print:hidden">
+      <nav aria-label="Fil d'Ariane">
+        <ol class="flex items-center gap-1.5 text-sm" role="list">
+          <li><a href="home.html" class="text-gray-400 hover:text-ua-navy transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue">Accueil</a></li>
+          <li aria-hidden="true"><svg class="w-3.5 h-3.5 text-gray-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg></li>
+          <li><span class="text-ua-navy font-semibold" aria-current="page">Administration</span></li>
+        </ol>
+      </nav>
+      <div class="flex items-center gap-3">
+        <span class="hidden sm:flex items-center gap-1.5 text-xs text-ua-orange font-semibold bg-orange-50 border border-ua-orange/20 px-2.5 py-1">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 0 1 0 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 0 1 0-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg>
+          Mode admin
+        </span>
+        <span class="text-sm text-gray-600">M. Laurent</span>
+      </div>
+    </header>
+
+    <!-- Contenu -->
+    <main id="content" class="flex-1 p-6 lg:p-8" tabindex="-1">
+
+      <!-- En-tête page -->
+      <div class="mb-6">
+        <h1 class="font-display font-bold text-2xl text-ua-navy uppercase tracking-wide">Administration MFA</h1>
+        <p class="text-gray-500 text-sm mt-1">Contrôle global des méthodes et journal des actions d'administration.</p>
+      </div>
+
+      <!-- ── SECTION 1 : CONTRÔLES GLOBAUX (Style D) ─────────────────────── -->
+      <section class="mb-8" aria-labelledby="global-controls-title" data-od-id="global-controls">
+        <div class="flex items-center justify-between mb-3">
+          <h2 id="global-controls-title" class="font-display font-bold text-lg text-ua-navy uppercase tracking-wide">
+            Activation globale des méthodes
+          </h2>
+          <span class="text-xs text-gray-400">Modifications appliquées à tous les utilisateurs</span>
+        </div>
+
+        <!-- Alerte si une méthode est désactivée globalement -->
+        <div v-if="globalMethods.some(m => !m.globalEnabled)"
+             role="alert"
+             class="bg-orange-50 border-l-4 border-ua-orange text-ua-navy px-4 py-3 text-sm mb-4 flex items-start gap-2">
+          <svg class="w-4 h-4 text-ua-orange flex-shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"/></svg>
+          <span>
+            {{ globalMethods.filter(m => !m.globalEnabled).map(m => m.name).join(', ') }}
+            {{ globalMethods.filter(m => !m.globalEnabled).length === 1 ? 'est désactivée' : 'sont désactivées' }}
+            pour l'ensemble des utilisateurs.
+          </span>
+        </div>
+
+        <!-- Tableau contrôles — Extractable: +method-global-toggle(method) -->
+        <div class="bg-white border border-gray-200 overflow-hidden">
+          <table class="w-full text-sm" aria-label="Contrôles globaux des méthodes MFA">
+            <thead>
+              <tr class="bg-gray-50 border-b border-gray-200">
+                <th scope="col" class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider w-8">Méthode</th>
+                <th scope="col" class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Description</th>
+                <th scope="col" class="px-5 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider w-28">Utilisateurs actifs</th>
+                <th scope="col" class="px-5 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider w-36">Activation globale</th>
+                <th scope="col" class="px-5 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider w-28">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+              <tr v-for="method in globalMethods" :key="method.id"
+                  class="transition-colors"
+                  :class="method.globalEnabled ? 'bg-white' : 'bg-gray-50'">
+                <!-- Nom + icône -->
+                <td class="px-5 py-3.5">
+                  <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 flex items-center justify-center flex-shrink-0"
+                         :class="method.globalEnabled ? 'bg-ua-navy' : 'bg-gray-200'" aria-hidden="true">
+                      <svg class="w-4 h-4" :class="method.globalEnabled ? 'text-ua-blue' : 'text-gray-400'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" :d="method.iconPath"/>
+                      </svg>
+                    </div>
+                    <span class="font-semibold text-ua-navy text-sm">{{ method.name }}</span>
+                  </div>
+                </td>
+                <!-- Description -->
+                <td class="px-5 py-3.5 text-gray-500 text-xs max-w-xs">{{ method.desc }}</td>
+                <!-- Utilisateurs actifs -->
+                <td class="px-5 py-3.5 text-right font-mono tabular-nums text-ua-navy font-semibold">
+                  {{ method.activeUsers.toLocaleString('fr-FR') }}
+                </td>
+                <!-- Toggle global -->
+                <td class="px-5 py-3.5 text-center">
+                  <div class="flex flex-col items-center gap-1">
+                    <button :id="`global-toggle-${method.id}`"
+                            role="switch"
+                            :aria-checked="method.globalEnabled.toString()"
+                            :aria-label="`${method.globalEnabled ? 'Désactiver' : 'Activer'} globalement ${method.name}`"
+                            @click="requestGlobalToggle(method)"
+                            class="relative inline-flex w-10 h-5 items-center transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue focus-visible:ring-offset-1"
+                            :class="method.globalEnabled ? 'bg-ua-blue' : 'bg-gray-300'">
+                      <span class="absolute w-3.5 h-3.5 bg-white transition-transform duration-200"
+                            :class="method.globalEnabled ? 'translate-x-5' : 'translate-x-0.5'"></span>
+                    </button>
+                    <span class="text-xs" :class="method.globalEnabled ? 'text-ua-navy font-semibold' : 'text-gray-400'">
+                      {{ method.globalEnabled ? 'Activée' : 'Désactivée' }}
+                    </span>
+                  </div>
+                </td>
+                <!-- Actions -->
+                <td class="px-5 py-3.5 text-right">
+                  <div class="flex items-center justify-end gap-2">
+                    <button class="text-xs text-gray-500 hover:text-ua-navy border border-gray-200 px-2.5 py-1 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue">
+                      Configurer
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ── SECTION 2 : JOURNAL DES ACTIONS (Style J) ───────────────────── -->
+      <section aria-labelledby="actions-log-title" data-od-id="admin-actions-table">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
+          <h2 id="actions-log-title" class="font-display font-bold text-lg text-ua-navy uppercase tracking-wide">
+            Journal des actions
+          </h2>
+          <!-- Filtres — Extractable: +table-filter(options) -->
+          <div class="flex items-center gap-2 flex-wrap">
+            <!-- Filtre méthode -->
+            <select v-model="filterMethod"
+                    class="text-xs border border-gray-200 bg-white px-3 py-1.5 text-ua-navy focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue"
+                    aria-label="Filtrer par méthode">
+              <option value="">Toutes les méthodes</option>
+              <option value="TOTP">TOTP</option>
+              <option value="WebAuthn">WebAuthn</option>
+              <option value="Push">Push</option>
+              <option value="Email">Email</option>
+              <option value="SMS">SMS</option>
+              <option value="Codes secours">Codes de secours</option>
+            </select>
+            <!-- Filtre action -->
+            <select v-model="filterAction"
+                    class="text-xs border border-gray-200 bg-white px-3 py-1.5 text-ua-navy focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue"
+                    aria-label="Filtrer par type d'action">
+              <option value="">Toutes les actions</option>
+              <option value="Activation">Activation</option>
+              <option value="Désactivation">Désactivation</option>
+              <option value="Configuration">Configuration</option>
+              <option value="Audit">Audit</option>
+            </select>
+            <!-- Réinitialiser -->
+            <button v-if="filterMethod || filterAction"
+                    @click="filterMethod = ''; filterAction = ''"
+                    class="text-xs text-ua-crimson hover:text-red-900 underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-crimson px-1">
+              Effacer filtres
+            </button>
+            <!-- Export -->
+            <button class="text-xs font-medium text-ua-navy border border-gray-200 bg-white px-3 py-1.5 hover:bg-gray-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue">
+              Exporter CSV
+            </button>
+          </div>
+        </div>
+
+        <div class="bg-white border border-gray-200 overflow-x-auto">
+          <table class="w-full text-sm" aria-label="Journal des actions administrateur">
+            <thead>
+              <tr class="bg-gray-50 border-b border-gray-200">
+                <th scope="col" class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap">
+                  <button @click="toggleSort('date')"
+                          class="flex items-center gap-1 hover:text-ua-navy transition-colors focus-visible:outline-none"
+                          :aria-sort="sortField === 'date' ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none'">
+                    Date
+                    <svg class="w-3 h-3 opacity-50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15 12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9"/></svg>
+                  </button>
+                </th>
+                <th scope="col" class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Administrateur</th>
+                <th scope="col" class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Action</th>
+                <th scope="col" class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Méthode</th>
+                <th scope="col" class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Utilisateur concerné</th>
+                <th scope="col" class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">IP source</th>
+                <th scope="col" class="px-4 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Statut</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+              <tr v-if="filteredActions.length === 0">
+                <td colspan="7" class="px-4 py-8 text-center text-gray-400 text-sm">Aucune action ne correspond aux filtres sélectionnés.</td>
+              </tr>
+              <tr v-for="action in filteredActions" :key="action.id"
+                  class="hover:bg-gray-50 transition-colors">
+                <td class="px-4 py-3 text-xs text-gray-500 font-mono whitespace-nowrap tabular-nums">{{ action.date }}</td>
+                <td class="px-4 py-3 text-sm text-ua-navy font-medium whitespace-nowrap">{{ action.admin }}</td>
+                <td class="px-4 py-3 text-sm text-ua-navy whitespace-nowrap">{{ action.action }}</td>
+                <td class="px-4 py-3 whitespace-nowrap">
+                  <span class="text-xs font-semibold px-2 py-0.5 bg-slate-100 text-ua-navy">{{ action.method }}</span>
+                </td>
+                <td class="px-4 py-3 text-xs text-gray-500 max-w-xs truncate">{{ action.user }}</td>
+                <td class="px-4 py-3 text-xs text-gray-500 font-mono tabular-nums whitespace-nowrap">{{ action.ip }}</td>
+                <td class="px-4 py-3 text-center">
+                  <span class="text-xs font-semibold px-2 py-0.5"
+                        :class="{
+                          'bg-blue-50 text-ua-navy':     action.status === 'success',
+                          'bg-red-50 text-ua-crimson':   action.status === 'error',
+                          'bg-slate-100 text-slate-600': action.status === 'info',
+                        }">
+                    {{ action.status === 'success' ? 'Réussi' : action.status === 'error' ? 'Échec' : 'Info' }}
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="flex items-center justify-between mt-3 text-xs text-gray-500">
+          <span>{{ filteredActions.length }} action{{ filteredActions.length > 1 ? 's' : '' }} affichée{{ filteredActions.length > 1 ? 's' : '' }}</span>
+          <div class="flex items-center gap-1">
+            <button class="px-2.5 py-1 border border-gray-200 hover:bg-gray-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue" disabled>← Préc.</button>
+            <span class="px-2.5 py-1 border border-ua-navy bg-ua-navy text-white font-semibold">1</span>
+            <button class="px-2.5 py-1 border border-gray-200 hover:bg-gray-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue">Suiv. →</button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- ─── MODALE CONFIRMATION GLOBALE ──────────────────────────────────── -->
+  <div v-if="modal.show"
+       class="fixed inset-0 z-50 flex items-center justify-center p-4"
+       role="dialog" aria-modal="true" aria-labelledby="global-modal-title"
+       @keydown.esc="modal.show = false">
+    <div class="absolute inset-0 bg-black/40" @click="modal.show = false" aria-hidden="true"></div>
+    <div class="relative bg-white border border-gray-200 shadow-lg w-full max-w-sm p-6 z-10">
+      <div class="flex items-start gap-4 mb-4">
+        <div class="w-10 h-10 flex-shrink-0 flex items-center justify-center"
+             :class="modal.action === 'disable' ? 'bg-red-50' : 'bg-blue-50'">
+          <svg class="w-5 h-5" :class="modal.action === 'disable' ? 'text-ua-crimson' : 'text-ua-blue'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"/>
+          </svg>
+        </div>
+        <div>
+          <h2 id="global-modal-title" class="font-semibold text-ua-navy text-sm">
+            {{ modal.action === 'disable' ? 'Désactiver' : 'Activer' }} {{ modal.method?.name }} pour tous les utilisateurs ?
+          </h2>
+          <p class="text-gray-500 text-xs mt-1 leading-relaxed">
+            <span v-if="modal.action === 'disable'">
+              Cette méthode sera immédiatement indisponible pour {{ modal.method?.activeUsers?.toLocaleString('fr-FR') }} utilisateurs actifs.
+            </span>
+            <span v-else>
+              Cette méthode redeviendra disponible pour l'ensemble des utilisateurs.
+            </span>
+          </p>
+        </div>
+      </div>
+      <div class="flex gap-2 justify-end">
+        <button @click="modal.show = false"
+                class="px-4 py-2 text-sm font-medium text-gray-600 border border-gray-200 hover:bg-gray-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue">
+          Annuler
+        </button>
+        <button @click="confirmGlobalToggle" ref="confirmBtn"
+                class="px-4 py-2 text-sm font-semibold text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1"
+                :class="modal.action === 'disable' ? 'bg-ua-crimson hover:bg-red-900 focus-visible:ring-ua-crimson' : 'bg-ua-navy hover:bg-ua-indigo focus-visible:ring-ua-navy'">
+          {{ modal.action === 'disable' ? 'Désactiver pour tous' : 'Activer pour tous' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── TOAST ─────────────────────────────────────────────────────────── -->
+  <div aria-live="polite" aria-atomic="true" class="fixed bottom-4 right-4 z-50 pointer-events-none">
+    <div v-if="toast.show" class="toast-enter pointer-events-auto flex items-center gap-3 px-4 py-3 shadow-lg text-sm font-medium text-white"
+         :class="toast.type === 'success' ? 'bg-ua-navy' : 'bg-ua-crimson'">
+      <svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path v-if="toast.type === 'success'" stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/>
+        <path v-else stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/>
+      </svg>
+      {{ toast.message }}
+    </div>
+  </div>
+
+</div><!-- #app -->
+
+<script>
+const { createApp, ref, computed, nextTick } = Vue;
+
+createApp({
+  setup() {
+    const globalMethods = ref([
+      { id:'totp',     name:'TOTP',             desc:'Codes via application d\'authentification (Google Auth, Authy)',            activeUsers:1934, globalEnabled:true,  iconPath:'M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 3.75 9.375v-4.5ZM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 0 1-1.125-1.125v-4.5ZM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 13.5 9.375v-4.5Z' },
+      { id:'push',     name:'Push',             desc:'Notification push via application mobile UA — validation en un clic',       activeUsers: 423, globalEnabled:true,  iconPath:'M10.5 1.5H8.25A2.25 2.25 0 0 0 6 3.75v16.5a2.25 2.25 0 0 0 2.25 2.25h7.5A2.25 2.25 0 0 0 18 20.25V3.75a2.25 2.25 0 0 0-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18h3' },
+      { id:'webauthn', name:'WebAuthn',          desc:'Clés matérielles FIDO2 (YubiKey, Titan Key) et authentification biométrique', activeUsers: 312, globalEnabled:true,  iconPath:'M15.75 5.25a3 3 0 0 1 3 3m3 0a6 6 0 0 1-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 0 1 21.75 8.25Z' },
+      { id:'email',    name:'Email',             desc:'Code à usage unique envoyé à l\'adresse universitaire (@univ-antilles.fr)', activeUsers: 289, globalEnabled:true,  iconPath:'M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75' },
+      { id:'sms',      name:'SMS',               desc:'Code à usage unique par SMS — dépend de la couverture réseau mobile',       activeUsers:  78, globalEnabled:false, iconPath:'M8.625 12a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 0 1-2.555-.337A5.972 5.972 0 0 1 5.41 20.97a5.969 5.969 0 0 1-.474-.065 4.48 4.48 0 0 0 .978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25Z' },
+      { id:'bypass',   name:'Codes de secours', desc:'Codes à usage unique d\'urgence — limitez l\'usage et renouvelez régulièrement', activeUsers: 847, globalEnabled:true,  iconPath:'M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z' },
+    ]);
+
+    const actions = ref([
+      { id:1, date:'23/05/26 09:47', admin:'M. Laurent',  action:'Activation',    method:'TOTP',           user:'p.placide@univ-antilles.fr',  ip:'194.167.48.12', status:'success' },
+      { id:2, date:'23/05/26 08:23', admin:'A. Céleste',  action:'Désactivation', method:'SMS',            user:'m.vernet@univ-antilles.fr',   ip:'194.167.48.35', status:'success' },
+      { id:3, date:'22/05/26 17:04', admin:'M. Laurent',  action:'Configuration', method:'WebAuthn',       user:'s.dupuy@univ-antilles.fr',    ip:'194.167.48.12', status:'success' },
+      { id:4, date:'22/05/26 14:18', admin:'A. Céleste',  action:'Audit',         method:'Tous',           user:'—',                           ip:'194.167.48.35', status:'info'    },
+      { id:5, date:'22/05/26 11:33', admin:'R. Mathieu',  action:'Activation',    method:'Push',           user:'j.bernard@univ-antilles.fr',  ip:'194.167.48.91', status:'success' },
+      { id:6, date:'21/05/26 16:05', admin:'M. Laurent',  action:'Désactivation', method:'TOTP',           user:'f.moreau@univ-antilles.fr',   ip:'194.167.48.12', status:'error'   },
+      { id:7, date:'21/05/26 10:22', admin:'A. Céleste',  action:'Configuration', method:'Email',          user:'l.petit@univ-antilles.fr',    ip:'194.167.48.35', status:'success' },
+      { id:8, date:'20/05/26 15:47', admin:'R. Mathieu',  action:'Activation',    method:'Codes secours',  user:'n.martin@univ-antilles.fr',   ip:'194.167.48.91', status:'success' },
+    ]);
+
+    const filterMethod = ref('');
+    const filterAction = ref('');
+    const sortField = ref('date');
+    const sortDir = ref('desc');
+    const modal = ref({ show: false, method: null, action: null });
+    const toast = ref({ show: false, message: '', type: 'success' });
+    const confirmBtn = ref(null);
+
+    const filteredActions = computed(() => {
+      let rows = actions.value;
+      if (filterMethod.value) rows = rows.filter(r => r.method === filterMethod.value);
+      if (filterAction.value) rows = rows.filter(r => r.action === filterAction.value);
+      return rows;
+    });
+
+    function toggleSort(field) {
+      if (sortField.value === field) sortDir.value = sortDir.value === 'asc' ? 'desc' : 'asc';
+      else { sortField.value = field; sortDir.value = 'desc'; }
+    }
+
+    function requestGlobalToggle(method) {
+      modal.value = { show: true, method, action: method.globalEnabled ? 'disable' : 'enable' };
+      nextTick(() => confirmBtn.value?.focus());
+    }
+
+    function confirmGlobalToggle() {
+      const { method, action } = modal.value;
+      method.globalEnabled = action === 'enable';
+      modal.value.show = false;
+      showToast(
+        action === 'enable'
+          ? `${method.name} activée pour tous les utilisateurs`
+          : `${method.name} désactivée — ${method.activeUsers.toLocaleString('fr-FR')} utilisateurs impactés`,
+        action === 'enable' ? 'success' : 'warning'
+      );
+    }
+
+    function showToast(message, type = 'success') {
+      toast.value = { show: true, message, type };
+      setTimeout(() => { toast.value.show = false; }, 4000);
+    }
+
+    return { globalMethods, actions, filterMethod, filterAction, sortField, sortDir,
+             filteredActions, modal, toast, confirmBtn,
+             toggleSort, requestGlobalToggle, confirmGlobalToggle };
+  }
+}).mount('#app');
+</script>
+</body>
+</html>

@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<!--
+  index.html — Page de connexion CAS (Style D)
+  =============================================
+  COMPOSANTS EXTRACTIBLES EN PUG :
+    +ua-logo(size)         → SVG logo UA
+    +cas-login-card(url)   → Carte de connexion CAS centrée
+    +page-footer(devise)   → Pied de page avec devise
+
+  NOTES :
+    - Pas de sidebar (utilisateur non authentifié)
+    - L'utilisateur arrive depuis le portail CAS via redirect
+    - Vue 3 gère l'état du bouton (loading) pendant la redirection
+-->
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Connexion — Authentification MFA | Université des Antilles</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&family=Barlow+Condensed:wght@700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'ua-blue': '#00A0DC', 'ua-navy': '#202E56',
+            'ua-indigo': '#1107A0', 'ua-orange': '#CC5717', 'ua-crimson': '#9B1E21',
+          },
+          fontFamily: {
+            display: ['"Barlow Condensed"', 'Impact', 'system-ui', 'sans-serif'],
+            sans:    ['"Open Sans"', 'system-ui', 'sans-serif'],
+          },
+          borderRadius: {
+            none: '0px', sm: '1px', DEFAULT: '2px',
+            md: '2px', lg: '2px', xl: '2px', '2xl': '2px', full: '9999px',
+          },
+        }
+      }
+    }
+  </script>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <style>body { -webkit-font-smoothing: antialiased; }</style>
+</head>
+<body class="font-sans bg-gray-50 min-h-screen flex flex-col">
+
+<div id="app" class="flex flex-col min-h-screen">
+
+  <!-- ─── BANDEAU INSTITUTIONNEL ──────────────────────────────────────────── -->
+  <div class="bg-ua-navy border-b-4 border-ua-blue flex-shrink-0">
+    <div class="max-w-6xl mx-auto px-6 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-4">
+        <svg viewBox="0 0 44 44" width="40" height="40" aria-hidden="true" focusable="false">
+          <circle cx="22" cy="22" r="20" fill="white"/>
+          <path d="M22 3 A19 19 0 0 1 40 29" fill="none" stroke="#00A0DC" stroke-width="2.5" stroke-linecap="round"/>
+          <circle cx="33" cy="19" r="3" fill="#CC5717"/>
+          <circle cx="33" cy="26" r="3" fill="#9B1E21"/>
+          <text x="17.5" y="27" font-family="'Barlow Condensed',Impact,sans-serif"
+                font-weight="800" font-size="12" fill="#202E56" text-anchor="middle">UA</text>
+        </svg>
+        <div>
+          <p class="font-display font-bold text-white text-base uppercase tracking-wide leading-tight">
+            Université des Antilles
+          </p>
+          <p class="text-white/60 text-xs leading-tight">Système d'authentification multi-facteurs</p>
+        </div>
+      </div>
+      <nav aria-label="Liens institutionnels" class="hidden md:flex items-center gap-4 text-xs text-white/50">
+        <a href="#" class="hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue">univ-antilles.fr</a>
+        <span aria-hidden="true">·</span>
+        <a href="#" class="hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue">Aide</a>
+        <span aria-hidden="true">·</span>
+        <a href="#" class="hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue">Contact DSI</a>
+      </nav>
+    </div>
+  </div>
+
+  <!-- ─── CONTENU CENTRÉ ──────────────────────────────────────────────────── -->
+  <main id="content" class="flex-1 flex items-center justify-center px-4 py-12" tabindex="-1">
+    <div class="w-full max-w-md">
+
+      <!-- Alerte erreur CAS -->
+      <div v-if="error" role="alert"
+           class="bg-red-50 border-l-4 border-ua-crimson text-ua-crimson px-4 py-3 text-sm mb-4 flex items-start gap-3">
+        <svg class="w-5 h-5 flex-shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"/>
+        </svg>
+        <p>{{ error }}</p>
+      </div>
+
+      <!-- Carte de connexion — Extractable: +cas-login-card -->
+      <div class="bg-white border border-gray-200 shadow-sm p-8">
+
+        <div class="text-center mb-8">
+          <div class="flex justify-center mb-4">
+            <div class="w-16 h-16 bg-ua-navy flex items-center justify-center">
+              <svg class="w-8 h-8 text-ua-blue" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z"/>
+              </svg>
+            </div>
+          </div>
+          <h1 class="font-display font-bold text-2xl text-ua-navy uppercase tracking-wide">
+            Authentification MFA
+          </h1>
+          <p class="text-gray-500 text-sm mt-2 leading-relaxed">
+            Connectez-vous avec votre compte universitaire<br>
+            pour gérer vos méthodes de double authentification.
+          </p>
+        </div>
+
+        <div class="border-t border-gray-100 mb-6"></div>
+
+        <!-- Bouton CAS principal -->
+        <button @click="loginCAS" :disabled="loading"
+                class="w-full flex items-center justify-center gap-3 px-6 py-3.5
+                       bg-ua-navy text-white font-semibold text-sm
+                       hover:bg-ua-indigo transition-colors
+                       focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-navy focus-visible:ring-offset-2
+                       disabled:opacity-70 disabled:cursor-not-allowed"
+                :aria-label="loading ? 'Connexion en cours, veuillez patienter' : 'Se connecter via le portail CAS'">
+          <svg v-if="loading" class="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path stroke-linecap="round" d="M4 12a8 8 0 0 1 8-8"/>
+          </svg>
+          <svg v-else class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75"/>
+          </svg>
+          <span>{{ loading ? 'Redirection vers le portail CAS…' : 'Se connecter avec le compte universitaire' }}</span>
+        </button>
+
+        <!-- Note sécurité -->
+        <div class="mt-4 flex items-start gap-2 text-xs text-gray-400">
+          <svg class="w-3.5 h-3.5 flex-shrink-0 mt-0.5 text-gray-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"/>
+          </svg>
+          <p>Authentification sécurisée via le portail CAS de l'Université des Antilles. Vos identifiants ne transitent jamais par cette application.</p>
+        </div>
+
+        <div class="border-t border-gray-100 mt-6 pt-4">
+          <p class="text-xs text-gray-400 text-center">
+            En difficulté ?
+            <a href="mailto:dsi@univ-antilles.fr"
+               class="text-ua-navy font-medium hover:text-ua-blue transition-colors focus-visible:outline-none focus-visible:underline">
+              Contacter la DSI
+            </a>
+          </p>
+        </div>
+      </div>
+
+      <p class="text-center text-xs text-gray-400 mt-4">
+        Pas encore de compte ?
+        <a href="#" class="text-ua-navy font-medium hover:text-ua-blue transition-colors focus-visible:outline-none focus-visible:underline">
+          Portail d'inscription
+        </a>
+      </p>
+    </div>
+  </main>
+
+  <!-- ─── PIED DE PAGE — Extractable: +page-footer(devise) ───────────────── -->
+  <footer class="border-t border-gray-200 bg-white px-6 py-4 flex-shrink-0">
+    <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-gray-400">
+      <p>© 2026 Université des Antilles — Direction des Systèmes d'Information</p>
+      <p class="italic">« Être formés ici, c'est briller partout »</p>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+  const { createApp, ref } = Vue;
+  createApp({
+    setup() {
+      const loading = ref(false);
+      const error = ref(null);
+
+      function loginCAS() {
+        loading.value = true;
+        // Production : window.location.href = '/auth/cas'
+        setTimeout(() => { window.location.href = 'home.html'; }, 1200);
+      }
+
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('error') === 'invalid_ticket') {
+        error.value = 'Session CAS expirée ou ticket invalide. Veuillez vous reconnecter.';
+      }
+
+      return { loading, error, loginCAS };
+    }
+  }).mount('#app');
+</script>
+</body>
+</html>

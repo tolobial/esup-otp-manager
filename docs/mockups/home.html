@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<!--
+  home.html — Préférences MFA utilisateur (Style D)
+  ==================================================
+  COMPOSANTS EXTRACTIBLES EN PUG :
+    +sidebar(activeSection)        → Shell navigation (ici 'methodes')
+    +topbar(breadcrumbs, user)     → Topbar fine
+    +security-score(active, total) → Bandeau score de sécurité
+    +method-card(method)           → Carte méthode MFA (6 variantes)
+    +toggle(id, checked, label)    → Toggle switch ARIA
+    +confirm-modal(id)             → Modale de confirmation focus-trapped
+    +toast(type, message)          → Notification toast aria-live
+
+  INTERACTION VUE 3 :
+    - Toggle → modale de confirmation → update état → toast
+    - 6 méthodes : TOTP, Push, WebAuthn, Email, SMS, Bypass
+    - Score de sécurité calculé dynamiquement (actives / total)
+-->
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mes méthodes MFA — Université des Antilles</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,400;0,600;0,700;1,400&family=Barlow+Condensed:wght@700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'ua-blue': '#00A0DC', 'ua-navy': '#202E56',
+            'ua-indigo': '#1107A0', 'ua-orange': '#CC5717', 'ua-crimson': '#9B1E21',
+          },
+          fontFamily: {
+            display: ['"Barlow Condensed"', 'Impact', 'system-ui', 'sans-serif'],
+            sans:    ['"Open Sans"', 'system-ui', 'sans-serif'],
+          },
+          borderRadius: {
+            none: '0px', sm: '1px', DEFAULT: '2px',
+            md: '2px', lg: '2px', xl: '2px', '2xl': '2px', full: '9999px',
+          },
+        }
+      }
+    }
+  </script>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <style>
+    body { -webkit-font-smoothing: antialiased; }
+    /* Focus trap helper */
+    [data-focus-trap] { position: relative; }
+    @keyframes slide-in { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
+    .toast-enter { animation: slide-in 0.2s ease; }
+  </style>
+</head>
+<body class="font-sans bg-gray-50 text-ua-navy">
+
+<!-- ─── LIEN D'ÉVITEMENT ────────────────────────────────────────────────── -->
+<a href="#content"
+   class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50
+          focus:bg-ua-navy focus:text-white focus:px-4 focus:py-2 focus:text-sm focus:font-semibold">
+  Aller au contenu
+</a>
+
+<div id="app">
+
+  <!-- ─── SIDEBAR ────────────────────────────────────────────────────────── -->
+  <aside class="hidden lg:flex fixed inset-y-0 left-0 w-64 bg-ua-navy flex-col z-20 print:hidden"
+         aria-label="Navigation principale">
+
+    <div class="flex items-center gap-3 px-5 py-4 border-b-2 border-ua-blue flex-shrink-0">
+      <svg viewBox="0 0 44 44" width="42" height="42" aria-hidden="true" focusable="false">
+        <circle cx="22" cy="22" r="20" fill="white"/>
+        <path d="M22 3 A19 19 0 0 1 40 29" fill="none" stroke="#00A0DC" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cx="33" cy="19" r="3" fill="#CC5717"/>
+        <circle cx="33" cy="26" r="3" fill="#9B1E21"/>
+        <text x="17.5" y="27" font-family="'Barlow Condensed',Impact,sans-serif"
+              font-weight="800" font-size="12" fill="#202E56" text-anchor="middle">UA</text>
+      </svg>
+      <div class="overflow-hidden">
+        <p class="font-display font-bold text-white text-sm leading-tight uppercase tracking-wide">Université des Antilles</p>
+        <p class="text-ua-blue text-xs font-semibold uppercase tracking-wider truncate">Authentification MFA</p>
+      </div>
+    </div>
+
+    <nav class="flex-1 overflow-y-auto py-3 px-3" aria-label="Navigation principale">
+      <ul class="space-y-0.5" role="list">
+        <li>
+          <a href="home.html" class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium transition-colors text-white/70 hover:text-white hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue focus-visible:ring-inset">
+            <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"/></svg>
+            Accueil
+          </a>
+        </li>
+        <li>
+          <a href="home.html" class="flex items-center gap-3 px-3 py-2.5 text-sm font-semibold transition-colors border-l-2 border-ua-blue bg-white/10 text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue focus-visible:ring-inset" aria-current="page">
+            <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z"/></svg>
+            Mes méthodes
+          </a>
+        </li>
+        <li>
+          <a href="admin-dashboard.html" class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium transition-colors text-white/70 hover:text-white hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue focus-visible:ring-inset">
+            <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z"/></svg>
+            Espace manager
+          </a>
+        </li>
+        <li>
+          <a href="admin-dashboard.html" class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium transition-colors text-white/70 hover:text-white hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue focus-visible:ring-inset">
+            <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 0 1 0 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 0 1 0-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg>
+            Administration
+          </a>
+        </li>
+        <li>
+          <a href="stats-dashboard.html" class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium transition-colors text-white/70 hover:text-white hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue focus-visible:ring-inset">
+            <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v11.25A2.25 2.25 0 0 0 6 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0 1 18 16.5h-2.25m-7.5 0h7.5m-7.5 0-1 3m8.5-3 1 3m0 0 .5 1.5m-.5-1.5h-9.5m0 0-.5 1.5M9 11.25v1.5M12 9v3.75m3-6v6"/></svg>
+            Statistiques
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <div class="px-5 py-3 border-t border-white/10 flex-shrink-0">
+      <p class="text-white/40 text-xs italic">« Être formés ici, c'est briller partout »</p>
+    </div>
+    <div class="px-4 py-3 border-t border-white/20 flex items-center gap-3 flex-shrink-0">
+      <div class="w-8 h-8 rounded-full bg-ua-blue flex items-center justify-center flex-shrink-0" aria-hidden="true">
+        <span class="text-ua-navy font-display font-bold text-xs">PP</span>
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="text-white text-xs font-semibold truncate">Patrick Placide</p>
+        <p class="text-white/50 text-xs truncate">p.placide@univ-antilles.fr</p>
+      </div>
+      <a href="index.html" class="text-white/50 hover:text-ua-crimson transition-colors p-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue" aria-label="Se déconnecter">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9"/></svg>
+      </a>
+    </div>
+  </aside>
+
+  <!-- ─── ZONE PRINCIPALE ─────────────────────────────────────────────────── -->
+  <div class="lg:ml-64 flex flex-col min-h-screen">
+
+    <!-- Topbar -->
+    <header class="h-12 bg-white border-b border-gray-200 flex items-center px-6 justify-between flex-shrink-0 print:hidden">
+      <nav aria-label="Fil d'Ariane">
+        <ol class="flex items-center gap-1.5 text-sm" role="list">
+          <li><a href="home.html" class="text-gray-400 hover:text-ua-navy transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue">Accueil</a></li>
+          <li aria-hidden="true"><svg class="w-3.5 h-3.5 text-gray-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg></li>
+          <li><span class="text-ua-navy font-semibold" aria-current="page">Mes méthodes MFA</span></li>
+        </ol>
+      </nav>
+      <div class="flex items-center gap-3">
+        <button class="relative text-gray-400 hover:text-ua-navy transition-colors p-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue" aria-label="Notifications">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0"/></svg>
+          <span class="absolute top-0 right-0 w-2 h-2 bg-ua-orange rounded-full" aria-hidden="true"></span>
+        </button>
+        <div class="h-4 w-px bg-gray-200" aria-hidden="true"></div>
+        <span class="text-sm text-gray-600">Patrick Placide</span>
+      </div>
+    </header>
+
+    <!-- Contenu -->
+    <main id="content" class="flex-1 p-6 lg:p-8" tabindex="-1">
+
+      <!-- En-tête page -->
+      <div class="mb-6">
+        <h1 class="font-display font-bold text-2xl text-ua-navy uppercase tracking-wide">
+          Mes méthodes d'authentification
+        </h1>
+        <p class="text-gray-500 text-sm mt-1">
+          Gérez vos méthodes de double authentification pour sécuriser votre accès aux services de l'université.
+        </p>
+      </div>
+
+      <!-- Score de sécurité — Extractable: +security-score(active, total) -->
+      <div class="bg-white border border-gray-200 p-4 mb-6 flex flex-col sm:flex-row sm:items-center gap-4"
+           data-od-id="security-score">
+        <div class="flex items-center gap-4">
+          <div class="text-center">
+            <span class="font-display font-bold text-3xl text-ua-navy leading-none">{{ activeCount }}</span>
+            <span class="font-display font-bold text-3xl text-gray-300 leading-none">/6</span>
+            <p class="text-xs text-gray-400 font-semibold uppercase tracking-wide mt-0.5">Méthodes actives</p>
+          </div>
+          <div class="w-px h-12 bg-gray-200 hidden sm:block" aria-hidden="true"></div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="text-sm font-semibold text-ua-navy">Score de sécurité</span>
+              <span class="text-xs font-semibold" :class="scoreLabel.class">{{ scoreLabel.text }}</span>
+            </div>
+            <div class="w-full bg-gray-100 h-1.5" role="progressbar"
+                 :aria-valuenow="activeCount" aria-valuemin="0" aria-valuemax="6"
+                 :aria-label="`Score de sécurité : ${activeCount} méthodes actives sur 6`">
+              <div class="h-1.5 transition-all duration-500"
+                   :class="scoreLabel.barClass"
+                   :style="{ width: (activeCount / 6 * 100) + '%' }"></div>
+            </div>
+          </div>
+        </div>
+        <!-- Conseil contextuel -->
+        <div v-if="activeCount < 2" class="flex items-start gap-2 sm:ml-auto bg-orange-50 border border-ua-orange/20 px-3 py-2 text-xs text-ua-navy max-w-xs">
+          <svg class="w-4 h-4 text-ua-orange flex-shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"/></svg>
+          <span>Activez au moins 2 méthodes pour garantir un accès de secours.</span>
+        </div>
+        <div v-else-if="activeCount < 3" class="flex items-start gap-2 sm:ml-auto bg-blue-50 border border-ua-blue/20 px-3 py-2 text-xs text-ua-navy max-w-xs">
+          <svg class="w-4 h-4 text-ua-blue flex-shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z"/></svg>
+          <span>Ajoutez WebAuthn pour renforcer davantage votre sécurité.</span>
+        </div>
+      </div>
+
+      <!-- Grille des méthodes — Extractable: +method-card(method) x 6 -->
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4" data-od-id="methods-grid">
+        <div v-for="method in methods" :key="method.id"
+             class="bg-white border flex flex-col transition-all"
+             :class="method.active ? 'border-gray-200' : 'border-gray-200 opacity-80'"
+             :data-od-id="`method-card-${method.id}`">
+
+          <!-- En-tête carte -->
+          <div class="p-5 flex-1">
+            <div class="flex items-start justify-between mb-3">
+              <div class="flex items-center gap-3">
+                <!-- Icône méthode -->
+                <div class="w-10 h-10 flex items-center justify-center flex-shrink-0"
+                     :class="method.active ? 'bg-ua-navy' : 'bg-gray-100'"
+                     aria-hidden="true">
+                  <!-- TOTP icon -->
+                  <svg v-if="method.id === 'totp'" class="w-5 h-5" :class="method.active ? 'text-ua-blue' : 'text-gray-400'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 3.75 9.375v-4.5ZM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 0 1-1.125-1.125v-4.5ZM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 13.5 9.375v-4.5ZM6.75 6.75h.75v.75h-.75v-.75ZM6.75 16.5h.75v.75h-.75v-.75ZM16.5 6.75h.75v.75h-.75v-.75ZM13.5 13.5h.75v.75h-.75v-.75ZM13.5 19.5h.75v.75h-.75v-.75ZM19.5 13.5h.75v.75h-.75v-.75ZM19.5 19.5h.75v.75h-.75v-.75ZM16.5 16.5h.75v.75h-.75v-.75Z"/></svg>
+                  <!-- Push icon -->
+                  <svg v-else-if="method.id === 'push'" class="w-5 h-5" :class="method.active ? 'text-ua-blue' : 'text-gray-400'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 0 0 6 3.75v16.5a2.25 2.25 0 0 0 2.25 2.25h7.5A2.25 2.25 0 0 0 18 20.25V3.75a2.25 2.25 0 0 0-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18h3"/></svg>
+                  <!-- WebAuthn icon -->
+                  <svg v-else-if="method.id === 'webauthn'" class="w-5 h-5" :class="method.active ? 'text-ua-blue' : 'text-gray-400'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 0 1 3 3m3 0a6 6 0 0 1-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 0 1 21.75 8.25Z"/></svg>
+                  <!-- Email icon -->
+                  <svg v-else-if="method.id === 'email'" class="w-5 h-5" :class="method.active ? 'text-ua-blue' : 'text-gray-400'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75"/></svg>
+                  <!-- SMS icon -->
+                  <svg v-else-if="method.id === 'sms'" class="w-5 h-5" :class="method.active ? 'text-ua-blue' : 'text-gray-400'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 0 1-2.555-.337A5.972 5.972 0 0 1 5.41 20.97a5.969 5.969 0 0 1-.474-.065 4.48 4.48 0 0 0 .978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25Z"/></svg>
+                  <!-- Bypass icon -->
+                  <svg v-else class="w-5 h-5" :class="method.active ? 'text-ua-blue' : 'text-gray-400'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"/></svg>
+                </div>
+                <div>
+                  <h3 class="font-semibold text-ua-navy text-sm leading-tight">{{ method.name }}</h3>
+                  <p class="text-gray-400 text-xs mt-0.5">{{ method.category }}</p>
+                </div>
+              </div>
+              <!-- Badge statut -->
+              <span class="text-xs font-semibold px-2 py-0.5 flex-shrink-0"
+                    :class="method.active
+                      ? 'bg-blue-50 text-ua-navy'
+                      : 'bg-slate-100 text-slate-600'"
+                    :aria-label="method.active ? 'Méthode activée' : 'Méthode désactivée'">
+                {{ method.active ? 'Actif' : 'Inactif' }}
+              </span>
+            </div>
+
+            <!-- Description -->
+            <p class="text-gray-600 text-xs leading-relaxed mb-3">{{ method.desc }}</p>
+
+            <!-- Codes restants (bypass uniquement) -->
+            <div v-if="method.id === 'bypass' && method.codesLeft !== null"
+                 class="flex items-center gap-1.5 mb-2">
+              <span class="text-xs text-ua-orange font-semibold">{{ method.codesLeft }} codes disponibles sur 10</span>
+            </div>
+
+            <!-- Dernière utilisation -->
+            <p class="text-xs text-gray-400">
+              <span v-if="method.lastUsed">Dernière utilisation : {{ method.lastUsed }}</span>
+              <span v-else-if="method.configured" class="text-gray-300">Jamais utilisé</span>
+              <span v-else class="text-gray-300">Non configuré</span>
+            </p>
+          </div>
+
+          <!-- Pied de carte : toggle + actions -->
+          <div class="px-5 py-3 border-t border-gray-100 flex items-center justify-between gap-3">
+            <!-- Toggle — Extractable: +toggle(id, checked, label) -->
+            <button :id="`toggle-${method.id}`"
+                    role="switch"
+                    :aria-checked="method.active.toString()"
+                    :aria-label="`${method.active ? 'Désactiver' : 'Activer'} ${method.name}`"
+                    @click="requestToggle(method)"
+                    class="flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue focus-visible:ring-offset-1 group">
+              <!-- Track rectangulaire (posture institutionnelle) -->
+              <span class="relative inline-flex w-10 h-5 items-center transition-colors duration-200"
+                    :class="method.active ? 'bg-ua-blue' : 'bg-gray-300'">
+                <span class="absolute w-3.5 h-3.5 bg-white transition-transform duration-200"
+                      :class="method.active ? 'translate-x-5' : 'translate-x-0.5'"></span>
+              </span>
+              <span class="text-xs font-medium"
+                    :class="method.active ? 'text-ua-navy' : 'text-gray-400'">
+                {{ method.active ? 'Activée' : 'Désactivée' }}
+              </span>
+            </button>
+
+            <!-- Actions secondaires -->
+            <div class="flex gap-1.5">
+              <button v-if="method.id === 'bypass'"
+                      class="text-xs text-gray-500 hover:text-ua-navy border border-gray-200 px-2.5 py-1 transition-colors hover:border-gray-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue">
+                Voir les codes
+              </button>
+              <button v-else-if="method.configured"
+                      class="text-xs text-gray-500 hover:text-ua-navy border border-gray-200 px-2.5 py-1 transition-colors hover:border-gray-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue"
+                      :aria-label="`Tester ${method.name}`">
+                Tester
+              </button>
+              <button v-else
+                      class="text-xs text-white bg-ua-navy px-2.5 py-1 hover:bg-ua-indigo transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-navy"
+                      :aria-label="`Configurer ${method.name}`">
+                Configurer
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- ─── MODALE DE CONFIRMATION — Extractable: +confirm-modal ─────────── -->
+  <div v-if="modal.show"
+       class="fixed inset-0 z-50 flex items-center justify-center p-4"
+       role="dialog" aria-modal="true" :aria-labelledby="`modal-title-${modal.method?.id}`"
+       @keydown.esc="modal.show = false">
+    <!-- Fond -->
+    <div class="absolute inset-0 bg-black/40" @click="modal.show = false" aria-hidden="true"></div>
+    <!-- Fenêtre -->
+    <div class="relative bg-white border border-gray-200 shadow-lg w-full max-w-sm p-6 z-10"
+         data-focus-trap>
+      <!-- Icône + titre -->
+      <div class="flex items-start gap-4 mb-4">
+        <div class="w-10 h-10 flex-shrink-0 flex items-center justify-center"
+             :class="modal.action === 'disable' ? 'bg-red-50' : 'bg-blue-50'">
+          <svg class="w-5 h-5" :class="modal.action === 'disable' ? 'text-ua-crimson' : 'text-ua-blue'"
+               viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <path v-if="modal.action === 'disable'" stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"/>
+            <path v-else stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+          </svg>
+        </div>
+        <div>
+          <h2 :id="`modal-title-${modal.method?.id}`" class="font-semibold text-ua-navy text-sm">
+            {{ modal.action === 'disable' ? 'Désactiver' : 'Activer' }} {{ modal.method?.name }} ?
+          </h2>
+          <p class="text-gray-500 text-xs mt-1 leading-relaxed">
+            <span v-if="modal.action === 'disable'">
+              Cette méthode ne pourra plus être utilisée pour vous authentifier.
+            </span>
+            <span v-else>
+              Cette méthode sera disponible lors de vos prochaines authentifications.
+            </span>
+          </p>
+        </div>
+      </div>
+      <!-- Boutons -->
+      <div class="flex gap-2 justify-end">
+        <button @click="modal.show = false"
+                class="px-4 py-2 text-sm font-medium text-gray-600 border border-gray-200 hover:bg-gray-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue">
+          Annuler
+        </button>
+        <button @click="confirmToggle" ref="confirmBtn"
+                class="px-4 py-2 text-sm font-semibold text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1"
+                :class="modal.action === 'disable'
+                  ? 'bg-ua-crimson hover:bg-red-900 focus-visible:ring-ua-crimson'
+                  : 'bg-ua-navy hover:bg-ua-indigo focus-visible:ring-ua-navy'">
+          {{ modal.action === 'disable' ? 'Désactiver' : 'Activer' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── TOAST — Extractable: +toast(type, message) ──────────────────── -->
+  <div aria-live="polite" aria-atomic="true" class="fixed bottom-4 right-4 z-50 pointer-events-none">
+    <div v-if="toast.show"
+         class="toast-enter pointer-events-auto flex items-center gap-3 px-4 py-3 shadow-lg text-sm font-medium text-white max-w-xs"
+         :class="toast.type === 'success' ? 'bg-ua-navy' : 'bg-ua-crimson'">
+      <svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path v-if="toast.type === 'success'" stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/>
+        <path v-else stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/>
+      </svg>
+      {{ toast.message }}
+    </div>
+  </div>
+
+</div><!-- #app -->
+
+<script>
+const { createApp, ref, computed, nextTick } = Vue;
+
+createApp({
+  setup() {
+    const methods = ref([
+      { id:'totp',     name:'Application TOTP',        category:'Application mobile', desc:'Google Authenticator, Authy, Microsoft Authenticator. Génère un code à 6 chiffres toutes les 30 secondes.', active:true,  configured:true,  lastUsed:'23 mai 2026, 09:14', codesLeft:null },
+      { id:'push',     name:'Notification push',        category:'Application mobile', desc:'Validation en un clic via l\'application mobile UA. Requiert une connexion réseau sur l\'appareil.', active:true,  configured:true,  lastUsed:'23 mai 2026, 08:47', codesLeft:null },
+      { id:'webauthn', name:'Clé matérielle WebAuthn',  category:'Clé FIDO2 / biométrie', desc:'YubiKey 5 NFC, Titan Key ou empreinte biométrique. Méthode la plus sécurisée, insensible au phishing.', active:false, configured:false, lastUsed:null, codesLeft:null },
+      { id:'email',    name:'Code par courriel',        category:'Email', desc:'Code à usage unique envoyé à p.placide@univ-antilles.fr. Valable 15 minutes.', active:true,  configured:true,  lastUsed:'22 mai 2026, 16:32', codesLeft:null },
+      { id:'sms',      name:'Code par SMS',             category:'SMS', desc:'Code à usage unique envoyé au numéro +33 6 •• •• •• 47. Vérifiez votre opérateur mobile.', active:false, configured:false, lastUsed:null, codesLeft:null },
+      { id:'bypass',   name:'Codes de secours',         category:'Accès d\'urgence', desc:'Codes à usage unique pour accéder à votre compte si vos autres méthodes sont indisponibles.', active:true,  configured:true,  lastUsed:null, codesLeft:4 },
+    ]);
+
+    const modal = ref({ show: false, method: null, action: null });
+    const toast = ref({ show: false, message: '', type: 'success' });
+    const confirmBtn = ref(null);
+
+    const activeCount = computed(() => methods.value.filter(m => m.active).length);
+
+    const scoreLabel = computed(() => {
+      const n = activeCount.value;
+      if (n === 0) return { text: 'Aucune', class: 'text-ua-crimson', barClass: 'bg-ua-crimson' };
+      if (n <= 1)  return { text: 'Faible', class: 'text-ua-crimson', barClass: 'bg-ua-crimson' };
+      if (n <= 2)  return { text: 'Moyen',  class: 'text-ua-orange',  barClass: 'bg-ua-orange'  };
+      if (n <= 4)  return { text: 'Bon',    class: 'text-ua-blue',    barClass: 'bg-ua-blue'    };
+      return               { text: 'Élevé', class: 'text-green-600',  barClass: 'bg-green-500'  };
+    });
+
+    function requestToggle(method) {
+      modal.value = {
+        show: true,
+        method,
+        action: method.active ? 'disable' : 'enable',
+      };
+      nextTick(() => confirmBtn.value?.focus());
+    }
+
+    function confirmToggle() {
+      const { method, action } = modal.value;
+      method.active = action === 'enable';
+      method.configured = method.configured || action === 'enable';
+      modal.value.show = false;
+      showToast(
+        action === 'enable'
+          ? `${method.name} activée avec succès`
+          : `${method.name} désactivée`,
+        action === 'enable' ? 'success' : 'warning'
+      );
+    }
+
+    function showToast(message, type = 'success') {
+      toast.value = { show: true, message, type };
+      setTimeout(() => { toast.value.show = false; }, 3500);
+    }
+
+    return { methods, modal, toast, confirmBtn, activeCount, scoreLabel, requestToggle, confirmToggle };
+  }
+}).mount('#app');
+</script>
+</body>
+</html>

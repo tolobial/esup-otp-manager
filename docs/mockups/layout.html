@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<!--
+  layout.html — Gabarit général UA MFA
+  =====================================
+  COMPOSANTS EXTRACTIBLES EN PUG :
+    +sidebar(activeSection)       → <aside> complète (logo + nav + devise + user)
+    +ua-logo(size)                → SVG logo UA
+    +nav-item(href,label,icon,active)
+    +topbar(breadcrumbs,user)     → <header> fine avec breadcrumb
+    +skip-link()                  → lien d'évitement accessibilité
+
+  USAGE :
+    Ce fichier sert de référence structurelle.
+    Chaque page copie le shell et remplace :
+      1. aria-current="page" sur le bon nav-item
+      2. Le contenu de <main id="content">
+      3. Le titre <title> et le breadcrumb
+-->
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gabarit — Université des Antilles MFA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,400;0,600;0,700;1,400&family=Barlow+Condensed:wght@600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'ua-blue':    '#00A0DC',
+            'ua-navy':    '#202E56',
+            'ua-indigo':  '#1107A0',
+            'ua-orange':  '#CC5717',
+            'ua-crimson': '#9B1E21',
+          },
+          fontFamily: {
+            display: ['"Barlow Condensed"', 'Impact', 'system-ui', 'sans-serif'],
+            sans:    ['"Open Sans"', 'system-ui', 'sans-serif'],
+          },
+          borderRadius: {
+            none: '0px', sm: '1px', DEFAULT: '2px',
+            md: '2px', lg: '2px', xl: '2px', '2xl': '2px', full: '9999px',
+          },
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Force border-radius max 2px sur les éléments non-toggle/avatar */
+    *:not([class*="rounded-full"]) { border-radius: inherit; }
+    body { -webkit-font-smoothing: antialiased; }
+  </style>
+</head>
+<body class="bg-gray-50 font-sans text-ua-navy">
+
+  <!-- ─── LIEN D'ÉVITEMENT (WCAG 2.4.1) ─────────────────────────────────── -->
+  <!-- Extractable: +skip-link() -->
+  <a href="#content"
+     class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:bg-ua-navy focus:text-white focus:px-4 focus:py-2 focus:text-sm focus:font-semibold">
+    Aller au contenu principal
+  </a>
+
+  <!-- ─── SIDEBAR ─────────────────────────────────────────────────────────── -->
+  <!-- Extractable: +sidebar(activeSection) -->
+  <!-- Mobile: masquée par défaut (lg:flex); ajouter un drawer pour mobile -->
+  <aside class="hidden lg:flex fixed inset-y-0 left-0 w-64 bg-ua-navy flex-col z-20 print:hidden"
+         aria-label="Navigation principale">
+
+    <!-- Logo + marque — Extractable: +ua-logo -->
+    <div class="flex items-center gap-3 px-5 py-4 border-b-2 border-ua-blue flex-shrink-0">
+      <svg viewBox="0 0 44 44" width="42" height="42" aria-hidden="true" focusable="false">
+        <circle cx="22" cy="22" r="20" fill="white"/>
+        <path d="M22 3 A19 19 0 0 1 40 29" fill="none" stroke="#00A0DC" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cx="33" cy="19" r="3" fill="#CC5717"/>
+        <circle cx="33" cy="26" r="3" fill="#9B1E21"/>
+        <text x="17.5" y="27" font-family="'Barlow Condensed',Impact,sans-serif"
+              font-weight="800" font-size="12" fill="#202E56" text-anchor="middle">UA</text>
+      </svg>
+      <div class="overflow-hidden">
+        <p class="font-display font-bold text-white text-sm leading-tight uppercase tracking-wide">
+          Université des Antilles
+        </p>
+        <p class="text-ua-blue text-xs font-semibold uppercase tracking-wider truncate">
+          Authentification MFA
+        </p>
+      </div>
+    </div>
+
+    <!-- Navigation — Extractable: section +nav-item répétée -->
+    <nav class="flex-1 overflow-y-auto py-3 px-3" aria-label="Navigation principale">
+      <ul class="space-y-0.5" role="list">
+
+        <!-- Accueil — actif si activeSection === 'accueil' -->
+        <li>
+          <a href="home.html"
+             class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium transition-colors
+                    text-white/70 hover:text-white hover:bg-white/10
+                    focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue focus-visible:ring-inset">
+            <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"/>
+            </svg>
+            Accueil
+          </a>
+        </li>
+
+        <!-- Mes méthodes — actif sur home.html -->
+        <li>
+          <a href="home.html"
+             class="flex items-center gap-3 px-3 py-2.5 text-sm font-semibold transition-colors
+                    border-l-2 border-ua-blue bg-white/10 text-white
+                    focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue focus-visible:ring-inset"
+             aria-current="page">
+            <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z"/>
+            </svg>
+            Mes méthodes
+          </a>
+        </li>
+
+        <!-- Espace manager -->
+        <li>
+          <a href="admin-dashboard.html"
+             class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium transition-colors
+                    text-white/70 hover:text-white hover:bg-white/10
+                    focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue focus-visible:ring-inset">
+            <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z"/>
+            </svg>
+            Espace manager
+          </a>
+        </li>
+
+        <!-- Administration -->
+        <li>
+          <a href="admin-dashboard.html"
+             class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium transition-colors
+                    text-white/70 hover:text-white hover:bg-white/10
+                    focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue focus-visible:ring-inset">
+            <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 0 1 0 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 0 1 0-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281Z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
+            </svg>
+            Administration
+          </a>
+        </li>
+
+        <!-- Statistiques -->
+        <li>
+          <a href="stats-dashboard.html"
+             class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium transition-colors
+                    text-white/70 hover:text-white hover:bg-white/10
+                    focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue focus-visible:ring-inset">
+            <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v11.25A2.25 2.25 0 0 0 6 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0 1 18 16.5h-2.25m-7.5 0h7.5m-7.5 0-1 3m8.5-3 1 3m0 0 .5 1.5m-.5-1.5h-9.5m0 0-.5 1.5M9 11.25v1.5M12 9v3.75m3-6v6"/>
+            </svg>
+            Statistiques
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- Devise — Extractable: +sidebar-devise -->
+    <div class="px-5 py-3 border-t border-white/10 flex-shrink-0">
+      <p class="text-white/40 text-xs italic leading-relaxed">
+        « Être formés ici, c'est briller partout »
+      </p>
+    </div>
+
+    <!-- Utilisateur connecté — Extractable: +sidebar-user(user) -->
+    <div class="px-4 py-3 border-t border-white/20 flex items-center gap-3 flex-shrink-0">
+      <div class="w-8 h-8 rounded-full bg-ua-blue flex items-center justify-center flex-shrink-0" aria-hidden="true">
+        <span class="text-ua-navy font-display font-bold text-xs">PP</span>
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="text-white text-xs font-semibold leading-tight truncate">Patrick Placide</p>
+        <p class="text-white/50 text-xs leading-tight truncate">p.placide@univ-antilles.fr</p>
+      </div>
+      <a href="index.html"
+         class="text-white/50 hover:text-ua-crimson transition-colors p-1
+                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue"
+         title="Déconnexion" aria-label="Se déconnecter">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9"/>
+        </svg>
+      </a>
+    </div>
+  </aside>
+
+  <!-- ─── ZONE PRINCIPALE ─────────────────────────────────────────────────── -->
+  <div class="lg:ml-64 flex flex-col min-h-screen">
+
+    <!-- Topbar — Extractable: +topbar(breadcrumbs, user) -->
+    <header class="h-12 bg-white border-b border-gray-200 flex items-center px-6 justify-between flex-shrink-0 print:hidden">
+      <!-- Breadcrumb -->
+      <nav aria-label="Fil d'Ariane">
+        <ol class="flex items-center gap-1.5 text-sm" role="list">
+          <li>
+            <a href="home.html" class="text-gray-400 hover:text-ua-navy transition-colors
+                                       focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue">
+              Accueil
+            </a>
+          </li>
+          <li aria-hidden="true">
+            <svg class="w-3.5 h-3.5 text-gray-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/>
+            </svg>
+          </li>
+          <li>
+            <span class="text-ua-navy font-semibold" aria-current="page">Titre de la page</span>
+          </li>
+        </ol>
+      </nav>
+
+      <!-- Actions topbar -->
+      <div class="flex items-center gap-3">
+        <button class="relative text-gray-400 hover:text-ua-navy transition-colors p-1
+                       focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue"
+                aria-label="Notifications (1 non lue)">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0"/>
+          </svg>
+          <span class="absolute top-0 right-0 w-2 h-2 bg-ua-orange rounded-full" aria-hidden="true"></span>
+        </button>
+        <div class="h-4 w-px bg-gray-200" aria-hidden="true"></div>
+        <span class="text-sm text-gray-600">Patrick Placide</span>
+      </div>
+    </header>
+
+    <!-- Contenu principal — remplacer par le contenu de chaque page -->
+    <main id="content" class="flex-1 p-6 lg:p-8" tabindex="-1">
+      <div class="mb-6">
+        <h1 class="font-display font-bold text-2xl text-ua-navy uppercase tracking-wide">
+          Titre de la page
+        </h1>
+        <p class="text-gray-500 text-sm mt-1">
+          Description ou sous-titre de la page.
+        </p>
+      </div>
+
+      <!-- Placeholder — remplacer par le contenu spécifique -->
+      <div class="bg-white border border-dashed border-gray-300 p-12 text-center">
+        <p class="text-gray-400 text-sm font-medium">Zone de contenu principal</p>
+        <p class="text-gray-300 text-xs mt-1">Remplacer par le contenu de home.html, admin-dashboard.html ou stats-dashboard.html</p>
+      </div>
+    </main>
+  </div>
+
+</body>
+</html>
