@@ -32,6 +32,8 @@ function routing() {
             api_url: properties.esup.api_url,
             uid: req.session.passport.user.uid,
             name: req.session.passport.user.name,
+            isManager: req.session.passport.user.isManager === true,
+            role: req.session.passport.user.role,
             transport_regexes: properties.esup.transport_regexes,
         });
     });
