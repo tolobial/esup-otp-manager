@@ -9,7 +9,9 @@
   "license": "Apache-2.0",
   "type": "module",
   "scripts": {
-    "start": "node run"
+    "start": "node run",
+    "build:css": "npx @tailwindcss/cli -i src/styles/tailwind.css -o public/stylesheets/tailwind.css --minify",
+    "watch:css": "npx @tailwindcss/cli -i src/styles/tailwind.css -o public/stylesheets/tailwind.css --watch"
   },
   "dependencies": {
     "@coursetable/passport-cas": "floriannari/passport-cas#SLO_with_dist",
@@ -48,6 +50,7 @@
   },
   "devDependencies": {
     "@eslint/js": "10.x",
+    "@tailwindcss/cli": "^4.3.0",
     "@types/cookie-parser": "1.x",
     "@types/express-session": "1.x",
     "@types/express-socket.io-session": "1.x",
@@ -55,6 +58,7 @@
     "@types/node": "20.x",
     "@types/passport": "x",
     "eslint": "10.x",
-    "globals": "17.x"
+    "globals": "17.x",
+    "tailwindcss": "^4.3.0"
   }
 }

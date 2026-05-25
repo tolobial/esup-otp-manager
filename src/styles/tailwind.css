@@ -1,0 +1,133 @@
+/*
+ * Ordre des couches du cascade :
+ * - legacy  : materialize.min.css + style.css (chargés par legacy-wrapper.css)
+ * - theme/base/components/utilities : Tailwind v4
+ * Tailwind gagne nativement contre les règles unlayered du legacy.
+ */
+@layer legacy, theme, base, components, utilities;
+
+@import "tailwindcss";
+
+/*
+ * Overrides pour la cohabitation Materialize ↔ Tailwind.
+ * Les templates refondus utilisent [data-tw] pour s'isoler
+ * des styles globaux de style.css / Materialize.
+ */
+@layer base {
+  [data-tw] *,
+  [data-tw] *::before,
+  [data-tw] *::after {
+    box-sizing: border-box;
+  }
+  [data-tw] h1, [data-tw] h2, [data-tw] h3, [data-tw] h4, [data-tw] h5, [data-tw] h6 {
+    font-size: inherit;
+    font-weight: inherit;
+    margin: 0;
+  }
+  [data-tw] p {
+    margin: 0;
+  }
+  [data-tw] a {
+    color: inherit;
+    text-decoration: inherit;
+  }
+  /* Neutralise les fuites de style.css (legacy) sur les éléments génériques
+     du nouveau design — sans Tailwind utilitaire explicite, le legacy gagnait. */
+  [data-tw] nav,
+  [data-tw] header,
+  [data-tw] footer {
+    background: transparent;
+  }
+}
+
+@layer utilities {
+  .tw-reset {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: none !important;
+    width: 100% !important;
+  }
+}
+
+/*
+ * Quand le template home (data-tw) est affiché,
+ * masquer la sidebar Materialize et supprimer le padding-left du layout.
+ */
+body:has([data-tw]) #slide-out {
+  display: none !important;
+}
+body:has([data-tw]) header,
+body:has([data-tw]) main,
+body:has([data-tw]) footer {
+  padding-left: 0 !important;
+}
+body:has([data-tw]) .top-nav {
+  display: none !important;
+}
+body:has([data-tw]) #app.container {
+  width: 100% !important;
+  max-width: 100% !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+body:has([data-tw]) main > .container {
+  width: 100% !important;
+  max-width: 100% !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/*
+ * Sidebar rétractable CSS-only (checkbox toggle).
+ * Utilise :has() pour détecter l'état du checkbox depuis n'importe quel descendant.
+ */
+[data-tw]:has(#sidebar-toggle:checked) .sidebar {
+  width: 16rem; /* w-64 */
+}
+[data-tw]:has(#sidebar-toggle:checked) .sidebar .sidebar-label {
+  opacity: 1;
+  display: inline;
+}
+[data-tw]:not(:has(#sidebar-toggle:checked)) .sidebar {
+  width: 3.5rem; /* w-14 */
+}
+[data-tw]:not(:has(#sidebar-toggle:checked)) .sidebar .sidebar-label {
+  opacity: 0;
+  display: none;
+}
+/* Icône toggle : flèche direction */
+[data-tw]:has(#sidebar-toggle:checked) .sidebar .toggle-expand {
+  display: none;
+}
+[data-tw]:has(#sidebar-toggle:checked) .sidebar .toggle-collapse {
+  display: block;
+}
+[data-tw]:not(:has(#sidebar-toggle:checked)) .sidebar .toggle-expand {
+  display: block;
+}
+[data-tw]:not(:has(#sidebar-toggle:checked)) .sidebar .toggle-collapse {
+  display: none;
+}
+
+@theme {
+  /* Couleurs UA */
+  --color-ua-blue: #00A0DC;
+  --color-ua-navy: #202E56;
+  --color-ua-indigo: #1107A0;
+  --color-ua-orange: #CC5717;
+  --color-ua-crimson: #9B1E21;
+
+  /* Typographie */
+  --font-display: "Barlow Condensed", Impact, system-ui, sans-serif;
+  --font-sans: "Open Sans", system-ui, sans-serif;
+
+  /* Border-radius : posture institutionnelle (quasi-rectangulaire) */
+  --radius-none: 0px;
+  --radius-sm: 1px;
+  --radius: 2px;
+  --radius-md: 2px;
+  --radius-lg: 2px;
+  --radius-xl: 2px;
+  --radius-2xl: 2px;
+  --radius-full: 9999px;
+}
