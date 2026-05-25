@@ -1327,8 +1327,24 @@ const Home = {
         'user': Object,
     },
     methods: {
-        navigate: function (name) {
-            document.getElementById(name).click();
+        navigate: function (target) {
+            // Accepte une chaîne (cartes : @click="navigate(method.name)")
+            // ou un événement DOM (sidebar : @click="navigate").
+            const name = typeof target === 'string' ? target : target?.target?.name;
+            if (!name) return;
+
+            // Si une sidenav legacy avec id correspondant existe, on clique dessus
+            // (compatibilité avec dashboard.pug Materialize encore en place)
+            const legacyLink = document.getElementById(name);
+            if (legacyLink) {
+                legacyLink.click();
+                return;
+            }
+
+            // Sinon, on délègue à la navigate de l'app racine
+            this.$root.navigate({
+                target: { name, text: this.messages?.api?.menu?.[name] || name }
+            });
         },
     },
     template: '#home-dashboard'
