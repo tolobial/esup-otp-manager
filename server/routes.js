@@ -54,6 +54,10 @@ function updateApiUser(user) {
         relUrl: '/protected/users/' + user.uid,
         bearerAuth: true,
         body: values,
+    }).catch(err => {
+        // L'appel est fire-and-forget depuis serializeUser ; un rejet non
+        // catché tue le process. On loggue et on continue.
+        logger.warn(`updateApiUser failed for ${user.uid}: ${err?.code || err?.message || err}`);
     });
 }
 
