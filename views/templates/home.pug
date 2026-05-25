@@ -1,28 +1,190 @@
 
 script#home-dashboard(type='text/x-template').
-    <div>
-    <div v-if="messages.api">
-       <h2>{{messages.api.title}}</h2>
-       <p>
-       <img class= "lock-solid" src="images/logo-transparent.png" style="max-width: 150px; float: right;" alt="">
-       {{messages.api.home.description}}
-       </p>
-       <p>{{messages.api.home.note}}</p>
-     <p>{{messages.api.home.methods}}</p>
-     <div class="flex-container">
-     <template v-for="method in methods">
-      <button v-if="method.activate & method.authorize" role="link" class="methode" @click="navigate(method.name);" >
-      <p>
-      <img :src="'images/'+method.name+'.svg'" style="max-width: 200px;" alt="">
-     </p>
+  <div v-if="messages.api" data-tw class="tw-reset min-h-screen bg-gray-100 flex">
 
-      <span>{{messages.api.home[method.name]}}</span>
-      <span v-if="user.methods[method.name]?.active" class="status enabled">{{messages.api.home.activated}}</span>
-      <span v-else class="status disabled">{{messages.api.home.deactivated}}</span>
-     </button>
-     </template>
+    <!-- Checkbox caché pour toggle sidebar (CSS-only via :has()) -->
+    <input type="checkbox" id="sidebar-toggle" class="hidden" checked>
 
-     </div>
+    <!-- Sidebar rétractable -->
+    <aside class="sidebar flex-shrink-0 bg-ua-navy flex flex-col h-screen sticky top-0 transition-all duration-300 z-30 overflow-hidden">
 
+      <!-- Bouton toggle -->
+      <label for="sidebar-toggle"
+             class="w-full flex items-center justify-center h-12 text-white/70 hover:text-white hover:bg-white/10 transition-colors border-b border-white/10 cursor-pointer"
+             title="Ouvrir/Réduire le menu">
+        <!-- Icône expand (hamburger) -->
+        <svg class="toggle-expand w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/></svg>
+        <!-- Icône collapse (chevron gauche) -->
+        <svg class="toggle-collapse w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"/></svg>
+      </label>
+
+      <!-- Logo -->
+      <div class="flex items-center gap-2 px-3 py-3 border-b border-white/10 flex-shrink-0 overflow-hidden">
+        <svg viewBox="0 0 44 44" width="28" height="28" class="flex-shrink-0" aria-hidden="true" focusable="false">
+          <circle cx="22" cy="22" r="20" fill="white"/>
+          <path d="M22 3 A19 19 0 0 1 40 29" fill="none" stroke="#00A0DC" stroke-width="2.5" stroke-linecap="round"/>
+          <circle cx="33" cy="19" r="3" fill="#CC5717"/>
+          <circle cx="33" cy="26" r="3" fill="#9B1E21"/>
+          <text x="17.5" y="27" font-family="'Barlow Condensed',Impact,sans-serif" font-weight="800" font-size="12" fill="#202E56" text-anchor="middle">UA</text>
+        </svg>
+        <span class="sidebar-label font-display font-bold text-white text-xs uppercase tracking-wide whitespace-nowrap">UA MFA</span>
+      </div>
+
+      <!-- Navigation -->
+      <nav class="flex-1 overflow-y-auto py-2 px-2" aria-label="Navigation principale">
+        <ul class="space-y-1" role="list">
+          <!-- Accueil -->
+          <li>
+            <a href="#" @click="navigate" name="home"
+               class="flex items-center gap-3 px-2.5 py-2 text-sm font-medium transition-colors text-white bg-white/10 border-l-2 border-ua-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue"
+               title="Accueil">
+              <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"/></svg>
+              <span class="sidebar-label whitespace-nowrap">Accueil</span>
+            </a>
+          </li>
+
+          <!-- Méthodes -->
+          <template v-for="method in methods">
+            <li v-if="method.activate && method.authorize">
+              <a href="#" @click="navigate" :name="method.name"
+                 class="flex items-center gap-3 px-2.5 py-2 text-sm font-medium transition-colors text-white/70 hover:text-white hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue"
+                 :title="method.label || method.name">
+                <!-- TOTP -->
+                <svg v-if="method.name === 'totp'" class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 3.75 9.375v-4.5ZM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 0 1-1.125-1.125v-4.5ZM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 13.5 9.375v-4.5Z"/></svg>
+                <!-- Push -->
+                <svg v-else-if="method.name === 'push'" class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 0 0 6 3.75v16.5a2.25 2.25 0 0 0 2.25 2.25h7.5A2.25 2.25 0 0 0 18 20.25V3.75a2.25 2.25 0 0 0-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18h3"/></svg>
+                <!-- WebAuthn -->
+                <svg v-else-if="method.name === 'webauthn'" class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 0 1 3 3m3 0a6 6 0 0 1-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 0 1 21.75 8.25Z"/></svg>
+                <!-- Email -->
+                <svg v-else-if="method.name === 'random_code_mail'" class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75"/></svg>
+                <!-- SMS -->
+                <svg v-else-if="method.name === 'random_code'" class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 0 1-2.555-.337A5.972 5.972 0 0 1 5.41 20.97a5.969 5.969 0 0 1-.474-.065 4.48 4.48 0 0 0 .978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25Z"/></svg>
+                <!-- Bypass -->
+                <svg v-else-if="method.name === 'bypass'" class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"/></svg>
+                <!-- Fallback -->
+                <svg v-else class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z"/></svg>
+                <span class="sidebar-label whitespace-nowrap truncate">{{method.label || method.name}}</span>
+              </a>
+            </li>
+          </template>
+        </ul>
+      </nav>
+
+      <!-- Bas : user + logout -->
+      <div class="border-t border-white/10 px-2.5 py-3 flex-shrink-0">
+        <div class="flex items-center gap-2 overflow-hidden">
+          <div class="w-7 h-7 rounded-full bg-ua-blue flex items-center justify-center flex-shrink-0">
+            <span class="text-ua-navy font-display font-bold text-xs">{{(user.name || user.uid).split(' ').map(w => w[0]).join('').substring(0,2).toUpperCase()}}</span>
+          </div>
+          <span class="sidebar-label text-white text-xs font-medium truncate">{{user.name || user.uid}}</span>
+        </div>
+        <a href="/logout" class="flex items-center gap-2 mt-2 px-2.5 py-1.5 text-white/50 hover:text-ua-crimson hover:bg-white/5 transition-colors text-xs"
+           title="Déconnexion">
+          <svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9"/></svg>
+          <span class="sidebar-label whitespace-nowrap">Déconnexion</span>
+        </a>
+      </div>
+    </aside>
+
+    <!-- Contenu principal -->
+    <div class="flex-1 min-w-0 overflow-y-auto">
+      <div class="p-6 lg:p-8">
+
+        <!-- En-tête page -->
+        <div class="mb-6">
+          <h2 class="font-display font-bold text-2xl text-ua-navy uppercase tracking-wide">
+            {{messages.api.title}}
+          </h2>
+          <p class="text-gray-500 text-sm mt-1">
+            {{messages.api.home.description}}
+          </p>
+        </div>
+
+        <!-- Score de sécurité -->
+        <div class="bg-white border border-gray-300 shadow-sm p-4 mb-6 flex flex-col sm:flex-row sm:items-center gap-4">
+          <div class="flex items-center gap-4">
+            <div class="text-center">
+              <span class="font-display font-bold text-3xl text-ua-navy leading-none">{{Object.values(user.methods).filter(m => m.active).length}}</span>
+              <span class="font-display font-bold text-3xl text-gray-300 leading-none">/{{Object.keys(methods).filter(k => methods[k].activate && methods[k].authorize).length}}</span>
+              <p class="text-xs text-gray-400 font-semibold uppercase tracking-wide mt-0.5">{{messages.api.home.methods}}</p>
+            </div>
+            <div class="w-px h-12 bg-gray-200 hidden sm:block" aria-hidden="true"></div>
+            <div class="flex-1 min-w-0" style="min-width: 200px;">
+              <div class="flex items-center justify-between mb-1.5">
+                <span class="text-sm font-semibold text-ua-navy">Score de sécurité</span>
+                <span class="text-xs font-semibold"
+                      :class="Object.values(user.methods).filter(m => m.active).length <= 1 ? 'text-ua-crimson' : Object.values(user.methods).filter(m => m.active).length <= 2 ? 'text-ua-orange' : Object.values(user.methods).filter(m => m.active).length <= 4 ? 'text-ua-blue' : 'text-green-600'">
+                  {{Object.values(user.methods).filter(m => m.active).length === 0 ? 'Aucune' : Object.values(user.methods).filter(m => m.active).length <= 1 ? 'Faible' : Object.values(user.methods).filter(m => m.active).length <= 2 ? 'Moyen' : Object.values(user.methods).filter(m => m.active).length <= 4 ? 'Bon' : 'Élevé'}}
+                </span>
+              </div>
+              <div class="w-full bg-gray-100 h-1.5">
+                <div class="h-1.5 transition-all duration-500"
+                     :class="Object.values(user.methods).filter(m => m.active).length <= 1 ? 'bg-ua-crimson' : Object.values(user.methods).filter(m => m.active).length <= 2 ? 'bg-ua-orange' : Object.values(user.methods).filter(m => m.active).length <= 4 ? 'bg-ua-blue' : 'bg-green-500'"
+                     :style="{ width: (Object.values(user.methods).filter(m => m.active).length / Math.max(Object.keys(methods).filter(k => methods[k].activate && methods[k].authorize).length, 1) * 100) + '%' }"></div>
+              </div>
+            </div>
+          </div>
+          <!-- Conseil contextuel -->
+          <div v-if="Object.values(user.methods).filter(m => m.active).length < 2" class="flex items-start gap-2 sm:ml-auto bg-orange-50 border border-ua-orange/20 px-3 py-2 text-xs text-ua-navy max-w-xs">
+            <svg class="w-4 h-4 text-ua-orange flex-shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"/></svg>
+            <span>Activez au moins 2 méthodes pour garantir un accès de secours.</span>
+          </div>
+        </div>
+
+        <!-- Grille des méthodes : 2 colonnes, cartes rectangulaires -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <template v-for="method in methods">
+            <div v-if="method.activate && method.authorize"
+                 class="bg-white border shadow-md flex flex-row items-stretch transition-all duration-200 hover:shadow-xl hover:-translate-y-0.5 hover:border-ua-blue/50 cursor-pointer"
+                 :class="user.methods[method.name]?.active ? 'border-gray-300' : 'border-gray-200 opacity-75 hover:opacity-100'"
+                 @click="navigate(method.name)">
+
+              <!-- Icône à gauche -->
+              <div class="w-16 flex-shrink-0 flex items-center justify-center"
+                   :class="user.methods[method.name]?.active ? 'bg-ua-navy' : 'bg-gray-100'">
+                <!-- TOTP -->
+                <svg v-if="method.name === 'totp'" class="w-6 h-6" :class="user.methods[method.name]?.active ? 'text-ua-blue' : 'text-gray-400'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 3.75 9.375v-4.5ZM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 0 1-1.125-1.125v-4.5ZM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 13.5 9.375v-4.5Z"/></svg>
+                <!-- Push -->
+                <svg v-else-if="method.name === 'push'" class="w-6 h-6" :class="user.methods[method.name]?.active ? 'text-ua-blue' : 'text-gray-400'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 0 0 6 3.75v16.5a2.25 2.25 0 0 0 2.25 2.25h7.5A2.25 2.25 0 0 0 18 20.25V3.75a2.25 2.25 0 0 0-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18h3"/></svg>
+                <!-- WebAuthn -->
+                <svg v-else-if="method.name === 'webauthn'" class="w-6 h-6" :class="user.methods[method.name]?.active ? 'text-ua-blue' : 'text-gray-400'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 0 1 3 3m3 0a6 6 0 0 1-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 0 1 21.75 8.25Z"/></svg>
+                <!-- Email -->
+                <svg v-else-if="method.name === 'random_code_mail'" class="w-6 h-6" :class="user.methods[method.name]?.active ? 'text-ua-blue' : 'text-gray-400'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75"/></svg>
+                <!-- SMS -->
+                <svg v-else-if="method.name === 'random_code'" class="w-6 h-6" :class="user.methods[method.name]?.active ? 'text-ua-blue' : 'text-gray-400'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 0 1-2.555-.337A5.972 5.972 0 0 1 5.41 20.97a5.969 5.969 0 0 1-.474-.065 4.48 4.48 0 0 0 .978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25Z"/></svg>
+                <!-- Bypass -->
+                <svg v-else-if="method.name === 'bypass'" class="w-6 h-6" :class="user.methods[method.name]?.active ? 'text-ua-blue' : 'text-gray-400'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"/></svg>
+                <!-- Fallback -->
+                <svg v-else class="w-6 h-6" :class="user.methods[method.name]?.active ? 'text-ua-blue' : 'text-gray-400'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z"/></svg>
+              </div>
+
+              <!-- Contenu carte -->
+              <div class="flex-1 p-4 flex items-center justify-between gap-3">
+                <div class="min-w-0">
+                  <h3 class="font-semibold text-ua-navy text-sm leading-tight">{{method.label || method.name}}</h3>
+                  <p class="text-gray-500 text-xs mt-0.5 truncate">{{messages.api.home[method.name]}}</p>
+                </div>
+                <div class="flex items-center gap-3 flex-shrink-0">
+                  <!-- Toggle visuel -->
+                  <span class="relative inline-flex w-9 h-4 items-center transition-colors duration-200"
+                        :class="user.methods[method.name]?.active ? 'bg-ua-blue' : 'bg-gray-300'">
+                    <span class="absolute w-3 h-3 bg-white transition-transform duration-200"
+                          :class="user.methods[method.name]?.active ? 'translate-x-4.5' : 'translate-x-0.5'"></span>
+                  </span>
+                  <!-- Badge -->
+                  <span class="text-xs font-semibold px-2 py-0.5"
+                        :class="user.methods[method.name]?.active
+                          ? 'bg-blue-50 text-ua-navy'
+                          : 'bg-slate-100 text-slate-500'">
+                    {{user.methods[method.name]?.active ? messages.api.home.activated : messages.api.home.deactivated}}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </template>
+        </div>
+
+        <p class="text-gray-400 text-xs mt-4">{{messages.api.home.note}}</p>
+      </div>
     </div>
-    </div>
+  </div>

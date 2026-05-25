@@ -4,8 +4,14 @@ html(lang=lang)
         title ESUP OTP Manager
         meta(charset='UTF-8')
         link(rel='stylesheet', type='text/css', href='/stylesheets/material-icons.css')
-        link(rel='stylesheet', type='text/css', href='/css/materialize.min.css', media='screen,projection')
-        link(rel='stylesheet', type='text/css', href='/stylesheets/style.css')
+        //- Materialize + style.css sont importés via legacy-wrapper.css pour
+        //- les isoler dans @layer(legacy) — sinon ils battent les utilitaires
+        //- Tailwind (cascade : unlayered > layered).
+        link(rel='stylesheet', type='text/css', href='/stylesheets/legacy-wrapper.css', media='screen,projection')
+        link(rel='preconnect', href='https://fonts.googleapis.com')
+        link(rel='preconnect', href='https://fonts.gstatic.com', crossorigin)
+        link(href='https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&family=Barlow+Condensed:wght@600;700;800&display=swap', rel='stylesheet')
+        link(rel='stylesheet', href='/stylesheets/tailwind.css')
         meta(name='viewport', content='width=device-width, initial-scale=1.0')
     body
         block content
