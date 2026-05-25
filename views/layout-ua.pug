@@ -1,0 +1,24 @@
+doctype html
+html(lang=lang || 'fr')
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport" content="width=device-width, initial-scale=1.0")
+    title ESUP OTP Manager
+    //- Google Fonts
+    link(rel="preconnect" href="https://fonts.googleapis.com")
+    link(rel="preconnect" href="https://fonts.gstatic.com" crossorigin)
+    link(href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,400;0,600;0,700;1,400&family=Barlow+Condensed:wght@600;700;800&display=swap" rel="stylesheet")
+    //- Tailwind (compilé)
+    link(rel="stylesheet" href="/stylesheets/tailwind.css")
+  body.bg-gray-50.font-sans.text-ua-navy
+
+    include mixins/ua-design-system.pug
+
+    +skip-link()
+
+    block content
+
+    //- Scripts communs
+    script(src="/js/vue.js")
+    script(src="/js/socket.io.min.js")
+    block script

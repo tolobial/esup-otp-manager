@@ -1,0 +1,7 @@
+/*
+ * Wrapper qui isole Materialize + l'ancien style.css dans la couche `legacy`.
+ * Permet aux utilitaires Tailwind (@layer utilities) de gagner sur les sélecteurs
+ * unlayered de ces feuilles (ex: nav, h1-h6) sans avoir à les éditer.
+ */
+@import url("/css/materialize.min.css") layer(legacy);
+@import url("/stylesheets/style.css") layer(legacy);
