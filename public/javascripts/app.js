@@ -1078,6 +1078,8 @@ const AdminDashboard = {
 const StatsDashboard = {
     props: {
         messages: Object,
+        infos: Object,
+        methods: Object,
     },
     data() {
         return {
