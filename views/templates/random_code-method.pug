@@ -1,26 +1,28 @@
 script#random_code-method(type='text/x-template').
-   <div class="section">
+  <div class="space-y-4">
 
-    <div class="row" v-if="user.methods.random_code.transports.includes('sms')">
-     <div class="col s1 m2">
-      <span class="white-text"></span>
-     </div>
-     <div class="col s12 m8">
-      <div class="card" style="margin: auto;margin-bottom: 15px;">
-       <transport-form :user=user :messages=messages :infos=infos transport="sms" inputType="tel" :testAndSaveTransport=testAndSaveTransport :saveTransport=saveTransport :deleteTransport=deleteTransport :isManager=isManager />
-      </div>
-     </div>
-    </div>
+    <!-- Transport SMS (si autorisé pour cette méthode) -->
+    <transport-form v-if="user.methods.random_code.transports.includes('sms')"
+                    :user="user"
+                    :messages="messages"
+                    :infos="infos"
+                    transport="sms"
+                    inputType="tel"
+                    :testAndSaveTransport="testAndSaveTransport"
+                    :saveTransport="saveTransport"
+                    :deleteTransport="deleteTransport"
+                    :isManager="isManager"></transport-form>
 
-    <div class="row" v-if="user.methods.random_code.transports.includes('mail')">
-     <div class="col s1 m2">
-      <span class="white-text"></span>
-     </div>
-     <div class="col s12 m8">
-      <div class="card" style="margin: auto;margin-bottom: 15px;">
-       <transport-form :user=user :messages=messages :infos=infos transport="mail" inputType="email" :testAndSaveTransport=testAndSaveTransport :saveTransport=saveTransport :deleteTransport=deleteTransport :isManager=isManager />
-      </div>
-     </div>
-    </div>
+    <!-- Transport Mail (si autorisé pour cette méthode) -->
+    <transport-form v-if="user.methods.random_code.transports.includes('mail')"
+                    :user="user"
+                    :messages="messages"
+                    :infos="infos"
+                    transport="mail"
+                    inputType="email"
+                    :testAndSaveTransport="testAndSaveTransport"
+                    :saveTransport="saveTransport"
+                    :deleteTransport="deleteTransport"
+                    :isManager="isManager"></transport-form>
 
-   </div>
+  </div>

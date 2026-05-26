@@ -1,13 +1,12 @@
 script#random_code_mail-method(type='text/x-template').
-   <div class="section">
-    <div class="row">
-     <div class="col s1 m2">
-      <span class="white-text"></span>
-     </div>
-     <div class="col s12 m8">
-      <div class="card" style="margin: auto;margin-bottom: 15px;">
-       <transport-form :user=user :messages=messages :infos=infos transport="mail" inputType="email" :testAndSaveTransport=testAndSaveTransport :saveTransport=saveTransport :deleteTransport=deleteTransport :isManager=isManager />
-      </div>
-     </div>
-    </div>
-   </div>
+  <div>
+    <transport-form :user="user"
+                    :messages="messages"
+                    :infos="infos"
+                    transport="mail"
+                    inputType="email"
+                    :testAndSaveTransport="testAndSaveTransport"
+                    :saveTransport="saveTransport"
+                    :deleteTransport="deleteTransport"
+                    :isManager="isManager"></transport-form>
+  </div>
