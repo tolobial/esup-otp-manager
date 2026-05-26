@@ -1,21 +1,153 @@
 script#manager-dashboard(type='text/x-template').
-    <div>
-      <div class="row input-field">
-        <div class="col s8">
-          <i class="material-icons prefix" aria-hidden="true">account_box</i>
-          <input @keyup.enter="checkUserThenGetAndSet" v-model.trim="requestedUid" type="text" id="autocomplete-input" list="usersId">
-          <label for="autocomplete-input">{{messages.api.label.user}}</label>
-        </div>
-    
-        <a v-if="requestedUid" class="waves-effect waves-light btn col s4" @click="checkUserThenGetAndSet">
-          {{messages.api.action.select}}
-          <i class="material-icons right" aria-hidden="true">search</i>
-        </a>
-        <datalist id="usersId">
-          <option v-for="user in users" :value="user.uid" :label="user.displayName ? `${user.displayName} (${user.uid})` : user.uid"/>
-        </datalist>
+  <div data-tw class="tw-reset min-h-screen bg-gray-100 flex">
+
+    <input type="checkbox" id="sidebar-toggle" class="hidden" checked>
+
+    <!-- ═════════════════════════════════════════════ -->
+    <!-- Sidebar UA (Manager en état actif)            -->
+    <!-- ═════════════════════════════════════════════ -->
+    <aside class="sidebar flex-shrink-0 bg-ua-navy flex flex-col h-screen sticky top-0 transition-all duration-300 z-30 overflow-hidden">
+
+      <label for="sidebar-toggle"
+             class="w-full flex items-center justify-center h-12 text-white/70 hover:text-white hover:bg-white/10 transition-colors border-b border-white/10 cursor-pointer"
+             title="Ouvrir/Réduire le menu">
+        <svg class="toggle-expand w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/></svg>
+        <svg class="toggle-collapse w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"/></svg>
+      </label>
+
+      <div class="flex items-center gap-2 px-3 py-3 border-b border-white/10 flex-shrink-0 overflow-hidden">
+        <svg viewBox="0 0 44 44" width="28" height="28" class="flex-shrink-0" aria-hidden="true" focusable="false">
+          <circle cx="22" cy="22" r="20" fill="white"/>
+          <path d="M22 3 A19 19 0 0 1 40 29" fill="none" stroke="#00A0DC" stroke-width="2.5" stroke-linecap="round"/>
+          <circle cx="33" cy="19" r="3" fill="#CC5717"/>
+          <circle cx="33" cy="26" r="3" fill="#9B1E21"/>
+          <text x="17.5" y="27" font-family="'Barlow Condensed',Impact,sans-serif" font-weight="800" font-size="12" fill="#202E56" text-anchor="middle">UA</text>
+        </svg>
+        <span class="sidebar-label font-display font-bold text-white text-xs uppercase tracking-wide whitespace-nowrap">UA MFA</span>
       </div>
-      <div v-if="user.uid">
-        <user-view :methods=methods :user.sync=user :messages=messages :infos=infos :get-and-set-user=getAndSetUser></user-view>
+
+      <nav class="flex-1 overflow-y-auto py-2 px-2" aria-label="Navigation principale">
+        <ul class="space-y-1" role="list">
+          <li>
+            <a href="#" @click="$root.navigate" name="home"
+               class="flex items-center gap-3 px-2.5 py-2 text-sm font-medium transition-colors text-white/70 hover:text-white hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue"
+               title="Accueil">
+              <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"/></svg>
+              <span class="sidebar-label whitespace-nowrap">Accueil</span>
+            </a>
+          </li>
+
+          <li v-if="infos.isManager" class="pt-2 mt-2 border-t border-white/10" aria-hidden="true"></li>
+          <li v-if="infos.isManager">
+            <a href="#" @click="$root.navigate" name="stats"
+               class="flex items-center gap-3 px-2.5 py-2 text-sm font-medium transition-colors text-white/70 hover:text-white hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue"
+               title="Statistiques">
+              <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z"/></svg>
+              <span class="sidebar-label whitespace-nowrap">Statistiques</span>
+            </a>
+          </li>
+          <!-- Manager : ACTIF -->
+          <li v-if="infos.isManager">
+            <a href="#" @click="$root.navigate" name="manager"
+               class="flex items-center gap-3 px-2.5 py-2 text-sm font-medium transition-colors text-white bg-white/10 border-l-2 border-ua-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue"
+               title="Espace manager"
+               aria-current="page">
+              <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z"/></svg>
+              <span class="sidebar-label whitespace-nowrap">Manager</span>
+            </a>
+          </li>
+          <li v-if="infos.role === 'admin'">
+            <a href="#" @click="$root.navigate" name="admin"
+               class="flex items-center gap-3 px-2.5 py-2 text-sm font-medium transition-colors text-white/70 hover:text-white hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue"
+               title="Administration">
+              <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.213-1.281Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg>
+              <span class="sidebar-label whitespace-nowrap">Administration</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="border-t border-white/10 px-2.5 py-3 flex-shrink-0">
+        <div class="flex items-center gap-2 overflow-hidden">
+          <div class="w-7 h-7 rounded-full bg-ua-blue flex items-center justify-center flex-shrink-0" aria-hidden="true">
+            <span class="text-ua-navy font-display font-bold text-xs">{{(infos.name || infos.uid || '?').split(' ').map(w => w[0]).join('').substring(0,2).toUpperCase()}}</span>
+          </div>
+          <span class="sidebar-label text-white text-xs font-medium truncate">{{infos.name || infos.uid}}</span>
+        </div>
+        <a href="/logout" class="flex items-center gap-2 mt-2 px-2.5 py-1.5 text-white/50 hover:text-ua-crimson hover:bg-white/5 transition-colors text-xs">
+          <svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9"/></svg>
+          <span class="sidebar-label whitespace-nowrap">Déconnexion</span>
+        </a>
+      </div>
+    </aside>
+
+    <!-- ═════════════════════════════════════════════ -->
+    <!-- Zone principale                                -->
+    <!-- ═════════════════════════════════════════════ -->
+    <div class="flex-1 min-w-0 overflow-y-auto">
+      <div class="p-6 lg:p-8 space-y-6">
+
+        <!-- En-tête page -->
+        <div>
+          <h2 class="font-display font-bold text-2xl text-ua-navy uppercase tracking-wide">Espace Manager</h2>
+          <p class="text-gray-500 text-sm mt-1">Recherchez un utilisateur pour consulter et gérer ses méthodes MFA.</p>
+        </div>
+
+        <!-- Carte recherche utilisateur -->
+        <div class="bg-white border border-gray-200 p-5">
+          <h3 class="font-display font-bold text-sm text-ua-navy uppercase tracking-wide mb-4">Recherche utilisateur</h3>
+          <form @submit.prevent="checkUserThenGetAndSet" class="space-y-3">
+            <div>
+              <label for="autocomplete-input" class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">{{messages.api.label.user}}</label>
+              <div class="flex gap-3">
+                <div class="relative flex-1">
+                  <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"/>
+                  </svg>
+                  <input @keyup.enter="checkUserThenGetAndSet"
+                         v-model.trim="requestedUid"
+                         type="text"
+                         id="autocomplete-input"
+                         list="usersId"
+                         autocomplete="off"
+                         placeholder="UID ou nom d'utilisateur..."
+                         class="w-full pl-10 pr-3 py-2.5 border border-gray-300 text-sm text-ua-navy bg-white focus:outline-none focus:border-ua-blue focus:ring-1 focus:ring-ua-blue transition-colors">
+                </div>
+                <button type="button"
+                        :disabled="!requestedUid"
+                        @click="checkUserThenGetAndSet"
+                        class="inline-flex items-center gap-2 px-5 py-2.5 bg-ua-blue hover:bg-ua-indigo text-white font-semibold text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue focus-visible:ring-offset-2 disabled:bg-gray-300 disabled:cursor-not-allowed disabled:hover:bg-gray-300">
+                  <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/>
+                  </svg>
+                  <span>{{messages.api.action.select}}</span>
+                </button>
+              </div>
+              <datalist id="usersId">
+                <option v-for="user in users" :key="user.uid" :value="user.uid" :label="user.displayName ? `${user.displayName} (${user.uid})` : user.uid"/>
+              </datalist>
+            </div>
+          </form>
+        </div>
+
+        <!-- User view (si user sélectionné) -->
+        <div v-if="user.uid">
+          <user-view :methods="methods"
+                     :user="user"
+                     :messages="messages"
+                     :infos="infos"
+                     :get-and-set-user="getAndSetUser"></user-view>
+        </div>
+
+        <!-- Empty state (AJOUT UX : si aucun user sélectionné) -->
+        <div v-else class="bg-white border border-gray-200 p-12 flex flex-col items-center justify-center text-center">
+          <svg class="w-12 h-12 text-gray-300 mb-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z"/>
+          </svg>
+          <p class="text-sm font-medium text-gray-600">Aucun utilisateur sélectionné</p>
+          <p class="text-xs text-gray-400 mt-1">Utilisez le champ de recherche ci-dessus pour commencer.</p>
+        </div>
+
       </div>
     </div>
+  </div>
