@@ -1,5 +1,39 @@
 script#esupnfc-method(type='text/x-template').
-  <div class="section">
+  <div class="space-y-4">
+
+    <!-- ═══════════════════════════════════════════════════ -->
+    <!-- Carte d'information (AJOUT UX : template original    -->
+    <!-- était vide, on explique la méthode à l'utilisateur)  -->
+    <!-- ═══════════════════════════════════════════════════ -->
+    <div class="bg-white border border-gray-300 shadow-sm p-5">
+      <div class="flex items-start gap-4">
+
+        <!-- Icône NFC (ondes radio) -->
+        <div class="flex-shrink-0 w-12 h-12 flex items-center justify-center bg-blue-50 border border-blue-100">
+          <svg class="w-7 h-7 text-ua-blue" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9.348 14.652a3.75 3.75 0 0 1 0-5.304m5.304 0a3.75 3.75 0 0 1 0 5.304m-7.425 2.121a6.75 6.75 0 0 1 0-9.546m9.546 0a6.75 6.75 0 0 1 0 9.546M5.106 18.894c-3.808-3.808-3.808-9.98 0-13.788m13.788 0c3.808 3.808 3.808 9.98 0 13.788M12 12h.008v.008H12V12Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"/>
+          </svg>
+        </div>
+
+        <!-- Contenu -->
+        <div class="flex-1 min-w-0">
+          <h4 class="font-display font-bold text-ua-navy text-sm uppercase tracking-wide mb-2">Authentification par carte NFC</h4>
+          <p class="text-sm text-gray-700 leading-relaxed mb-3">
+            Cette méthode utilise votre carte d'établissement (carte multiservices UA)
+            ou tout autre objet NFC compatible préalablement enregistré.
+            Présentez-la à un lecteur NFC pour vous authentifier.
+          </p>
+
+          <!-- Encart d'aide : pas d'enrôlement utilisateur -->
+          <div class="bg-blue-50 border-l-2 border-ua-blue px-3 py-2 text-xs text-ua-navy leading-relaxed">
+            <p>
+              <strong class="font-semibold">À noter :</strong>
+              l'enrôlement de votre carte NFC est pris en charge par le service informatique de votre établissement.
+              Aucune action n'est requise ici — l'activation du commutateur au-dessus suffit à autoriser l'usage de cette méthode.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
 
   </div>
-
