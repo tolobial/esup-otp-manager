@@ -1085,7 +1085,27 @@ const StatsDashboard = {
             loading: false,
             chart: null,
             chart2: null,
+            chartMethodsCount: null,
         };
+    },
+    computed: {
+        // AJOUT UX : KPIs dérivés des données brutes /api/admin/stats
+        dominantMethod() {
+            if (!this.data?.methods || !this.data?.totalMfaUsers) return null;
+            const entries = Object.entries(this.data.methods);
+            if (!entries.length) return null;
+            const [methodKey, count] = entries.sort(([, a], [, b]) => b - a)[0];
+            const label = this.messages?.api?.methods?.[methodKey]?.name || methodKey;
+            return {
+                label,
+                count,
+                pct: ((count / this.data.totalMfaUsers) * 100).toFixed(1),
+            };
+        },
+        totalPushUsers() {
+            if (!this.data?.pushPlatforms) return 0;
+            return Object.values(this.data.pushPlatforms).reduce((a, b) => a + b, 0);
+        },
     },
     methods: {
         fetchStats() {
@@ -1108,6 +1128,20 @@ const StatsDashboard = {
 
             await import ("/js/chart.js");
             await import ("/js/chartjs-plugin-datalabels.min.js");
+
+            // AJOUT UX : alignement Chart.js sur l'identité visuelle UA
+            Chart.defaults.font.family = '"Open Sans", system-ui, sans-serif';
+            Chart.defaults.color = '#202E56';
+
+            // Style commun des tooltips (couleur UA navy)
+            const uaTooltip = {
+                backgroundColor: '#202E56',
+                titleFont: { family: '"Open Sans", system-ui', weight: 600 },
+                bodyFont: { family: '"Open Sans", system-ui' },
+                padding: 10,
+                cornerRadius: 2,
+                boxPadding: 4,
+            };
 
             // this.data example :
             // {"totalUsers":32507,"totalMfaUsers":1887,"methods":{"totp":588,"bypass":838,"passcode_grid":38,"push":1072,"esupnfc":195,"webauthn":518},"pushPlatforms":{"iOS":354,"Android":716,"Mac":2}}
@@ -1149,12 +1183,12 @@ const StatsDashboard = {
                             {
                                 label: this.messages.stats.methods_activated,
                                 data: activated,
-                                backgroundColor: '#42A5F5',
+                                backgroundColor: '#00A0DC', // ua-blue (refonte UA)
                             },
                             {
                                 label: this.messages.stats.methods_deactivated,
                                 data: notActivated,
-                                backgroundColor: '#B0BEC5',
+                                backgroundColor: '#E5E7EB', // gray-200 (refonte UA)
                             }
                         ],
                     },
@@ -1170,8 +1204,11 @@ const StatsDashboard = {
                             title: {
                                 display: true,
                                 text: title,
+                                font: { family: '"Barlow Condensed", Impact, sans-serif', size: 14, weight: 700 },
+                                color: '#202E56',
                             },
                             tooltip: {
+                                ...uaTooltip,
                                 callbacks: {
                                     label: function (context) {
                                         const total = activated[context.dataIndex] + notActivated[context.dataIndex];
@@ -1198,10 +1235,12 @@ const StatsDashboard = {
                             x: {
                                 stacked: true,
                                 beginAtZero: true,
-                                max: totalMfaUsers
+                                max: totalMfaUsers,
+                                grid: { color: 'rgba(0,0,0,0.04)' },
                             },
                             y: {
-                                stacked: true
+                                stacked: true,
+                                grid: { display: false },
                             }
                         }
                     },
@@ -1228,7 +1267,9 @@ const StatsDashboard = {
                     data: {
                         labels: pushPlatformsLabels,
                         datasets: [{
-                            data: pushPlatformsData
+                            data: pushPlatformsData,
+                            backgroundColor: ['#00A0DC', '#202E56', '#1107A0', '#CC5717', '#9B1E21'], // palette UA
+                            borderWidth: 0,
                         }]
                     },
                     options: {
@@ -1238,8 +1279,19 @@ const StatsDashboard = {
                             title: {
                                 display: true,
                                 text: title,
+                                font: { family: '"Barlow Condensed", Impact, sans-serif', size: 13, weight: 700 },
+                                color: '#202E56',
                             },
+                            tooltip: uaTooltip,
                             legend: {
+                                position: 'bottom',
+                                labels: {
+                                    font: { family: '"Open Sans", system-ui', size: 11 },
+                                    color: '#6B7280',
+                                    padding: 12,
+                                    boxWidth: 10,
+                                    boxHeight: 10,
+                                },
                                 onHover: (evt, legendItem) => {
                                     const activeElement = {
                                         datasetIndex: 0,
@@ -1269,7 +1321,7 @@ const StatsDashboard = {
                         labels: methodsCountArray.map(([count, _nb_users]) => this.messages.stats.methodsCount.label.replace("%NB_METHODS%", count)),
                         datasets: [{
                             data: methodsCountArray.map(([_count, nb_users]) => nb_users),
-                            backgroundColor: '#66BB6A',
+                            backgroundColor: '#202E56', // ua-navy (refonte UA)
                         }]
                     },
                     options: {
@@ -1279,11 +1331,14 @@ const StatsDashboard = {
                             title: {
                                 display: true,
                                 text: this.messages.stats.methodsCount.title,
+                                font: { family: '"Barlow Condensed", Impact, sans-serif', size: 13, weight: 700 },
+                                color: '#202E56',
                             },
                             legend: {
                                 display: false,
                             },
                             tooltip: {
+                                ...uaTooltip,
                                 callbacks: {
                                     label: context => this.messages.stats.methodsCount.context.replace("%NB_USERS%", context.raw),
                                 }
@@ -1291,14 +1346,19 @@ const StatsDashboard = {
                             datalabels: {
                                 anchor: 'end',
                                 align: 'top',
+                                color: '#202E56',
                                 font: {
                                     weight: 'bold',
                                 }
                             }
                         },
                         scales: {
+                            x: {
+                                grid: { display: false },
+                            },
                             y: {
                                 beginAtZero: true,
+                                grid: { color: 'rgba(0,0,0,0.04)' },
                                 ticks: {
                                     precision: 0,
                                 }
