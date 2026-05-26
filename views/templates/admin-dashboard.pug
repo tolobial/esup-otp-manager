@@ -1,38 +1,205 @@
 script#admin-dashboard(type='text/x-template').
-    <div>
-    <div>
-    <div class="section" v-for="method in methods">
-    <h4>{{method.label || method.name}}</h4>
-    <div class='switch'>
-    <label>
-    {{messages.api.action.deactivate}}
-    <input type='checkbox' v-if="methods[method.name].activate" @click="deactivate" :name=method.name checked>
-    <input type='checkbox' @click="activate" :name=method.name v-else>
-    <span class='lever'></span> {{messages.api.action.activate}}
-    </label>
+  <div v-if="messages.api" data-tw class="tw-reset min-h-screen bg-gray-100 flex">
+
+    <input type="checkbox" id="sidebar-toggle" class="hidden" checked>
+
+    <!-- ═════════════════════════════════════════════ -->
+    <!-- Sidebar UA (Administration en état actif)     -->
+    <!-- ═════════════════════════════════════════════ -->
+    <aside class="sidebar flex-shrink-0 bg-ua-navy flex flex-col h-screen sticky top-0 transition-all duration-300 z-30 overflow-hidden">
+
+      <label for="sidebar-toggle"
+             class="w-full flex items-center justify-center h-12 text-white/70 hover:text-white hover:bg-white/10 transition-colors border-b border-white/10 cursor-pointer"
+             title="Ouvrir/Réduire le menu">
+        <svg class="toggle-expand w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/></svg>
+        <svg class="toggle-collapse w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"/></svg>
+      </label>
+
+      <div class="flex items-center gap-2 px-3 py-3 border-b border-white/10 flex-shrink-0 overflow-hidden">
+        <svg viewBox="0 0 44 44" width="28" height="28" class="flex-shrink-0" aria-hidden="true" focusable="false">
+          <circle cx="22" cy="22" r="20" fill="white"/>
+          <path d="M22 3 A19 19 0 0 1 40 29" fill="none" stroke="#00A0DC" stroke-width="2.5" stroke-linecap="round"/>
+          <circle cx="33" cy="19" r="3" fill="#CC5717"/>
+          <circle cx="33" cy="26" r="3" fill="#9B1E21"/>
+          <text x="17.5" y="27" font-family="'Barlow Condensed',Impact,sans-serif" font-weight="800" font-size="12" fill="#202E56" text-anchor="middle">UA</text>
+        </svg>
+        <span class="sidebar-label font-display font-bold text-white text-xs uppercase tracking-wide whitespace-nowrap">UA MFA</span>
+      </div>
+
+      <nav class="flex-1 overflow-y-auto py-2 px-2" aria-label="Navigation principale">
+        <ul class="space-y-1" role="list">
+          <li>
+            <a href="#" @click="$root.navigate" name="home"
+               class="flex items-center gap-3 px-2.5 py-2 text-sm font-medium transition-colors text-white/70 hover:text-white hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue"
+               title="Accueil">
+              <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"/></svg>
+              <span class="sidebar-label whitespace-nowrap">Accueil</span>
+            </a>
+          </li>
+
+          <li v-if="infos.isManager" class="pt-2 mt-2 border-t border-white/10" aria-hidden="true"></li>
+          <li v-if="infos.isManager">
+            <a href="#" @click="$root.navigate" name="stats"
+               class="flex items-center gap-3 px-2.5 py-2 text-sm font-medium transition-colors text-white/70 hover:text-white hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue"
+               title="Statistiques">
+              <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z"/></svg>
+              <span class="sidebar-label whitespace-nowrap">Statistiques</span>
+            </a>
+          </li>
+          <li v-if="infos.isManager">
+            <a href="#" @click="$root.navigate" name="manager"
+               class="flex items-center gap-3 px-2.5 py-2 text-sm font-medium transition-colors text-white/70 hover:text-white hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue"
+               title="Espace manager">
+              <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z"/></svg>
+              <span class="sidebar-label whitespace-nowrap">Manager</span>
+            </a>
+          </li>
+          <!-- Administration : ACTIF -->
+          <li>
+            <a href="#" @click="$root.navigate" name="admin"
+               class="flex items-center gap-3 px-2.5 py-2 text-sm font-medium transition-colors text-white bg-white/10 border-l-2 border-ua-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue"
+               title="Administration"
+               aria-current="page">
+              <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.213-1.281Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg>
+              <span class="sidebar-label whitespace-nowrap">Administration</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="border-t border-white/10 px-2.5 py-3 flex-shrink-0">
+        <div class="flex items-center gap-2 overflow-hidden">
+          <div class="w-7 h-7 rounded-full bg-ua-blue flex items-center justify-center flex-shrink-0" aria-hidden="true">
+            <span class="text-ua-navy font-display font-bold text-xs">{{(infos.name || infos.uid || '?').split(' ').map(w => w[0]).join('').substring(0,2).toUpperCase()}}</span>
+          </div>
+          <span class="sidebar-label text-white text-xs font-medium truncate">{{infos.name || infos.uid}}</span>
+        </div>
+        <a href="/logout" class="flex items-center gap-2 mt-2 px-2.5 py-1.5 text-white/50 hover:text-ua-crimson hover:bg-white/5 transition-colors text-xs">
+          <svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9"/></svg>
+          <span class="sidebar-label whitespace-nowrap">Déconnexion</span>
+        </a>
+      </div>
+    </aside>
+
+    <!-- ═════════════════════════════════════════════ -->
+    <!-- Zone principale                                -->
+    <!-- ═════════════════════════════════════════════ -->
+    <div class="flex-1 min-w-0 overflow-y-auto">
+      <div class="p-6 lg:p-8 space-y-6">
+
+        <!-- En-tête page -->
+        <div>
+          <h2 class="font-display font-bold text-2xl text-ua-navy uppercase tracking-wide">Administration MFA</h2>
+          <p class="text-gray-500 text-sm mt-1">Contrôle global des méthodes — modifications appliquées à tous les utilisateurs.</p>
+        </div>
+
+        <!-- Liste des méthodes (cartes) -->
+        <div class="space-y-3">
+          <template v-for="method in methods" :key="method.name">
+            <div class="bg-white border border-gray-200 transition-colors"
+                 :class="methods[method.name].activate ? 'border-l-[3px] border-l-ua-blue' : 'border-l-[3px] border-l-gray-300'">
+
+              <!-- Header carte méthode -->
+              <div class="px-5 py-4 flex items-center justify-between gap-4">
+                <div class="flex items-center gap-3 flex-1 min-w-0">
+                  <!-- Icône (AJOUT UX : repères visuels par méthode) -->
+                  <div class="flex-shrink-0 w-10 h-10 flex items-center justify-center transition-colors"
+                       :class="methods[method.name].activate ? 'bg-blue-50' : 'bg-gray-50'">
+                    <svg v-if="method.name === 'totp'" class="w-5 h-5" :class="methods[method.name].activate ? 'text-ua-blue' : 'text-gray-400'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 3.75 9.375v-4.5ZM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 0 1-1.125-1.125v-4.5ZM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 13.5 9.375v-4.5Z"/></svg>
+                    <svg v-else-if="method.name === 'push'" class="w-5 h-5" :class="methods[method.name].activate ? 'text-ua-blue' : 'text-gray-400'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 0 0 6 3.75v16.5a2.25 2.25 0 0 0 2.25 2.25h7.5A2.25 2.25 0 0 0 18 20.25V3.75a2.25 2.25 0 0 0-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18h3"/></svg>
+                    <svg v-else-if="method.name === 'webauthn'" class="w-5 h-5" :class="methods[method.name].activate ? 'text-ua-blue' : 'text-gray-400'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 0 1 3 3m3 0a6 6 0 0 1-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 0 1 21.75 8.25Z"/></svg>
+                    <svg v-else-if="method.name === 'random_code_mail'" class="w-5 h-5" :class="methods[method.name].activate ? 'text-ua-blue' : 'text-gray-400'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75"/></svg>
+                    <svg v-else-if="method.name === 'random_code'" class="w-5 h-5" :class="methods[method.name].activate ? 'text-ua-blue' : 'text-gray-400'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 0 1-2.555-.337A5.972 5.972 0 0 1 5.41 20.97a5.969 5.969 0 0 1-.474-.065 4.48 4.48 0 0 0 .978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25Z"/></svg>
+                    <svg v-else-if="method.name === 'bypass'" class="w-5 h-5" :class="methods[method.name].activate ? 'text-ua-blue' : 'text-gray-400'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"/></svg>
+                    <svg v-else class="w-5 h-5" :class="methods[method.name].activate ? 'text-ua-blue' : 'text-gray-400'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z"/></svg>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <h4 class="font-semibold text-ua-navy text-sm">{{method.label || method.name}}</h4>
+                    <p class="text-xs mt-0.5 flex items-center gap-1.5">
+                      <span v-if="methods[method.name].activate" class="text-green-600 font-medium inline-flex items-center gap-1.5">
+                        <span class="inline-block w-1.5 h-1.5 bg-green-600"></span>
+                        Activée pour tous
+                      </span>
+                      <span v-else class="text-gray-400 inline-flex items-center gap-1.5">
+                        <span class="inline-block w-1.5 h-1.5 bg-gray-300"></span>
+                        Désactivée
+                      </span>
+                    </p>
+                  </div>
+                </div>
+
+                <!-- Switch global activation -->
+                <label class="relative inline-flex items-center cursor-pointer flex-shrink-0">
+                  <input v-if="methods[method.name].activate"
+                         type="checkbox"
+                         @click="deactivate"
+                         :name="method.name"
+                         checked
+                         :aria-label="`Désactiver globalement ${method.label || method.name}`"
+                         class="sr-only peer">
+                  <input v-else
+                         type="checkbox"
+                         @click="activate"
+                         :name="method.name"
+                         :aria-label="`Activer globalement ${method.label || method.name}`"
+                         class="sr-only peer">
+                  <span class="w-12 h-6 bg-gray-300 peer-checked:bg-ua-blue transition-colors duration-200 inline-block"></span>
+                  <span class="absolute top-0.5 left-0.5 w-5 h-5 bg-white transition-transform duration-200 peer-checked:translate-x-6 pointer-events-none"></span>
+                </label>
+              </div>
+
+              <!-- Sous-section : transports (uniquement pour random_code) -->
+              <div v-if="method.name === 'random_code'" class="border-t border-gray-100 px-5 py-3 bg-gray-50">
+                <h5 class="text-xs font-semibold text-ua-navy uppercase tracking-wide mb-3">Transports activables</h5>
+                <div class="space-y-2.5">
+                  <!-- SMS -->
+                  <div class="flex items-center justify-between gap-3">
+                    <span class="text-sm text-gray-700">{{messages.api.transports.sms}}</span>
+                    <label class="relative inline-flex items-center cursor-pointer flex-shrink-0">
+                      <input v-if="methods[method.name].transports.includes('sms')"
+                             type="checkbox"
+                             @click="deactivateTransport(method.name, 'sms')"
+                             :name="method.name"
+                             checked
+                             :aria-label="`Désactiver SMS pour ${method.label}`"
+                             class="sr-only peer">
+                      <input v-else
+                             type="checkbox"
+                             @click="activateTransport(method.name, 'sms')"
+                             :name="method.name"
+                             :aria-label="`Activer SMS pour ${method.label}`"
+                             class="sr-only peer">
+                      <span class="w-10 h-5 bg-gray-300 peer-checked:bg-ua-blue transition-colors duration-200 inline-block"></span>
+                      <span class="absolute top-0.5 left-0.5 w-4 h-4 bg-white transition-transform duration-200 peer-checked:translate-x-5 pointer-events-none"></span>
+                    </label>
+                  </div>
+                  <!-- Mail -->
+                  <div class="flex items-center justify-between gap-3">
+                    <span class="text-sm text-gray-700">{{messages.api.transports.mail}}</span>
+                    <label class="relative inline-flex items-center cursor-pointer flex-shrink-0">
+                      <input v-if="methods[method.name].transports.includes('mail')"
+                             type="checkbox"
+                             @click="deactivateTransport(method.name, 'mail')"
+                             :name="method.name"
+                             checked
+                             :aria-label="`Désactiver email pour ${method.label}`"
+                             class="sr-only peer">
+                      <input v-else
+                             type="checkbox"
+                             @click="activateTransport(method.name, 'mail')"
+                             :name="method.name"
+                             :aria-label="`Activer email pour ${method.label}`"
+                             class="sr-only peer">
+                      <span class="w-10 h-5 bg-gray-300 peer-checked:bg-ua-blue transition-colors duration-200 inline-block"></span>
+                      <span class="absolute top-0.5 left-0.5 w-4 h-4 bg-white transition-transform duration-200 peer-checked:translate-x-5 pointer-events-none"></span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </template>
+        </div>
+
+      </div>
     </div>
-    <div class="divider"></div>
-    <div class="section" v-show="method.name=='random_code' ">
-    <h5>Transports</h5> {{messages.api.transports.sms}} :
-    <div class='switch'>
-    <label>
-    {{messages.api.action.deactivate}}
-    <input type='checkbox' v-if="methods[method.name].transports.includes('sms')" @click="deactivateTransport(method.name,'sms')" :name=method.name checked>
-    <input type='checkbox' @click="activateTransport(method.name,'sms')" :name=method.name v-else>
-    <span class='lever'></span> {{messages.api.action.activate}}
-    </label>
-    </div>
-    {{messages.api.transports.mail}} :
-    <div class='switch'>
-    <label>
-    {{messages.api.action.deactivate}}
-    <input type='checkbox' v-if="methods[method.name].transports.includes('mail')" @click="deactivateTransport(method.name,'mail')" :name=method.name checked>
-    <input type='checkbox' @click="activateTransport(method.name,'mail')" :name=method.name v-else>
-    <span class='lever'></span> {{messages.api.action.activate}}
-    </label>
-    </div>
-    </div>
-    <div class="divider"></div>
-    </div>
-    </div>
-    </div>
+  </div>
