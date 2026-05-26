@@ -1,23 +1,98 @@
 script#user-view(type='text/x-template').
-    <div>
-      <ul>
-        <h2 class="h3" v-if="user.uid && typeof(user.uid)!== 'function'">{{user.displayName ? `${user.displayName} (${user.uid})` : user.uid}}</h2>
-        <template v-for="method in methods">
-          <li v-if="user.methods[method.name] && methods[method.name].activate">
-            <h3 class="h4">{{method.label}}</h3>
-            <div class='switch'>
-              <label>
-                {{messages.api.action.deactivate}}
-                <input type='checkbox' :id="method.name+'_switch'" @click.prevent="user.methods[method.name].active ? deactivate(method.name) : activate(method.name)" :name="method.name" role="switch" :aria-label="method.label" :checked="user.methods[method.name].active && !user.methods[method.name].askActivation"/>
-                <span class='lever'></span>
-                {{messages.api.action.activate}}
-              </label>
-            </div>
-            <div v-if="user.methods[method.name].active">
-              <component :is=method.name :method=method.name :methods=methods :generate_totp=generateTotpConfirm :generate_bypass=generateBypassConfirm :generate_passcode_grid=generatePasscodeGridConfirm :hasValidTransportForRandom_codeMethod=hasValidTransportForRandom_codeMethod :fetchWebauthnData=fetchWebauthnData :get-and-set-user=getAndSetUser :messages=messages :infos=infos :user.sync=user :formatApiUri=formatApiUri :isManager=true></component>
-            </div>
-            <div class="divider"></div>
-          </li>
-        </template>
-      </ul>
+  <div class="space-y-4">
+
+    <!-- ═════════════════════════════════════════════ -->
+    <!-- En-tête : identification de l'utilisateur     -->
+    <!-- ═════════════════════════════════════════════ -->
+    <div v-if="user.uid && typeof(user.uid) !== 'function'" class="bg-white border border-gray-200 p-5 flex items-center gap-4">
+      <div class="flex-shrink-0 w-12 h-12 rounded-full bg-ua-blue flex items-center justify-center" aria-hidden="true">
+        <span class="text-ua-navy font-display font-bold text-base">
+          {{((user.displayName || user.uid).split(' ').map(w => w[0]).join('') || '?').substring(0,2).toUpperCase()}}
+        </span>
+      </div>
+      <div class="flex-1 min-w-0">
+        <h2 class="font-display font-bold text-xl text-ua-navy uppercase tracking-wide truncate">
+          {{user.displayName || user.uid}}
+        </h2>
+        <p v-if="user.displayName" class="text-xs text-gray-500 font-mono tabular-nums mt-0.5">{{user.uid}}</p>
+        <p class="text-xs text-gray-400 mt-0.5">Méthodes MFA de l'utilisateur</p>
+      </div>
     </div>
+
+    <!-- ═════════════════════════════════════════════ -->
+    <!-- Liste des méthodes (globalement disponibles)   -->
+    <!-- ═════════════════════════════════════════════ -->
+    <div class="space-y-3">
+      <template v-for="method in methods" :key="method.name">
+        <div v-if="user.methods[method.name] && methods[method.name].activate"
+             class="bg-white border border-gray-200 transition-colors"
+             :class="user.methods[method.name].active && !user.methods[method.name].askActivation ? 'border-l-[3px] border-l-ua-blue' : (user.methods[method.name].askActivation ? 'border-l-[3px] border-l-ua-orange' : 'border-l-[3px] border-l-gray-300')">
+
+          <!-- Header carte méthode -->
+          <div class="px-5 py-4 flex items-center justify-between gap-4">
+            <div class="flex-1 min-w-0">
+              <h3 class="font-semibold text-ua-navy text-sm">{{method.label || method.name}}</h3>
+              <p class="text-xs mt-0.5">
+                <span v-if="user.methods[method.name].active && !user.methods[method.name].askActivation" class="text-green-600 font-medium inline-flex items-center gap-1.5">
+                  <span class="inline-block w-1.5 h-1.5 bg-green-600"></span>
+                  Activée
+                </span>
+                <span v-else-if="user.methods[method.name].askActivation" class="text-ua-orange font-medium inline-flex items-center gap-1.5">
+                  <svg class="w-3 h-3 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"/>
+                  </svg>
+                  En attente de validation
+                </span>
+                <span v-else class="text-gray-400 inline-flex items-center gap-1.5">
+                  <span class="inline-block w-1.5 h-1.5 bg-gray-300"></span>
+                  Désactivée
+                </span>
+              </p>
+            </div>
+
+            <!-- Switch tricolore (off / askActivation / on) -->
+            <label class="relative inline-flex items-center cursor-pointer flex-shrink-0">
+              <input type="checkbox"
+                     :id="method.name+'_switch'"
+                     @click.prevent="user.methods[method.name].active ? deactivate(method.name) : activate(method.name)"
+                     :name="method.name"
+                     role="switch"
+                     :aria-label="method.label"
+                     :checked="user.methods[method.name].active && !user.methods[method.name].askActivation"
+                     class="sr-only peer">
+              <span class="w-12 h-6 transition-colors duration-200 inline-block"
+                    :class="{
+                      'bg-gray-300': !user.methods[method.name].active,
+                      'bg-ua-orange': user.methods[method.name].askActivation,
+                      'bg-ua-blue': user.methods[method.name].active && !user.methods[method.name].askActivation
+                    }"></span>
+              <span class="absolute top-0.5 w-5 h-5 bg-white transition-all duration-200 pointer-events-none"
+                    :class="{
+                      'left-0.5': !user.methods[method.name].active && !user.methods[method.name].askActivation,
+                      'left-3': user.methods[method.name].askActivation,
+                      'left-[26px]': user.methods[method.name].active && !user.methods[method.name].askActivation
+                    }"></span>
+            </label>
+          </div>
+
+          <!-- Composant de la méthode (si active) -->
+          <div v-if="user.methods[method.name].active" class="border-t border-gray-100 p-5 bg-gray-50">
+            <component :is="method.name"
+                       :method="method.name"
+                       :methods="methods"
+                       :generate_totp="generateTotpConfirm"
+                       :generate_bypass="generateBypassConfirm"
+                       :generate_passcode_grid="generatePasscodeGridConfirm"
+                       :hasValidTransportForRandom_codeMethod="hasValidTransportForRandom_codeMethod"
+                       :fetchWebauthnData="fetchWebauthnData"
+                       :get-and-set-user="getAndSetUser"
+                       :messages="messages"
+                       :infos="infos"
+                       :user="user"
+                       :formatApiUri="formatApiUri"
+                       :isManager="true"></component>
+          </div>
+        </div>
+      </template>
+    </div>
+  </div>

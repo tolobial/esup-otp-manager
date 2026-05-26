@@ -1,26 +1,185 @@
 script#user-dashboard(type='text/x-template').
-   <div>
-     <template v-for="method in methods">
-      <div class="section method-section" v-if="method.activate && currentmethod==method.name" autofocus aria-live="assertive">
-         <div class="method-header">
-            <h2 class="h3">{{method.label || method.name}}</h2>
-            <p>
-               {{messages.api.methods[method.name].description}}
-            </p>
-         </div>
-        <div class='switch'>
-          <label>
-            {{messages.api.home.deactivated}}
-            <input type='checkbox' :id="method.name+'_switch'" @click.prevent="user.methods[method.name].active ? deactivate(method.name) : activate(method.name)" :name="method.name" role="switch" :aria-label="method.label" :checked="user.methods[method.name].active && !user.methods[method.name].askActivation"/>
-            <span class='lever' :class="{ askActivation: user.methods[method.name].askActivation }"></span>
-            {{ messages.api.home.activated }}
-          </label>
-          <p v-if="user.methods[method.name].askActivation" class="grey-text text-darken-1" style="margin-top: 0">{{ messages.api.home.activating }}</p>
-        </div>
-         <div class="divider"></div>
-         <div class="method-component-wrapper" v-if="user.methods[method.name].active">
-            <component :is=currentmethod :method=currentmethod :methods=methods :generate_totp=generateTotpConfirm :generate_bypass=generateBypassConfirm :generate_passcode_grid=generatePasscodeGridConfirm :hasValidTransportForRandom_codeMethod=hasValidTransportForRandom_codeMethod :fetchWebauthnData=fetchWebauthnData :get-and-set-user=getAndSetUser :messages=messages :infos=infos :user=user :formatApiUri=formatApiUri :isManager=false></component>
-         </div>
+  <div v-if="messages.api && currentmethod" data-tw class="tw-reset min-h-screen bg-gray-100 flex">
+
+    <input type="checkbox" id="sidebar-toggle" class="hidden" checked>
+
+    <!-- ═════════════════════════════════════════════ -->
+    <!-- Sidebar UA                                     -->
+    <!-- ═════════════════════════════════════════════ -->
+    <aside class="sidebar flex-shrink-0 bg-ua-navy flex flex-col h-screen sticky top-0 transition-all duration-300 z-30 overflow-hidden">
+
+      <label for="sidebar-toggle"
+             class="w-full flex items-center justify-center h-12 text-white/70 hover:text-white hover:bg-white/10 transition-colors border-b border-white/10 cursor-pointer"
+             title="Ouvrir/Réduire le menu">
+        <svg class="toggle-expand w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/></svg>
+        <svg class="toggle-collapse w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"/></svg>
+      </label>
+
+      <div class="flex items-center gap-2 px-3 py-3 border-b border-white/10 flex-shrink-0 overflow-hidden">
+        <svg viewBox="0 0 44 44" width="28" height="28" class="flex-shrink-0" aria-hidden="true" focusable="false">
+          <circle cx="22" cy="22" r="20" fill="white"/>
+          <path d="M22 3 A19 19 0 0 1 40 29" fill="none" stroke="#00A0DC" stroke-width="2.5" stroke-linecap="round"/>
+          <circle cx="33" cy="19" r="3" fill="#CC5717"/>
+          <circle cx="33" cy="26" r="3" fill="#9B1E21"/>
+          <text x="17.5" y="27" font-family="'Barlow Condensed',Impact,sans-serif" font-weight="800" font-size="12" fill="#202E56" text-anchor="middle">UA</text>
+        </svg>
+        <span class="sidebar-label font-display font-bold text-white text-xs uppercase tracking-wide whitespace-nowrap">UA MFA</span>
       </div>
-     </template>
-   </div>
+
+      <nav class="flex-1 overflow-y-auto py-2 px-2" aria-label="Navigation principale">
+        <ul class="space-y-1" role="list">
+          <li>
+            <a href="#" @click="$root.navigate" name="home"
+               class="flex items-center gap-3 px-2.5 py-2 text-sm font-medium transition-colors text-white/70 hover:text-white hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue"
+               title="Accueil">
+              <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"/></svg>
+              <span class="sidebar-label whitespace-nowrap">Accueil</span>
+            </a>
+          </li>
+
+          <!-- Section : Préférences (méthodes activées) -->
+          <li class="pt-2 mt-2 border-t border-white/10" aria-hidden="true"></li>
+          <li class="px-2.5 py-1">
+            <p class="sidebar-label text-xs font-display font-bold uppercase tracking-wider text-white/40 whitespace-nowrap">Préférences</p>
+          </li>
+          <template v-for="method in methods" :key="method.name">
+            <li v-if="method.activate && method.authorize">
+              <a href="#" @click="$root.navigate" :name="method.name"
+                 class="flex items-center gap-3 px-2.5 py-2 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue"
+                 :class="currentmethod === method.name ? 'text-white bg-white/10 border-l-2 border-ua-blue font-medium' : 'text-white/70 hover:text-white hover:bg-white/10 font-medium'"
+                 :title="method.label || method.name"
+                 :aria-current="currentmethod === method.name ? 'page' : 'false'">
+                <svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z"/></svg>
+                <span class="sidebar-label whitespace-nowrap truncate">{{method.label || method.name}}</span>
+              </a>
+            </li>
+          </template>
+
+          <!-- Manager/Stats si isManager -->
+          <li v-if="infos.isManager" class="pt-2 mt-2 border-t border-white/10" aria-hidden="true"></li>
+          <li v-if="infos.isManager">
+            <a href="#" @click="$root.navigate" name="stats"
+               class="flex items-center gap-3 px-2.5 py-2 text-sm font-medium transition-colors text-white/70 hover:text-white hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue"
+               title="Statistiques">
+              <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z"/></svg>
+              <span class="sidebar-label whitespace-nowrap">Statistiques</span>
+            </a>
+          </li>
+          <li v-if="infos.isManager">
+            <a href="#" @click="$root.navigate" name="manager"
+               class="flex items-center gap-3 px-2.5 py-2 text-sm font-medium transition-colors text-white/70 hover:text-white hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue"
+               title="Espace manager">
+              <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z"/></svg>
+              <span class="sidebar-label whitespace-nowrap">Manager</span>
+            </a>
+          </li>
+          <li v-if="infos.role === 'admin'">
+            <a href="#" @click="$root.navigate" name="admin"
+               class="flex items-center gap-3 px-2.5 py-2 text-sm font-medium transition-colors text-white/70 hover:text-white hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue"
+               title="Administration">
+              <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.213-1.281Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg>
+              <span class="sidebar-label whitespace-nowrap">Administration</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="border-t border-white/10 px-2.5 py-3 flex-shrink-0">
+        <div class="flex items-center gap-2 overflow-hidden">
+          <div class="w-7 h-7 rounded-full bg-ua-blue flex items-center justify-center flex-shrink-0" aria-hidden="true">
+            <span class="text-ua-navy font-display font-bold text-xs">{{(infos.name || infos.uid || '?').split(' ').map(w => w[0]).join('').substring(0,2).toUpperCase()}}</span>
+          </div>
+          <span class="sidebar-label text-white text-xs font-medium truncate">{{infos.name || infos.uid}}</span>
+        </div>
+        <a href="/logout" class="flex items-center gap-2 mt-2 px-2.5 py-1.5 text-white/50 hover:text-ua-crimson hover:bg-white/5 transition-colors text-xs">
+          <svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9"/></svg>
+          <span class="sidebar-label whitespace-nowrap">Déconnexion</span>
+        </a>
+      </div>
+    </aside>
+
+    <!-- ═════════════════════════════════════════════ -->
+    <!-- Zone principale                                -->
+    <!-- ═════════════════════════════════════════════ -->
+    <div class="flex-1 min-w-0 overflow-y-auto">
+      <div class="p-6 lg:p-8 space-y-6">
+
+        <template v-for="method in methods" :key="method.name">
+          <div v-if="method.activate && currentmethod === method.name" autofocus aria-live="assertive" class="space-y-6">
+
+            <!-- En-tête méthode -->
+            <div>
+              <h2 class="font-display font-bold text-2xl text-ua-navy uppercase tracking-wide">{{method.label || method.name}}</h2>
+              <p class="text-gray-500 text-sm mt-1">{{messages.api.methods[method.name].description}}</p>
+            </div>
+
+            <!-- Carte switch d'activation (3 états : off / askActivation / on) -->
+            <div class="bg-white border border-gray-200 p-4 flex items-center justify-between gap-4">
+              <div class="flex-1 min-w-0">
+                <p class="text-sm">
+                  <span v-if="user.methods[method.name].active && !user.methods[method.name].askActivation" class="font-medium text-green-600 inline-flex items-center gap-2">
+                    <span class="inline-block w-2 h-2 bg-green-600"></span>
+                    {{ messages.api.home.activated }}
+                  </span>
+                  <span v-else-if="user.methods[method.name].askActivation" class="font-medium text-ua-orange inline-flex items-center gap-2">
+                    <svg class="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"/>
+                    </svg>
+                    {{ messages.api.home.activating }}
+                  </span>
+                  <span v-else class="font-medium text-gray-500 inline-flex items-center gap-2">
+                    <span class="inline-block w-2 h-2 bg-gray-300"></span>
+                    {{ messages.api.home.deactivated }}
+                  </span>
+                </p>
+              </div>
+
+              <!-- Switch toggle (3 états visuels via Vue :class) -->
+              <label class="relative inline-flex items-center cursor-pointer flex-shrink-0">
+                <input type="checkbox"
+                       :id="method.name+'_switch'"
+                       @click.prevent="user.methods[method.name].active ? deactivate(method.name) : activate(method.name)"
+                       :name="method.name"
+                       role="switch"
+                       :aria-label="method.label"
+                       :checked="user.methods[method.name].active && !user.methods[method.name].askActivation"
+                       class="sr-only peer">
+                <span class="w-12 h-6 transition-colors duration-200 inline-block"
+                      :class="{
+                        'bg-gray-300': !user.methods[method.name].active,
+                        'bg-ua-orange': user.methods[method.name].askActivation,
+                        'bg-ua-blue': user.methods[method.name].active && !user.methods[method.name].askActivation
+                      }"></span>
+                <span class="absolute top-0.5 w-5 h-5 bg-white transition-all duration-200 pointer-events-none"
+                      :class="{
+                        'left-0.5': !user.methods[method.name].active && !user.methods[method.name].askActivation,
+                        'left-3': user.methods[method.name].askActivation,
+                        'left-[26px]': user.methods[method.name].active && !user.methods[method.name].askActivation
+                      }"></span>
+              </label>
+            </div>
+
+            <!-- Composant méthode (TOTP, bypass, etc.) -->
+            <div v-if="user.methods[method.name].active">
+              <component :is="currentmethod"
+                         :method="currentmethod"
+                         :methods="methods"
+                         :generate_totp="generateTotpConfirm"
+                         :generate_bypass="generateBypassConfirm"
+                         :generate_passcode_grid="generatePasscodeGridConfirm"
+                         :hasValidTransportForRandom_codeMethod="hasValidTransportForRandom_codeMethod"
+                         :fetchWebauthnData="fetchWebauthnData"
+                         :get-and-set-user="getAndSetUser"
+                         :messages="messages"
+                         :infos="infos"
+                         :user="user"
+                         :formatApiUri="formatApiUri"
+                         :isManager="false"></component>
+            </div>
+
+          </div>
+        </template>
+
+      </div>
+    </div>
+  </div>
