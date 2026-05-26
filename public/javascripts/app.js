@@ -1514,21 +1514,26 @@ Vue.createApp({
         },
 
         navigate: function(event) {
-            if (event.target.name == "manager") {
-                this.pageTitle = event.target.text;
+            // Fix UX : event.target = élément cliqué (peut être un SVG enfant) ;
+            // event.currentTarget = le <a> sur lequel @click est attaché. On veut ce dernier
+            // pour pouvoir lire l'attribut name="..." de manière fiable.
+            const target = event.currentTarget;
+
+            if (target.name == "manager") {
+                this.pageTitle = target.text;
                 this.currentView = 'manager';
-            } else if (event.target.name == "admin") {
+            } else if (target.name == "admin") {
                 this.currentView = 'admin';
-                this.pageTitle = event.target.text;
-            } else if (event.target.name == "stats") {
+                this.pageTitle = target.text;
+            } else if (target.name == "stats") {
                 this.currentView = 'stats';
-                this.pageTitle = event.target.text;
-            } else if (event.target.name == "home") {
+                this.pageTitle = target.text;
+            } else if (target.name == "home") {
                 this.currentView = 'home';
-                this.pageTitle = event.target.text;
+                this.pageTitle = target.text;
             } else {
                 this.pageTitle = "Préférences";
-                this.currentMethod = event.target.name;
+                this.currentMethod = target.name;
                 this.currentView = 'preferences';
             }
 
@@ -1539,8 +1544,8 @@ Vue.createApp({
 
             $('a').parent().removeClass('active');
             $('a').parent().attr('aria-current', 'false');
-            $('#' + event.target.name).parent().addClass('active');
-            $('#' + event.target.name).parent().attr('aria-current', 'page');
+            $('#' + target.name).parent().addClass('active');
+            $('#' + target.name).parent().attr('aria-current', 'page');
             if (document.getElementById("sidenav-overlay")) $('#navButton').click();
             this.getAndSetUser();
         },
