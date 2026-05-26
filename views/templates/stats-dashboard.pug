@@ -26,6 +26,17 @@ script#stats-dashboard(type='text/x-template').
         <span class="sidebar-label font-display font-bold text-white text-xs uppercase tracking-wide whitespace-nowrap">UA MFA</span>
       </div>
 
+      <!-- Badge de rôle (dot toujours visible + pill cachée en mode sidebar collapsed) -->
+      <div class="px-3 py-2 flex items-center gap-2 border-b border-white/10 flex-shrink-0 overflow-hidden" role="status" :aria-label="'Rôle : ' + (infos.role === 'admin' ? 'administrateur' : infos.role === 'manager' ? 'manager' : 'utilisateur')">
+        <span class="w-2 h-2 rounded-full flex-shrink-0"
+              :class="{ 'bg-ua-blue': infos.role === 'user', 'bg-ua-orange': infos.role === 'manager', 'bg-ua-crimson': infos.role === 'admin' }"
+              aria-hidden="true"></span>
+        <span class="sidebar-label inline-flex items-center text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 text-white whitespace-nowrap"
+              :class="{ 'bg-ua-blue': infos.role === 'user', 'bg-ua-orange': infos.role === 'manager', 'bg-ua-crimson': infos.role === 'admin' }">
+          {{infos.role === 'admin' ? 'Admin' : infos.role === 'manager' ? 'Manager' : 'Utilisateur'}}
+        </span>
+      </div>
+
       <nav class="flex-1 overflow-y-auto py-2 px-2" aria-label="Navigation principale">
         <ul class="space-y-1" role="list">
           <li>

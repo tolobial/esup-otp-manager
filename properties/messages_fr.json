@@ -99,7 +99,7 @@
         ]
       },
       "esupnfc": {
-        "name": "EsupNFC",
+        "name": "Ma carte UA",
         "description": "Méthode permettant de récupérer un code en badgeant la carte"
       },
       "webauthn": {
