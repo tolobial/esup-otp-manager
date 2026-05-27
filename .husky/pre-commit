@@ -1,0 +1,20 @@
+#!/usr/bin/env sh
+
+# ────────────────────────────────────────────────────────────────────────
+# Auto-rebuild Tailwind si des sources Pug ou CSS sont modifiées.
+# Le minifié `public/stylesheets/tailwind.css` est alors ajouté au commit
+# en cours, garantissant cohérence permanente source ↔ build.
+# ────────────────────────────────────────────────────────────────────────
+
+NEEDS_REBUILD=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '\.pug$|^src/styles/.*\.css$' | head -1)
+
+if [ -n "$NEEDS_REBUILD" ]; then
+  echo "🔨 Source Pug/CSS modifié ($NEEDS_REBUILD…) → rebuild Tailwind…"
+  npm run build:css
+  if [ $? -ne 0 ]; then
+    echo "❌ npm run build:css a échoué — commit annulé."
+    exit 1
+  fi
+  git add public/stylesheets/tailwind.css
+  echo "✅ public/stylesheets/tailwind.css ajouté au commit"
+fi

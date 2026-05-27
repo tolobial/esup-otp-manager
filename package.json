@@ -11,7 +11,8 @@
   "scripts": {
     "start": "node run",
     "build:css": "npx @tailwindcss/cli -i src/styles/tailwind.css -o public/stylesheets/tailwind.css --minify",
-    "watch:css": "npx @tailwindcss/cli -i src/styles/tailwind.css -o public/stylesheets/tailwind.css --watch"
+    "watch:css": "npx @tailwindcss/cli -i src/styles/tailwind.css -o public/stylesheets/tailwind.css --watch",
+    "prepare": "husky"
   },
   "dependencies": {
     "@coursetable/passport-cas": "floriannari/passport-cas#SLO_with_dist",
@@ -59,6 +60,7 @@
     "@types/passport": "x",
     "eslint": "10.x",
     "globals": "17.x",
+    "husky": "^9.1.7",
     "tailwindcss": "^4.3.0"
   }
 }
