@@ -9,3 +9,6 @@ npm-debug.log
 *.out
 /.settings/
 *.bak
+
+# Sauvegardes manuelles "*.pug.org" (générées en éditant un .pug avec un IDE Vim/Emacs)
+*.pug.org
