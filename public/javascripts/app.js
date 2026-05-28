@@ -1426,6 +1426,17 @@ Vue.createApp({
         pageTitle: 'Accueil',
         currentView: 'home',
         currentMethod: '',
+        openSection: 'preferences',  // 'preferences' | 'manager' | 'admin' | null
+        tutoLinks: {
+            totp: '',
+            push: '',
+            webauthn: '',
+            random_code_mail: '',
+            random_code: '',
+            bypass: '',
+            passcode_grid: '',
+            esupnfc: ''
+        },
         methods: {},
         user: {
             uid: '',
@@ -1477,6 +1488,15 @@ Vue.createApp({
             return methods
                 .filter(([_key, value]) => value.active && !value.askActivation)
                 .length > 0
+        },
+        availableMethodsCount: function() {
+            if (!this.methods) return 0;
+            const arr = Array.isArray(this.methods) ? this.methods : Object.values(this.methods);
+            return arr.filter(m => m && m.activate && m.authorize).length;
+        },
+        activeMethodsCount: function() {
+            if (!this.user || !this.user.methods) return 0;
+            return Object.values(this.user.methods).filter(m => m && m.active === true).length;
         }
     },
     created: async function() {
@@ -1513,6 +1533,21 @@ Vue.createApp({
                 }
             }
 
+        },
+
+        toggleSection: function(name) {
+            this.openSection = this.openSection === name ? null : name;
+        },
+
+        handleDockHover: function(event) {
+            const icon = event.currentTarget;
+            const rect = icon.getBoundingClientRect();
+            const ratio = (event.clientX - rect.left) / rect.width;
+            const shift = ((Math.min(1, Math.max(0, ratio)) - 0.5) * 6).toFixed(1);
+            icon.style.setProperty('--dock-shift', shift + 'px');
+        },
+        resetDockHover: function(event) {
+            event.currentTarget.style.removeProperty('--dock-shift');
         },
 
         navigate: function(event) {
