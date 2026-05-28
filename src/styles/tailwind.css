@@ -109,6 +109,52 @@ body:has([data-tw]) main > .container {
   display: none;
 }
 
+/* ===== Rail extensible : masquage des labels nav en mode rail ===== */
+[data-tw]:not(:has(#sidebar-toggle:checked)) .sidebar .lbl,
+[data-tw]:not(:has(#sidebar-toggle:checked)) .sidebar .ua-nav-count,
+[data-tw]:not(:has(#sidebar-toggle:checked)) .sidebar .ua-nav-arr,
+[data-tw]:not(:has(#sidebar-toggle:checked)) .sidebar .ua-nav-back span {
+  opacity: 0;
+  display: none;
+}
+[data-tw]:not(:has(#sidebar-toggle:checked)) .sidebar .ua-nav-item,
+[data-tw]:not(:has(#sidebar-toggle:checked)) .sidebar .ua-nav-drill,
+[data-tw]:not(:has(#sidebar-toggle:checked)) .sidebar .ua-nav-back {
+  justify-content: center;
+}
+
+/* ===== Déploiement au survol (souris) ou focus clavier ===== */
+@media (hover: hover) {
+  [data-tw]:not(:has(#sidebar-toggle:checked)) .sidebar:hover,
+  [data-tw]:not(:has(#sidebar-toggle:checked)) .sidebar:focus-within {
+    width: 16rem;
+  }
+  [data-tw]:not(:has(#sidebar-toggle:checked)) .sidebar:hover .sidebar-label,
+  [data-tw]:not(:has(#sidebar-toggle:checked)) .sidebar:focus-within .sidebar-label,
+  [data-tw]:not(:has(#sidebar-toggle:checked)) .sidebar:hover .lbl,
+  [data-tw]:not(:has(#sidebar-toggle:checked)) .sidebar:focus-within .lbl,
+  [data-tw]:not(:has(#sidebar-toggle:checked)) .sidebar:hover .ua-nav-back span,
+  [data-tw]:not(:has(#sidebar-toggle:checked)) .sidebar:focus-within .ua-nav-back span {
+    opacity: 1;
+    display: inline;
+  }
+  [data-tw]:not(:has(#sidebar-toggle:checked)) .sidebar:hover .ua-nav-count,
+  [data-tw]:not(:has(#sidebar-toggle:checked)) .sidebar:focus-within .ua-nav-count,
+  [data-tw]:not(:has(#sidebar-toggle:checked)) .sidebar:hover .ua-nav-arr,
+  [data-tw]:not(:has(#sidebar-toggle:checked)) .sidebar:focus-within .ua-nav-arr {
+    opacity: 1;
+    display: inline-flex;
+  }
+  [data-tw]:not(:has(#sidebar-toggle:checked)) .sidebar:hover .ua-nav-item,
+  [data-tw]:not(:has(#sidebar-toggle:checked)) .sidebar:focus-within .ua-nav-item,
+  [data-tw]:not(:has(#sidebar-toggle:checked)) .sidebar:hover .ua-nav-drill,
+  [data-tw]:not(:has(#sidebar-toggle:checked)) .sidebar:focus-within .ua-nav-drill,
+  [data-tw]:not(:has(#sidebar-toggle:checked)) .sidebar:hover .ua-nav-back,
+  [data-tw]:not(:has(#sidebar-toggle:checked)) .sidebar:focus-within .ua-nav-back {
+    justify-content: flex-start;
+  }
+}
+
 @layer components {
   .ua-dock { display: flex; align-items: flex-end; justify-content: center; gap: 6px; padding: 28px 12px 12px; }
   .ua-dock-icon { position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px; width: 48px; cursor: pointer; text-decoration: none; transition: transform 160ms cubic-bezier(0.25,1,0.5,1); transform-origin: bottom center; color: var(--color-ua-navy); }
@@ -122,18 +168,11 @@ body:has([data-tw]) main > .container {
   .ua-dock-icon:hover .ua-dock-tip { opacity: 1; }
   .ua-dock-icon:hover .ua-dock-lbl { opacity: 1; }
 
-  .ua-nav-item { display:flex; align-items:center; gap:11px; padding:8px 10px; border-radius:3px; color:rgba(255,255,255,.62); font-size:13px; text-decoration:none; transition:background .15s,color .15s; }
+  .ua-nav-item { display:flex; align-items:center; gap:11px; padding:5px 10px; border-radius:3px; color:rgba(255,255,255,.62); font-size:13px; text-decoration:none; transition:background .15s,color .15s; }
   .ua-nav-item:hover { background:rgba(255,255,255,.06); color:#fff; }
   .ua-nav-item.active { background:rgba(255,255,255,.10); color:#fff; }
   .ua-nav-item svg { color:rgba(255,255,255,.5); transition:color .15s; flex-shrink:0; }
   .ua-nav-item.active svg { color:var(--color-ua-blue); }
-  .ua-nav-head { display:flex; align-items:center; gap:8px; width:100%; background:none; border:none; cursor:pointer; padding:8px 10px 6px; margin-top:14px; color:rgba(255,255,255,.4); font-size:10.5px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; transition:color .15s; }
-  .ua-nav-head:hover { color:rgba(255,255,255,.7); }
-  .ua-nav-head .chev { transition:transform .2s; flex-shrink:0; }
-  .ua-nav-head.closed .chev { transform:rotate(-90deg); }
-  .ua-nav-head .lbl { flex:1; text-align:left; }
-  .ua-nav-group { margin-left:18px; border-left:1px solid rgba(255,255,255,.08); padding-left:6px; display:flex; flex-direction:column; gap:1px; }
-  .ua-nav-group .ua-nav-item { font-size:12.5px; padding:7px 10px; }
   .ua-nav-count { font-size:10px; font-weight:700; letter-spacing:0; color:var(--color-ua-blue); background:rgba(0,160,220,.16); padding:1px 6px; border-radius:2px; }
   .ua-foot-id { display:flex; align-items:center; gap:11px; padding:10px 8px; border-top:1px solid rgba(255,255,255,.08); }
   .ua-foot-actions { display:flex; align-items:center; gap:6px; padding-top:8px; border-top:1px solid rgba(255,255,255,.07); }
@@ -143,6 +182,18 @@ body:has([data-tw]) main > .container {
   .ua-foot-act svg { flex-shrink:0; }
   .ua-foot-sep { width:1px; align-self:stretch; background:rgba(255,255,255,.1); }
   .ua-lang-on { color:var(--color-ua-blue); }
+
+  .ua-nav-rail { overflow-x:hidden; overflow-y:auto; }
+  .ua-nav-track { display:flex; width:200%; transition:transform .28s cubic-bezier(.4,0,.2,1); }
+  .ua-nav-track.level-sub { transform:translateX(-50%); }
+  .ua-nav-panel { width:50%; flex-shrink:0; }
+  .ua-nav-drill { width:100%; text-align:left; background:none; border:none; cursor:pointer; font:inherit; }
+  .ua-nav-arr { margin-left:6px; flex-shrink:0; color:rgba(255,255,255,.35); width:1rem; height:1rem; }
+  .ua-nav-back { display:flex; align-items:center; gap:9px; width:100%; padding:9px 10px; margin-bottom:4px; background:none; border:none; border-bottom:1px solid rgba(255,255,255,.08); color:rgba(255,255,255,.55); font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.07em; cursor:pointer; transition:color .15s; }
+  .ua-nav-back:hover { color:#fff; }
+  .ua-nav-back svg { flex-shrink:0; width:1.1rem; height:1.1rem; }
+  .ua-nav-dot { width:6px; height:6px; border-radius:50%; background:#34D399; margin-left:auto; flex-shrink:0; }
+  .ua-nav-item .lbl { flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 }
 
 /*

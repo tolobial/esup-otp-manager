@@ -1426,7 +1426,7 @@ Vue.createApp({
         pageTitle: 'Accueil',
         currentView: 'home',
         currentMethod: '',
-        openSection: 'preferences',  // 'preferences' | 'manager' | 'admin' | null
+        navLevel: 'root',  // 'root' | 'preferences' | 'manager' | 'admin'
         tutoLinks: {
             totp: '',
             push: '',
@@ -1535,8 +1535,11 @@ Vue.createApp({
 
         },
 
-        toggleSection: function(name) {
-            this.openSection = this.openSection === name ? null : name;
+        drillInto: function(level) {
+            this.navLevel = level;
+        },
+        drillBack: function() {
+            this.navLevel = 'root';
         },
 
         handleDockHover: function(event) {
