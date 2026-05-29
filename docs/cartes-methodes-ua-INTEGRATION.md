@@ -53,7 +53,11 @@ var Home = Vue.extend({
             homeView: (function () { try { return localStorage.getItem('ua-home-view') || 'grid'; } catch (e) { return 'grid'; } })(),
             fanActive: 0,
             fanMode: 'fan',     // 'fan' | 'pairs'
-            _fanIdle: null
+            _fanIdle: null,
+            fanHover: false,
+            fanInterval: 3000,      // vitesse du défilement (ms entre 2 cartes)
+            fanIdleDelay: 10000,    // délai de survol avant passage en 2 colonnes
+            _fanAuto: null
         };
     },
 
@@ -67,14 +71,44 @@ var Home = Vue.extend({
         }
     },
 
+    // démarre/arrête le défilement quand on bascule fan <-> pairs
+    watch: {
+        fanMode: function (m) {
+            if (m === 'pairs') this.fanAutoStop();
+            else if (!this.fanHover) this.fanAutoStart();
+        }
+    },
+    mounted: function () { this.fanAutoStart(); },
+    beforeUnmount: function () { this.fanAutoStop(); this.fanClearIdle(); },
+
     methods: {
         // --- TON EXISTANT : garde-le tel quel ---
         navigate: function (name) { document.getElementById(name).click(); },
 
         // --- NOUVEAU : vue éventail ---
+        fanReducedMotion: function () {
+            try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; }
+            catch (e) { return false; }
+        },
+        fanAutoStart: function () {
+            // défile uniquement si vue 'fan' ET mode 'fan' ET pas de survol ET mouvement autorisé
+            this.fanAutoStop();
+            if (this.homeView !== 'fan' || this.fanMode !== 'fan') return;
+            if (this.fanHover || this.fanReducedMotion()) return;
+            if (this.visibleMethods.length < 2) return;
+            var self = this;
+            this._fanAuto = setInterval(function () {
+                var n = self.visibleMethods.length;
+                self.fanActive = (self.fanActive + 1) % n;
+            }, this.fanInterval);
+        },
+        fanAutoStop: function () {
+            if (this._fanAuto) { clearInterval(this._fanAuto); this._fanAuto = null; }
+        },
         setHomeView: function (v) {
             this.homeView = v;
             try { localStorage.setItem('ua-home-view', v); } catch (e) {}
+            if (v === 'fan') this.fanAutoStart(); else this.fanAutoStop();
         },
         fanColor: function (i) { return ['bleu', 'navy', 'warm'][i % 3]; },
         fanOff: function (i) {
@@ -105,13 +139,29 @@ var Home = Vue.extend({
         fanNext: function () { if (this.fanMode === 'fan') { var n = this.visibleMethods.length; this.fanActive = (this.fanActive + 1) % n; } },
         onCardClick: function (i, method) {
             // carte centrale (ou mode "par 2") => on ouvre la méthode ; sinon on la met au centre
+            this.fanClearIdle();
             if (this.fanMode === 'pairs' || this.fanOff(i) === 0) this.navigate(method.name);
             else this.fanGo(i);
         },
         fanToggleMode: function () { this.fanClearIdle(); this.fanMode = this.fanMode === 'fan' ? 'pairs' : 'fan'; },
-        fanStartIdle: function () { this.fanClearIdle(); if (this.fanMode === 'fan') { var self = this; this._fanIdle = setTimeout(function () { self.fanMode = 'pairs'; }, 5000); } },
+        fanStartIdle: function () {
+            // mouseenter : on stoppe le défilement et on arme le minuteur d'inactivité
+            this.fanHover = true;
+            this.fanAutoStop();
+            this.fanClearIdle();
+            if (this.fanMode === 'fan') {
+                var self = this;
+                this._fanIdle = setTimeout(function () { self.fanMode = 'pairs'; }, this.fanIdleDelay);
+            }
+        },
         fanClearIdle: function () { if (this._fanIdle) { clearTimeout(this._fanIdle); this._fanIdle = null; } },
-        fanLeave: function () { this.fanClearIdle(); if (this.fanMode === 'pairs') this.fanMode = 'fan'; }
+        fanLeave: function () {
+            // mouseleave : on annule le minuteur, on revient à l'éventail et on reprend le défilement
+            this.fanHover = false;
+            this.fanClearIdle();
+            if (this.fanMode === 'pairs') this.fanMode = 'fan';
+            this.fanAutoStart();
+        }
     },
 
     template: '#home-dashboard'
@@ -221,8 +271,10 @@ de simples nombres en millisecondes, modifiables sans rien casser :
 - `fanInterval: 3000` → vitesse du défilement automatique (ms entre deux cartes).
 - `fanIdleDelay: 10000` → délai de survol avant le passage en 2 colonnes.
 
-Pour que le second soit éditable au même endroit, déclare `fanIdleDelay: 10000` dans
-`data()` et utilise `this.fanIdleDelay` (au lieu du `10000` en dur) dans `fanStartIdle`.
+Les deux sont déjà lus depuis `data()` (`this.fanInterval` dans `fanAutoStart`,
+`this.fanIdleDelay` dans `fanStartIdle`) : il suffit de changer le nombre, sans toucher
+aux méthodes. Mettre `prefers-reduced-motion` côté OS désactive automatiquement le
+défilement (via `fanReducedMotion`).
 
 La vitesse de rotation du spot lumineux est, elle, dans
 `public/stylesheets/ua-cartes-methodes.css` : `animation: ua-rotbd 3.5s` (baisse la
