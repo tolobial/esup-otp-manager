@@ -1,0 +1,84 @@
+/* ============================================================
+   Cartes méthodes UA — vue « éventail » (vitrine)
+   À charger APRÈS Materialize / Tailwind.
+   Tout est préfixé .ua- pour ne rien percuter d'existant.
+   Charte UA : grenat #9B1E21, nectar #CC5717, lagon #00A0DC,
+               outremer #202E56, dégradé indigo #1107A0.
+   ============================================================ */
+
+@property --ua-bd { syntax: "<angle>"; initial-value: 0deg; inherits: false; }
+
+:root{
+  --ua-navy:#202E56; --ua-indigo:#1107A0; --ua-lagon:#00A0DC;
+  --ua-grenat:#9B1E21; --ua-nectar:#CC5717;
+}
+
+/* --- Sélecteur de vue (grille / éventail) --- */
+.ua-view-switch{display:inline-flex;gap:4px;background:#eef0f5;border-radius:999px;padding:4px;margin-bottom:16px}
+.ua-view-switch button{border:none;background:transparent;font:inherit;font-size:13px;font-weight:600;
+  color:#64708f;padding:6px 16px;border-radius:999px;cursor:pointer;transition:.2s}
+.ua-view-switch button.active{background:#fff;color:var(--ua-navy);box-shadow:0 1px 2px rgba(0,0,0,.12)}
+
+/* --- Zone éventail --- */
+.ua-fan-zone{margin-top:8px}
+.ua-fan-controls{display:flex;justify-content:center;margin-bottom:10px}
+.ua-fan-btn{border:1px solid #cfd6e4;background:#fff;color:var(--ua-navy);font:inherit;font-weight:600;
+  font-size:13px;border-radius:999px;padding:8px 16px;cursor:pointer;transition:.2s}
+.ua-fan-btn:hover{background:#f3f5fa}
+
+.ua-fan-stage{position:relative;height:440px;perspective:1300px;transition:height .55s cubic-bezier(.2,.8,.2,1)}
+.ua-fan-stage.pairs{height:820px}
+.ua-fan{position:absolute;inset:0}
+
+.ua-slot{position:absolute;left:50%;top:50%;width:360px;height:168px;
+  transition:transform .55s cubic-bezier(.2,.8,.2,1),opacity .5s;will-change:transform}
+.ua-slot:hover{z-index:300 !important}
+.ua-inner{position:absolute;inset:0;transform-origin:center;transition:transform .4s cubic-bezier(.2,.8,.2,1)}
+.ua-slot:hover .ua-inner{transform:scale(1.08)}
+
+/* spot de lumière blanc rotatif */
+.ua-spot{position:absolute;inset:-3px;border-radius:23px;z-index:0;opacity:0;transition:opacity .3s;pointer-events:none;
+  filter:blur(.7px);
+  background:conic-gradient(from var(--ua-bd),
+    rgba(255,255,255,.05) 0deg 250deg,
+    rgba(255,255,255,.9) 305deg, #fff 320deg, rgba(255,255,255,.9) 335deg,
+    rgba(255,255,255,.05) 360deg);
+  animation:ua-rotbd 3.5s linear infinite}
+.ua-slot:hover .ua-spot{opacity:1}
+
+.ua-card{position:absolute;inset:0;z-index:1;border-radius:20px;color:#fff;cursor:pointer;overflow:hidden;
+  display:flex;align-items:center;gap:18px;padding:18px 24px;
+  box-shadow:0 8px 22px rgba(0,0,0,.28);transition:box-shadow .35s}
+.ua-slot:hover .ua-card{box-shadow:0 28px 64px rgba(0,0,0,.5)}
+.ua-card::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(120deg,rgba(255,255,255,.10),transparent 45%)}
+.ua-card.g-bleu{background:linear-gradient(150deg,var(--ua-lagon),var(--ua-indigo))}
+.ua-card.g-navy{background:linear-gradient(150deg,var(--ua-navy),var(--ua-indigo))}
+.ua-card.g-warm{background:linear-gradient(150deg,var(--ua-grenat),var(--ua-nectar))}
+
+.ua-ic{flex:0 0 auto;width:66px;height:66px;border-radius:16px;background:rgba(255,255,255,.16);
+  display:flex;align-items:center;justify-content:center}
+.ua-ic img{width:42px;height:42px}            /* met à l'échelle ton method-icon (SVG) */
+.ua-meta{flex:1;min-width:0}
+.ua-meta h3{font-weight:700;font-size:18px;line-height:1.15;margin:0}
+.ua-meta p{font-size:13.5px;color:rgba(255,255,255,.85);margin:4px 0 0;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ua-badge{flex:0 0 auto;align-self:flex-start;font-size:11px;font-weight:700;padding:4px 10px;border-radius:999px;
+  background:rgba(255,255,255,.16);color:#fff}
+.ua-badge.on{background:rgba(90,230,170,.24);color:#d3ffe9}
+
+.ua-fan-nav{display:flex;align-items:center;justify-content:center;gap:16px;margin-top:14px}
+.ua-fan-nav>button{width:38px;height:38px;border-radius:50%;border:1px solid #cfd6e4;background:#fff;
+  color:var(--ua-navy);font-size:20px;line-height:1;cursor:pointer;transition:.2s}
+.ua-fan-nav>button:hover{background:#f3f5fa}
+.ua-fan-dots{display:flex;gap:8px}
+.ua-fan-dots button{width:8px;height:8px;padding:0;border:none;border-radius:50%;background:#c7cede;cursor:pointer;transition:.2s}
+.ua-fan-dots button.on{background:var(--ua-navy)}
+
+@keyframes ua-rotbd{to{--ua-bd:360deg}}
+
+@media (prefers-reduced-motion:reduce){
+  .ua-spot{animation:none}
+  .ua-slot:hover .ua-inner{transform:scale(1.03)}
+  .ua-slot,.ua-inner,.ua-fan-stage{transition-duration:.01ms}
+}

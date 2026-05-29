@@ -164,8 +164,14 @@ script#home-dashboard(type='text/x-template').
           </div>
         </div>
 
+        <!-- Sélecteur de vue : grille (gestion) / éventail (vitrine) -->
+        <div class="ua-view-switch">
+          <button type="button" @click="setHomeView('grid')" :class="{active: homeView === 'grid'}">Grille</button>
+          <button type="button" @click="setHomeView('fan')"  :class="{active: homeView === 'fan'}">Éventail</button>
+        </div>
+
         <!-- Grille des méthodes : 2 colonnes, cartes rectangulaires -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div v-if="homeView === 'grid'" class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <template v-for="method in methods">
             <div v-if="method.activate && method.authorize"
                  class="bg-white border shadow-md flex flex-row items-stretch transition-all duration-200 hover:shadow-xl hover:-translate-y-0.5 hover:border-ua-blue/50 cursor-pointer"
@@ -202,6 +208,51 @@ script#home-dashboard(type='text/x-template').
               </div>
             </div>
           </template>
+        </div>
+
+        <!-- Modèle 2 : éventail vitrine -->
+        <div v-else class="ua-fan-zone">
+
+          <div class="ua-fan-controls">
+            <button type="button" class="ua-fan-btn" @click="fanToggleMode">
+              {{ fanMode === 'fan' ? 'Aligner par 2' : "Revenir à l'éventail" }}
+            </button>
+          </div>
+
+          <div class="ua-fan-stage" :class="{pairs: fanMode === 'pairs'}"
+               @mouseenter="fanStartIdle" @mouseleave="fanLeave">
+            <div class="ua-fan">
+              <div v-for="(method, i) in visibleMethods" :key="method.name"
+                   class="ua-slot" :style="fanSlotStyle(i)">
+                <div class="ua-inner">
+                  <span class="ua-spot"></span>
+                  <div class="ua-card" :class="'g-' + fanColor(i)" @click="onCardClick(i, method)">
+                    <div class="ua-ic"><method-icon :name="method.name" :size="'8'"></method-icon></div>
+                    <div class="ua-meta">
+                      <h3>{{ method.label || method.name }}</h3>
+                      <p>{{ messages.api.home[method.name] }}</p>
+                    </div>
+                    <span class="ua-badge"
+                          :class="{ on: user.methods[method.name] && user.methods[method.name].active }">
+                      {{ (user.methods[method.name] && user.methods[method.name].active)
+                          ? messages.api.home.activated : messages.api.home.deactivated }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="ua-fan-nav">
+            <button type="button" @click="fanPrev" aria-label="Précédent">‹</button>
+            <span class="ua-fan-dots">
+              <button v-for="(method, i) in visibleMethods" :key="'dot-' + method.name"
+                      type="button" :class="{ on: fanOff(i) === 0 }"
+                      @click="fanGo(i)" :aria-label="method.label || method.name"></button>
+            </span>
+            <button type="button" @click="fanNext" aria-label="Suivant">›</button>
+          </div>
+
         </div>
 
         <p class="text-gray-400 text-xs mt-4">{{messages.api.home.note}}</p>

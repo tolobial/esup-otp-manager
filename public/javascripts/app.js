@@ -1391,6 +1391,24 @@ const Home = {
         'methods': Object,
         'user': Object,
     },
+    data: function () {
+        return {
+            // 'grid' (gestion, défaut) | 'fan' (vitrine)
+            homeView: (function () { try { return localStorage.getItem('ua-home-view') || 'grid'; } catch (e) { return 'grid'; } })(),
+            fanActive: 0,
+            fanMode: 'fan',     // 'fan' | 'pairs'
+            _fanIdle: null
+        };
+    },
+    computed: {
+        // méthodes visibles, sous forme de tableau (indices stables pour l'éventail)
+        visibleMethods: function () {
+            var m = this.methods;
+            return Object.keys(m)
+                .filter(function (k) { return m[k].activate && m[k].authorize; })
+                .map(function (k) { return m[k]; });
+        }
+    },
     methods: {
         navigate: function (target) {
             // Accepte une chaîne (cartes : @click="navigate(method.name)")
@@ -1411,6 +1429,48 @@ const Home = {
                 target: { name, text: this.messages?.api?.menu?.[name] || name }
             });
         },
+
+        // --- Vue éventail (vitrine) ---
+        setHomeView: function (v) {
+            this.homeView = v;
+            try { localStorage.setItem('ua-home-view', v); } catch (e) {}
+        },
+        fanColor: function (i) { return ['bleu', 'navy', 'warm'][i % 3]; },
+        fanOff: function (i) {
+            var n = this.visibleMethods.length;
+            var r = i - this.fanActive;
+            var alt = r > 0 ? r - n : r + n;
+            return Math.abs(alt) < Math.abs(r) ? alt : r;
+        },
+        fanSlotStyle: function (i) {
+            var W = 360, H = 168, maxOff = 2, spacing = 152, step = 10, depth = 140;
+            if (this.fanMode === 'pairs') {
+                var n = this.visibleMethods.length, rows = Math.ceil(n / 2);
+                var r = Math.floor(i / 2), c = i % 2, last = (i === n - 1 && n % 2 === 1);
+                var x = last ? 0 : (c === 0 ? -(W / 2 + 11) : (W / 2 + 11));
+                var y = (r - (rows - 1) / 2) * (H + 22);
+                return { transform: 'translate(-50%,-50%) translateX(' + x + 'px) translateY(' + y + 'px) scale(1)', opacity: 1, zIndex: 10, pointerEvents: 'auto' };
+            }
+            var o = this.fanOff(i), a = Math.abs(o), vis = a <= maxOff, lift = o === 0 ? -14 : 0;
+            return {
+                transform: 'translate(-50%,-50%) translateX(' + (o * spacing) + 'px) translateY(' + (a * 8 + lift) + 'px) translateZ(' + (-a * depth) + 'px) rotateZ(' + (o * step) + 'deg) scale(' + (o === 0 ? 1 : 0.9) + ')',
+                opacity: vis ? 1 : 0,
+                zIndex: 100 - a,
+                pointerEvents: vis ? 'auto' : 'none'
+            };
+        },
+        fanGo: function (i) { if (this.fanMode === 'fan') this.fanActive = i; },
+        fanPrev: function () { if (this.fanMode === 'fan') { var n = this.visibleMethods.length; this.fanActive = (this.fanActive - 1 + n) % n; } },
+        fanNext: function () { if (this.fanMode === 'fan') { var n = this.visibleMethods.length; this.fanActive = (this.fanActive + 1) % n; } },
+        onCardClick: function (i, method) {
+            // carte centrale (ou mode "par 2") => on ouvre la méthode ; sinon on la met au centre
+            if (this.fanMode === 'pairs' || this.fanOff(i) === 0) this.navigate(method.name);
+            else this.fanGo(i);
+        },
+        fanToggleMode: function () { this.fanClearIdle(); this.fanMode = this.fanMode === 'fan' ? 'pairs' : 'fan'; },
+        fanStartIdle: function () { this.fanClearIdle(); if (this.fanMode === 'fan') { var self = this; this._fanIdle = setTimeout(function () { self.fanMode = 'pairs'; }, 5000); } },
+        fanClearIdle: function () { if (this._fanIdle) { clearTimeout(this._fanIdle); this._fanIdle = null; } },
+        fanLeave: function () { this.fanClearIdle(); if (this.fanMode === 'pairs') this.fanMode = 'fan'; }
     },
     template: '#home-dashboard'
 };
