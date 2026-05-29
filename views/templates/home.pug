@@ -168,6 +168,7 @@ script#home-dashboard(type='text/x-template').
         <div class="ua-view-switch">
           <button type="button" @click="setHomeView('grid')" :class="{active: homeView === 'grid'}">Grille</button>
           <button type="button" @click="setHomeView('fan')"  :class="{active: homeView === 'fan'}">Éventail</button>
+          <button type="button" @click="setHomeView('bento')" :class="{active: homeView === 'bento'}">Bento</button>
         </div>
 
         <!-- Grille des méthodes : 2 colonnes, cartes rectangulaires -->
@@ -211,7 +212,7 @@ script#home-dashboard(type='text/x-template').
         </div>
 
         <!-- Modèle 2 : éventail vitrine -->
-        <div v-else class="ua-fan-zone">
+        <div v-else-if="homeView === 'fan'" class="ua-fan-zone">
 
           <div class="ua-fan-controls">
             <button type="button" class="ua-fan-btn" @click="fanToggleMode">
@@ -253,6 +254,49 @@ script#home-dashboard(type='text/x-template').
             <button type="button" @click="fanNext" aria-label="Suivant">›</button>
           </div>
 
+        </div>
+
+        <!-- Modèle 3 : bento (clic = aperçu en modal) -->
+        <div v-else-if="homeView === 'bento'" class="grid grid-cols-2 md:grid-cols-4 gap-3" style="grid-auto-rows: 7rem;">
+          <div v-for="(method, i) in visibleMethods" :key="method.name"
+               class="bg-white border shadow-sm flex flex-col justify-between p-3 cursor-pointer transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 hover:border-ua-blue/50"
+               :class="user.methods[method.name]?.active ? 'border-gray-300' : 'border-gray-200 opacity-75 hover:opacity-100'"
+               :style="bentoSpan(i)"
+               @click="openBento(method)">
+            <div class="flex items-start justify-between">
+              <method-icon :name="method.name" :size="'8'" :class="user.methods[method.name]?.active ? 'text-ua-blue' : 'text-gray-400'" />
+              <svg class="w-4 h-4 text-gray-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15"/></svg>
+            </div>
+            <div>
+              <h3 class="font-semibold text-ua-navy text-sm leading-tight">{{method.label || method.name}}</h3>
+              <span class="inline-block mt-1 text-xs font-semibold px-2 py-0.5"
+                    :class="user.methods[method.name]?.active ? 'bg-blue-50 text-ua-navy' : 'bg-slate-100 text-slate-500'">
+                {{user.methods[method.name]?.active ? messages.api.home.activated : messages.api.home.deactivated}}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Modal aperçu (vue bento) -->
+        <div v-if="bentoSelected" class="fixed inset-0 z-50 flex items-center justify-center bg-ua-navy/60 p-4" @click.self="closeBento">
+          <div class="bg-white shadow-xl w-full max-w-md p-6 relative">
+            <button type="button" class="absolute top-3 right-3 text-gray-400 hover:text-ua-navy transition-colors" @click="closeBento" aria-label="Fermer">
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+            </button>
+            <div class="flex flex-col items-center text-center">
+              <div class="w-16 h-16 flex items-center justify-center mb-3"
+                   :class="user.methods[bentoSelected.name]?.active ? 'bg-ua-navy' : 'bg-gray-100'">
+                <method-icon :name="bentoSelected.name" :size="'8'" :class="user.methods[bentoSelected.name]?.active ? 'text-ua-blue' : 'text-gray-400'" />
+              </div>
+              <h3 class="font-display font-bold text-xl text-ua-navy uppercase tracking-wide">{{bentoSelected.label || bentoSelected.name}}</h3>
+              <p class="text-gray-500 text-sm mt-1">{{messages.api.home[bentoSelected.name]}}</p>
+              <span class="mt-3 text-xs font-semibold px-2 py-0.5"
+                    :class="user.methods[bentoSelected.name]?.active ? 'bg-blue-50 text-ua-navy' : 'bg-slate-100 text-slate-500'">
+                {{user.methods[bentoSelected.name]?.active ? messages.api.home.activated : messages.api.home.deactivated}}
+              </span>
+              <button type="button" class="mt-5 w-full bg-ua-blue hover:bg-ua-indigo text-white font-semibold py-2.5 transition-colors" @click="bentoManage">Gérer cette méthode</button>
+            </div>
+          </div>
         </div>
 
         <p class="text-gray-400 text-xs mt-4">{{messages.api.home.note}}</p>

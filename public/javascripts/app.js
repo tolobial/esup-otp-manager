@@ -1395,6 +1395,7 @@ const Home = {
         return {
             // 'grid' (gestion, défaut) | 'fan' (vitrine)
             homeView: (function () { try { return localStorage.getItem('ua-home-view') || 'grid'; } catch (e) { return 'grid'; } })(),
+            bentoSelected: null,
             fanActive: 0,
             fanMode: 'fan',     // 'fan' | 'pairs'
             _fanIdle: null,
@@ -1466,6 +1467,15 @@ const Home = {
             try { localStorage.setItem('ua-home-view', v); } catch (e) {}
             if (v === 'fan') this.fanAutoStart(); else this.fanAutoStop();
         },
+        // --- Vue bento (option B : aperçu en modal) ---
+        bentoSpan: function (i) {
+            var pattern = [ {c:2,r:2}, {c:2,r:1}, {c:1,r:1}, {c:1,r:1}, {c:2,r:1}, {c:1,r:1} ];
+            var p = pattern[i % pattern.length];
+            return { gridColumn: 'span ' + p.c, gridRow: 'span ' + p.r };
+        },
+        openBento: function (method) { this.bentoSelected = method; },
+        closeBento: function () { this.bentoSelected = null; },
+        bentoManage: function () { var m = this.bentoSelected; this.closeBento(); this.navigate(m.name); },
         fanColor: function (i) { return ['bleu', 'navy', 'warm'][i % 3]; },
         fanOff: function (i) {
             var n = this.visibleMethods.length;
