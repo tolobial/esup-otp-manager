@@ -895,6 +895,7 @@ const ManagerDashboard = {
         'methods': Object,
         'messages': Object,
         'infos': Object,
+        'user': Object,
     },
     components: {
         "user-view": UserView
@@ -994,7 +995,8 @@ const AdminDashboard = {
     props: {
         'messages': Object,
         'infos': Object,
-        'methods': Object
+        'methods': Object,
+        'user': Object,
     },
     template: '#admin-dashboard',
     methods: {
@@ -1080,6 +1082,7 @@ const StatsDashboard = {
         messages: Object,
         infos: Object,
         methods: Object,
+        user: Object,
     },
     data() {
         return {
