@@ -1513,6 +1513,17 @@ const Home = {
 
         animateKnob() {
             const target = this.weightedScore.pct;
+            // Rotation de l'aiguille vers l'angle final correspondant au pct
+            const body = document.querySelector('.knob-body');
+            if (body) {
+                const finalAngle = -135 + (target / 100) * 270;
+                // Reset à -135° puis transition vers la cible (forcer le replay)
+                body.style.transform = 'rotate(-135deg)';
+                // Petit délai pour que le navigateur applique le reset avant la cible
+                setTimeout(() => {
+                    body.style.transform = `rotate(${finalAngle}deg)`;
+                }, 50);
+            }
             const ACTIVE_TICKS = Math.round((target / 100) * 40);
             const ticks = this.$el?.querySelectorAll('.knob-svg .tick') || [];
             ticks.forEach(t => t.classList.remove('active'));
