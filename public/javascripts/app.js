@@ -679,12 +679,12 @@ const UserDashboard = {
                 if (!currentmethod) {
                     return;
                 }
-                if (this.user.methods[currentmethod].active) {
+                if (this.user.methods[currentmethod]?.active) {
                     return;
                 }
                 // avoid overwriting a method that may have been activated in the meantime (e.g., TOTP auto-activated with push)
                 await this.getAndSetUser();
-                if (this.user.methods[currentmethod].active) {
+                if (this.user.methods[currentmethod]?.active) {
                     return;
                 }
 
@@ -1545,6 +1545,13 @@ const Home = {
             // ou un événement DOM (sidebar : @click="navigate").
             const name = typeof target === 'string' ? target : target?.target?.name;
             if (!name) return;
+
+            // Garde-fou : si la méthode n'est pas encore dans user.methods, l'initialiser
+            // évite le crash du watcher `currentmethod` (user-dashboard) qui lit
+            // user.methods[currentmethod].active sur un objet undefined.
+            if (this.user && this.user.methods && !this.user.methods[name]) {
+                this.user.methods[name] = { active: false };
+            }
 
             // Si une sidenav legacy avec id correspondant existe, on clique dessus
             // (compatibilité avec dashboard.pug Materialize encore en place)
