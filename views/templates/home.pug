@@ -133,36 +133,64 @@ script#home-dashboard(type='text/x-template').
           </p>
         </div>
 
-        <!-- Score de sécurité -->
-        <div class="bg-white border border-gray-300 shadow-sm p-4 mb-6 flex flex-col sm:flex-row sm:items-center gap-4">
-          <div class="flex items-center gap-4">
-            <div class="text-center">
-              <span class="font-display font-bold text-3xl text-ua-navy leading-none">{{Object.values(user.methods).filter(m => m.active).length}}</span>
-              <span class="font-display font-bold text-3xl text-gray-300 leading-none">/{{Object.keys(methods).filter(k => methods[k].activate && methods[k].authorize).length}}</span>
-              <p class="text-xs text-gray-400 font-semibold uppercase tracking-wide mt-0.5">{{messages.api.home.methods}}</p>
-            </div>
-            <div class="w-px h-12 bg-gray-200 hidden sm:block" aria-hidden="true"></div>
-            <div class="flex-1 min-w-0" style="min-width: 200px;">
-              <div class="flex items-center justify-between mb-1.5">
-                <span class="text-sm font-semibold text-ua-navy">Score de sécurité</span>
-                <span class="text-xs font-semibold"
-                      :class="Object.values(user.methods).filter(m => m.active).length <= 1 ? 'text-ua-crimson' : Object.values(user.methods).filter(m => m.active).length <= 2 ? 'text-ua-orange' : Object.values(user.methods).filter(m => m.active).length <= 4 ? 'text-ua-blue' : 'text-green-600'">
-                  {{Object.values(user.methods).filter(m => m.active).length === 0 ? 'Aucune' : Object.values(user.methods).filter(m => m.active).length <= 1 ? 'Faible' : Object.values(user.methods).filter(m => m.active).length <= 2 ? 'Moyen' : Object.values(user.methods).filter(m => m.active).length <= 4 ? 'Bon' : 'Élevé'}}
-                </span>
-              </div>
-              <div class="w-full bg-gray-100 h-1.5">
-                <div class="h-1.5 transition-all duration-500"
-                     :class="Object.values(user.methods).filter(m => m.active).length <= 1 ? 'bg-ua-crimson' : Object.values(user.methods).filter(m => m.active).length <= 2 ? 'bg-ua-orange' : Object.values(user.methods).filter(m => m.active).length <= 4 ? 'bg-ua-blue' : 'bg-green-500'"
-                     :style="{ width: (Object.values(user.methods).filter(m => m.active).length / Math.max(Object.keys(methods).filter(k => methods[k].activate && methods[k].authorize).length, 1) * 100) + '%' }"></div>
+        <!-- SCORE PANEL HERO -->
+        <section class="bg-white rounded-2xl shadow-xl p-10 mb-12 grid md:grid-cols-[280px_1fr] gap-10 items-center">
+
+          <!-- KNOB -->
+          <div class="knob-stage">
+            <div class="knob-glow"></div>
+            <svg class="knob-svg" viewBox="0 0 280 280"></svg>
+            <div class="knob-body">
+              <div class="knob-cap">
+                <div class="knob-indicator"></div>
               </div>
             </div>
+            <div class="knob-center-pct">
+              <span>{{ String(knobPct).padStart(3, '0') }}</span><span class="pct-sign">%</span>
+            </div>
           </div>
-          <!-- Conseil contextuel -->
-          <div v-if="Object.values(user.methods).filter(m => m.active).length < 2" class="flex items-start gap-2 sm:ml-auto bg-orange-50 border border-ua-orange/20 px-3 py-2 text-xs text-ua-navy max-w-xs">
-            <svg class="w-4 h-4 text-ua-orange flex-shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"/></svg>
-            <span>Activez au moins 2 méthodes pour garantir un accès de secours.</span>
+
+          <!-- NARRATION -->
+          <div>
+            <div class="score-eyebrow">
+              Score de sécurité pondéré ·
+              <span :class="weightedScore.objective ? 'eyebrow-ok' : 'eyebrow-warn'">
+                ✓ {{ weightedScore.count }} méthode<span v-if="weightedScore.count > 1">s</span> activée<span v-if="weightedScore.count > 1">s</span>
+              </span>
+            </div>
+
+            <h3 class="score-title">
+              Vous protégez votre compte au niveau
+              <span class="level-word" :style="{ color: weightedScore.color, borderColor: weightedScore.color }">{{ weightedScore.level }}</span>
+            </h3>
+
+            <p class="score-subtitle">
+              Le calcul retient les deux meilleurs facteurs activés. Total : <strong>{{ weightedScore.sum }}/55 points</strong>.
+            </p>
+
+            <!-- NEXT STEP CARD -->
+            <div v-if="nextLevelSuggestion" class="next-step">
+              <div class="ns-icon">
+                <method-icon :name="nextLevelSuggestion.name"></method-icon>
+              </div>
+              <div class="ns-body">
+                <div class="ns-label" v-if="nextLevelSuggestion.targetLevel">
+                  Pour passer au niveau {{ nextLevelSuggestion.targetLevel }}
+                </div>
+                <div class="ns-label" v-else>Pour améliorer votre niveau</div>
+                <p class="ns-text">
+                  Activez <strong>{{ methods[nextLevelSuggestion.name] && methods[nextLevelSuggestion.name].label || nextLevelSuggestion.name }}</strong> — vous gagnerez <strong>+{{ nextLevelSuggestion.gainPts }} points</strong>
+                </p>
+              </div>
+              <button class="cta-btn" @click="navigate(nextLevelSuggestion.name)">Configurer</button>
+            </div>
+
+            <!-- EXCELLENT MESSAGE (palier max atteint) -->
+            <div v-else-if="weightedScore.level === 'Excellent'" class="excellent-message">
+              ✓ Votre compte est protégé au maximum.
+            </div>
           </div>
-        </div>
+        </section>
 
         <!-- Sélecteur de vue : grille (gestion) / éventail (vitrine) -->
         <div class="ua-view-switch">

@@ -1414,7 +1414,8 @@ const Home = {
             fanHover: false,
             fanInterval: 3000,      // vitesse du défilement (ms entre 2 cartes)
             fanIdleDelay: 10000,    // délai de survol avant passage en 2 colonnes
-            _fanAuto: null
+            _fanAuto: null,
+            knobPct: 0
         };
     },
     computed: {
@@ -1479,11 +1480,57 @@ const Home = {
         fanMode: function (m) {
             if (m === 'pairs') this.fanAutoStop();
             else if (!this.fanHover) this.fanAutoStart();
+        },
+        'weightedScore.pct'() {
+            this.$nextTick(() => this.animateKnob());
         }
     },
-    mounted: function () { this.fanAutoStart(); },
+    mounted: function () { this.fanAutoStart(); this.$nextTick(() => this.initKnob()); },
     beforeUnmount: function () { this.fanAutoStop(); this.fanClearIdle(); },
     methods: {
+        initKnob() {
+            const svg = document.querySelector('.knob-svg');
+            if (!svg) return;
+            // Nettoie les ticks éventuellement déjà présents (cas re-init)
+            svg.querySelectorAll('.tick').forEach(t => t.remove());
+            const TOTAL_TICKS = 40, MIN_DEG = -135, MAX_DEG = 135;
+            const cx = 140, cy = 140, rInner = 118, rOuter = 132;
+            for (let i = 0; i <= TOTAL_TICKS; i++) {
+                const angle = MIN_DEG + (i / TOTAL_TICKS) * (MAX_DEG - MIN_DEG);
+                const rad = (angle - 90) * Math.PI / 180;
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', cx + Math.cos(rad) * rInner);
+                line.setAttribute('y1', cy + Math.sin(rad) * rInner);
+                line.setAttribute('x2', cx + Math.cos(rad) * rOuter);
+                line.setAttribute('y2', cy + Math.sin(rad) * rOuter);
+                line.setAttribute('stroke-width', 3);
+                line.setAttribute('stroke-linecap', 'round');
+                line.setAttribute('class', 'tick');
+                svg.appendChild(line);
+            }
+            this.animateKnob();
+        },
+
+        animateKnob() {
+            const target = this.weightedScore.pct;
+            const ACTIVE_TICKS = Math.round((target / 100) * 40);
+            const ticks = this.$el?.querySelectorAll('.knob-svg .tick') || [];
+            ticks.forEach(t => t.classList.remove('active'));
+            setTimeout(() => {
+                ticks.forEach((t, i) => {
+                    setTimeout(() => { if (i <= ACTIVE_TICKS) t.classList.add('active'); }, i * 35);
+                });
+            }, 300);
+            // Compteur animé
+            this.knobPct = 0;
+            if (target === 0) return;
+            const step = () => {
+                this.knobPct += 1;
+                if (this.knobPct < target) setTimeout(step, 1500 / target);
+            };
+            setTimeout(step, 300);
+        },
+
         methodState(name) {
             if (this.user?.methods?.[name]?.active) return 'on';
             return 'off';
