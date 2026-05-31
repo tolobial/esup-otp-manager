@@ -17,6 +17,53 @@
     }
   },
   "api": {
+
+    "score": {
+      "eyebrow": "Score de sécurité pondéré ·",
+      "method_activated_singular": "✓ %COUNT% méthode activée",
+      "method_activated_plural": "✓ %COUNT% méthodes activées",
+      "title_prefix": "Vous protégez votre compte au niveau",
+      "subtitle": "Le calcul retient les deux meilleurs facteurs activés. Total : <strong>%SUM%/55 points</strong>.",
+      "cta": "Configurer",
+      "excellent_message": "✓ Votre compte est protégé au maximum.",
+      "points": "points",
+      "next_step": {
+        "label_target": "Pour passer au niveau %TARGET_LEVEL%",
+        "label_default": "Pour améliorer votre niveau",
+        "text": "Activez <strong>%LABEL%</strong> — vous gagnerez <strong>+%GAIN_PTS% points</strong>"
+      },
+      "levels": {
+        "disabled": "Désactivé",
+        "weak": "Faible",
+        "medium": "Moyen",
+        "good": "Bon",
+        "excellent": "Excellent"
+      }
+    },
+    "groups": {
+      "recommended": "Méthodes recommandées",
+      "complementary": "Méthodes complémentaires",
+      "weak": "À éviter en méthode principale"
+    },
+    "themes": {
+      "grid": "Grille",
+      "fan": "Éventail",
+      "bento": "Bento",
+      "hero": "Hero"
+    },
+    "method_strength": {
+      "strong": "Forte",
+      "medium": "Moyenne",
+      "weak": "Faible"
+    },
+    "views": {
+      "fan_align_pairs": "Aligner par 2",
+      "fan_back_to_fan": "Revenir à l'éventail",
+      "prev": "Précédent",
+      "next": "Suivant",
+      "bento_manage": "Gérer cette méthode",
+      "bento_close": "Fermer"
+    },
     "methods": {
       "totp": {
         "name": "Code temporel (TOTP)",
@@ -127,7 +174,7 @@
       "activating": "Suivez les étapes ci-dessous pour finaliser l’activation",
       "note": "Dans vos préférences, nous vous conseillons fortement de paramétrer au moins 2 méthodes afin de pouvoir assurer la continuité d’utilisation des services numériques."
     },
-    "index": "Interface de gestion de l’authentification renforcée (multifacteur)",
+    "index": "sécuriser l’accès à vos données.",
     "action": {
       "connection": "Se connecter",
       "activate": "Activer",
@@ -156,7 +203,7 @@
         "confirm_delete": "Voulez vous vraiment supprimer %NAME% ?"
       }
     },
-    "title": "ESUP OTP Manager",
+    "title": "Manager des Facteurs d'Authentification",
     "menu": {
       "home": "Accueil",
       "preferences": "Préférences",

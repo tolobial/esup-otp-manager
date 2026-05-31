@@ -153,20 +153,18 @@ script#home-dashboard(type='text/x-template').
           <!-- NARRATION -->
           <div>
             <div class="score-eyebrow">
-              Score de sécurité pondéré ·
+              {{ messages.api.score.eyebrow }}
               <span :class="weightedScore.objective ? 'eyebrow-ok' : 'eyebrow-warn'">
-                ✓ {{ weightedScore.count }} méthode<span v-if="weightedScore.count > 1">s</span> activée<span v-if="weightedScore.count > 1">s</span>
+                {{ weightedScore.count === 1 ? tr('score.method_activated_singular', { COUNT: weightedScore.count }) : tr('score.method_activated_plural', { COUNT: weightedScore.count }) }}
               </span>
             </div>
 
             <h3 class="score-title">
-              Vous protégez votre compte au niveau
-              <span class="level-word" :style="{ color: weightedScore.color, borderColor: weightedScore.color }">{{ weightedScore.level }}</span>
+              {{ messages.api.score.title_prefix }}
+              <span class="level-word" :style="{ color: weightedScore.color, borderColor: weightedScore.color }">{{ messages.api.score.levels[weightedScore.levelKey] }}</span>
             </h3>
 
-            <p class="score-subtitle">
-              Le calcul retient les deux meilleurs facteurs activés. Total : <strong>{{ weightedScore.sum }}/55 points</strong>.
-            </p>
+            <p class="score-subtitle" v-html="tr('score.subtitle', { SUM: weightedScore.sum })"></p>
 
             <!-- NEXT STEP CARD -->
             <div v-if="nextLevelSuggestion" class="next-step">
@@ -174,30 +172,28 @@ script#home-dashboard(type='text/x-template').
                 <method-icon :name="nextLevelSuggestion.name"></method-icon>
               </div>
               <div class="ns-body">
-                <div class="ns-label" v-if="nextLevelSuggestion.targetLevel">
-                  Pour passer au niveau {{ nextLevelSuggestion.targetLevel }}
+                <div class="ns-label" v-if="nextLevelSuggestion.targetLevelKey">
+                  {{ tr('score.next_step.label_target', { TARGET_LEVEL: messages.api.score.levels[nextLevelSuggestion.targetLevelKey] }) }}
                 </div>
-                <div class="ns-label" v-else>Pour améliorer votre niveau</div>
-                <p class="ns-text">
-                  Activez <strong>{{ methods[nextLevelSuggestion.name] && methods[nextLevelSuggestion.name].label || nextLevelSuggestion.name }}</strong> — vous gagnerez <strong>+{{ nextLevelSuggestion.gainPts }} points</strong>
-                </p>
+                <div class="ns-label" v-else>{{ messages.api.score.next_step.label_default }}</div>
+                <p class="ns-text" v-html="tr('score.next_step.text', { LABEL: (methods[nextLevelSuggestion.name] && methods[nextLevelSuggestion.name].label) || nextLevelSuggestion.name, GAIN_PTS: nextLevelSuggestion.gainPts })"></p>
               </div>
-              <button class="cta-btn" @click="navigate(nextLevelSuggestion.name)">Configurer</button>
+              <button class="cta-btn" @click="navigate(nextLevelSuggestion.name)">{{ messages.api.score.cta }}</button>
             </div>
 
             <!-- EXCELLENT MESSAGE (palier max atteint) -->
-            <div v-else-if="weightedScore.level === 'Excellent'" class="excellent-message">
-              ✓ Votre compte est protégé au maximum.
+            <div v-else-if="weightedScore.levelKey === 'excellent'" class="excellent-message">
+              {{ messages.api.score.excellent_message }}
             </div>
           </div>
         </section>
 
         <!-- Sélecteur de vue : grille (gestion) / éventail (vitrine) -->
         <div class="ua-view-switch">
-          <button type="button" @click="setHomeView('grid')" :class="{active: homeView === 'grid'}">Grille</button>
-          <button type="button" @click="setHomeView('fan')"  :class="{active: homeView === 'fan'}">Éventail</button>
-          <button type="button" @click="setHomeView('bento')" :class="{active: homeView === 'bento'}">Bento</button>
-          <button type="button" @click="setHomeView('hero')" :class="{active: homeView === 'hero'}">Hero</button>
+          <button type="button" @click="setHomeView('grid')" :class="{active: homeView === 'grid'}">{{ messages.api.themes.grid }}</button>
+          <button type="button" @click="setHomeView('fan')"  :class="{active: homeView === 'fan'}">{{ messages.api.themes.fan }}</button>
+          <button type="button" @click="setHomeView('bento')" :class="{active: homeView === 'bento'}">{{ messages.api.themes.bento }}</button>
+          <button type="button" @click="setHomeView('hero')" :class="{active: homeView === 'hero'}">{{ messages.api.themes.hero }}</button>
         </div>
 
         <!-- Grille des méthodes : 2 colonnes, cartes rectangulaires -->
@@ -245,7 +241,7 @@ script#home-dashboard(type='text/x-template').
 
           <div class="ua-fan-controls">
             <button type="button" class="ua-fan-btn" @click="fanToggleMode">
-              {{ fanMode === 'fan' ? 'Aligner par 2' : "Revenir à l'éventail" }}
+              {{ fanMode === 'fan' ? messages.api.views.fan_align_pairs : messages.api.views.fan_back_to_fan }}
             </button>
           </div>
 
@@ -274,13 +270,13 @@ script#home-dashboard(type='text/x-template').
           </div>
 
           <div class="ua-fan-nav">
-            <button type="button" @click="fanPrev" aria-label="Précédent">‹</button>
+            <button type="button" @click="fanPrev" :aria-label="messages.api.views.prev">‹</button>
             <span class="ua-fan-dots">
               <button v-for="(method, i) in visibleMethods" :key="'dot-' + method.name"
                       type="button" :class="{ on: fanOff(i) === 0 }"
                       @click="fanGo(i)" :aria-label="method.label || method.name"></button>
             </span>
-            <button type="button" @click="fanNext" aria-label="Suivant">›</button>
+            <button type="button" @click="fanNext" :aria-label="messages.api.views.next">›</button>
           </div>
 
         </div>
@@ -311,7 +307,7 @@ script#home-dashboard(type='text/x-template').
 
           <!-- Groupe 1 : Méthodes recommandées -->
           <section>
-            <h3 class="section-title">Méthodes recommandées</h3>
+            <h3 class="section-title">{{ messages.api.groups.recommended }}</h3>
             <div class="methods-grid">
               <template v-for="name in methodGroups.recommended.filter(n => methods[n] && methods[n].activate && methods[n].authorize)" :key="name">
                 <div class="method-card"
@@ -321,10 +317,10 @@ script#home-dashboard(type='text/x-template').
                   <div class="method-body">
                     <div class="method-head">
                       <span class="method-name">{{ methods[name].label }}</span>
-                      <span class="method-strength strength-high">Forte</span>
+                      <span class="method-strength strength-high">{{ messages.api.method_strength.strong }}</span>
                     </div>
                     <p class="method-desc">{{ messages.api.home[name] }}</p>
-                    <div class="method-weight">{{ methodWeight(name) }} points</div>
+                    <div class="method-weight">{{ methodWeight(name) }} {{ messages.api.score.points }}</div>
                   </div>
                   <div class="tristate" :class="{ on: methodState(name) === 'on' }" aria-hidden="true">
                     <div class="switch"></div>
@@ -337,7 +333,7 @@ script#home-dashboard(type='text/x-template').
 
           <!-- Groupe 2 : Méthodes complémentaires -->
           <section>
-            <h3 class="section-title">Méthodes complémentaires</h3>
+            <h3 class="section-title">{{ messages.api.groups.complementary }}</h3>
             <div class="methods-grid">
               <template v-for="name in methodGroups.complementary.filter(n => methods[n] && methods[n].activate && methods[n].authorize)" :key="name">
                 <div class="method-card"
@@ -347,10 +343,10 @@ script#home-dashboard(type='text/x-template').
                   <div class="method-body">
                     <div class="method-head">
                       <span class="method-name">{{ methods[name].label }}</span>
-                      <span class="method-strength strength-medium">Moyenne</span>
+                      <span class="method-strength strength-medium">{{ messages.api.method_strength.medium }}</span>
                     </div>
                     <p class="method-desc">{{ messages.api.home[name] }}</p>
-                    <div class="method-weight">{{ methodWeight(name) }} points</div>
+                    <div class="method-weight">{{ methodWeight(name) }} {{ messages.api.score.points }}</div>
                   </div>
                   <div class="tristate" :class="{ on: methodState(name) === 'on' }" aria-hidden="true">
                     <div class="switch"></div>
@@ -363,7 +359,7 @@ script#home-dashboard(type='text/x-template').
 
           <!-- Groupe 3 : Méthodes à éviter -->
           <section>
-            <h3 class="section-title faible-group">À éviter en méthode principale</h3>
+            <h3 class="section-title faible-group">{{ messages.api.groups.weak }}</h3>
             <div class="methods-grid">
               <template v-for="name in methodGroups.weak.filter(n => methods[n] && methods[n].activate && methods[n].authorize)" :key="name">
                 <div class="method-card"
@@ -373,10 +369,10 @@ script#home-dashboard(type='text/x-template').
                   <div class="method-body">
                     <div class="method-head">
                       <span class="method-name">{{ methods[name].label }}</span>
-                      <span class="method-strength strength-low">Faible</span>
+                      <span class="method-strength strength-low">{{ messages.api.method_strength.weak }}</span>
                     </div>
                     <p class="method-desc">{{ messages.api.home[name] }}</p>
-                    <div class="method-weight">{{ methodWeight(name) }} points</div>
+                    <div class="method-weight">{{ methodWeight(name) }} {{ messages.api.score.points }}</div>
                   </div>
                   <div class="tristate" :class="{ on: methodState(name) === 'on' }" aria-hidden="true">
                     <div class="switch"></div>
@@ -392,7 +388,7 @@ script#home-dashboard(type='text/x-template').
         <!-- Modal aperçu (vue bento) -->
         <div v-if="bentoSelected" class="fixed inset-0 z-50 flex items-center justify-center bg-ua-navy/60 p-4" @click.self="closeBento">
           <div class="bg-white shadow-xl w-full max-w-md p-6 relative">
-            <button type="button" class="absolute top-3 right-3 text-gray-400 hover:text-ua-navy transition-colors" @click="closeBento" aria-label="Fermer">
+            <button type="button" class="absolute top-3 right-3 text-gray-400 hover:text-ua-navy transition-colors" @click="closeBento" :aria-label="messages.api.views.bento_close">
               <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
             </button>
             <div class="flex flex-col items-center text-center">
@@ -406,7 +402,7 @@ script#home-dashboard(type='text/x-template').
                     :class="user.methods[bentoSelected.name]?.active ? 'bg-blue-50 text-ua-navy' : 'bg-slate-100 text-slate-500'">
                 {{user.methods[bentoSelected.name]?.active ? messages.api.home.activated : messages.api.home.deactivated}}
               </span>
-              <button type="button" class="mt-5 w-full bg-ua-blue hover:bg-ua-indigo text-white font-semibold py-2.5 transition-colors" @click="bentoManage">Gérer cette méthode</button>
+              <button type="button" class="mt-5 w-full bg-ua-blue hover:bg-ua-indigo text-white font-semibold py-2.5 transition-colors" @click="bentoManage">{{ messages.api.views.bento_manage }}</button>
             </div>
           </div>
         </div>

@@ -17,6 +17,53 @@
     }
   },
   "api": {
+
+    "score": {
+      "eyebrow": "Weighted security score ·",
+      "method_activated_singular": "✓ %COUNT% method enabled",
+      "method_activated_plural": "✓ %COUNT% methods enabled",
+      "title_prefix": "You are protecting your account at level",
+      "subtitle": "The score keeps your two strongest enabled factors. Total: <strong>%SUM%/55 points</strong>.",
+      "cta": "Configure",
+      "excellent_message": "✓ Your account is protected at the maximum level.",
+      "points": "points",
+      "next_step": {
+        "label_target": "To reach level %TARGET_LEVEL%",
+        "label_default": "To improve your level",
+        "text": "Enable <strong>%LABEL%</strong> — you will gain <strong>+%GAIN_PTS% points</strong>"
+      },
+      "levels": {
+        "disabled": "Disabled",
+        "weak": "Weak",
+        "medium": "Medium",
+        "good": "Good",
+        "excellent": "Excellent"
+      }
+    },
+    "groups": {
+      "recommended": "Recommended methods",
+      "complementary": "Complementary methods",
+      "weak": "Avoid as primary method"
+    },
+    "themes": {
+      "grid": "Grid",
+      "fan": "Fan",
+      "bento": "Bento",
+      "hero": "Hero"
+    },
+    "method_strength": {
+      "strong": "Strong",
+      "medium": "Medium",
+      "weak": "Weak"
+    },
+    "views": {
+      "fan_align_pairs": "Align in pairs",
+      "fan_back_to_fan": "Back to fan",
+      "prev": "Previous",
+      "next": "Next",
+      "bento_manage": "Manage this method",
+      "bento_close": "Close"
+    },
     "methods": {
       "totp": {
         "name": "Timed password (TOTP)",
@@ -127,7 +174,7 @@
       "activating": "Follow the steps below to complete the activation process",
       "note": "Set up at least 2 methods among:"
     },
-    "index": "Multi-Factor Authentication Management Interface",
+    "index": "secure access to your data.",
     "action": {
       "connection": "Login",
       "activate": "Activate",
@@ -156,7 +203,7 @@
         "confirm_delete": "Do you really want to delete %NAME%?"
       }
     },
-    "title": "ESUP OTP Manager",
+    "title": "Manager des Facteurs d'Authentification",
     "menu": {
       "home": "Home",
       "preferences": "Preferences",

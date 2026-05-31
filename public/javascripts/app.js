@@ -1452,40 +1452,40 @@ const Home = {
                 .sort((a, b) => b - a).slice(0, 2);
             const sum = top2.reduce((s, w) => s + w, 0);
             const pct = Math.round((sum / 55) * 100);
-            let level = 'Désactivé', color = '#94a3b8';
+            let levelKey = 'disabled', color = '#94a3b8';
             if (active.length > 0) {
-                if (pct <= 30)      { level = 'Faible';    color = '#dc2626'; }
-                else if (pct <= 60) { level = 'Moyen';     color = '#CC5717'; }
-                else if (pct <= 89) { level = 'Bon';       color = '#00A0DC'; }
-                else                { level = 'Excellent'; color = '#16a34a'; }
+                if (pct <= 30)      { levelKey = 'weak';      color = '#dc2626'; }
+                else if (pct <= 60) { levelKey = 'medium';    color = '#CC5717'; }
+                else if (pct <= 89) { levelKey = 'good';      color = '#00A0DC'; }
+                else                { levelKey = 'excellent'; color = '#16a34a'; }
             }
-            return { pct, level, color, count: active.length, sum, objective: active.length >= 2 };
+            return { pct, levelKey, color, count: active.length, sum, objective: active.length >= 2 };
         },
 
         nextLevelSuggestion() {
-            if (this.weightedScore.level === 'Excellent') return null;
+            if (this.weightedScore.levelKey === 'excellent') return null;
             const activeNames = Object.entries(this.user?.methods || {})
                 .filter(([_, m]) => m?.active).map(([n]) => n);
             const inactive = Object.keys(METHOD_WEIGHTS).filter(n => !activeNames.includes(n));
             if (inactive.length === 0) return null;
-            const levels = ['Désactivé', 'Faible', 'Moyen', 'Bon', 'Excellent'];
-            const targetLevel = levels[levels.indexOf(this.weightedScore.level) + 1];
+            const levels = ['disabled', 'weak', 'medium', 'good', 'excellent'];
+            const targetLevelKey = levels[levels.indexOf(this.weightedScore.levelKey) + 1];
             let best = null;
             for (const name of inactive) {
                 const sim = [...activeNames, name].map(n => METHOD_WEIGHTS[n] || 0)
                     .sort((a, b) => b - a).slice(0, 2).reduce((s, w) => s + w, 0);
                 const pct = Math.round((sim / 55) * 100);
-                let lvl = 'Faible';
-                if (pct > 89) lvl = 'Excellent';
-                else if (pct > 60) lvl = 'Bon';
-                else if (pct > 30) lvl = 'Moyen';
-                if (lvl === targetLevel && (!best || METHOD_WEIGHTS[name] < best.gainPts)) {
-                    best = { name, gainPts: METHOD_WEIGHTS[name], targetLevel };
+                let lvl = 'weak';
+                if (pct > 89) lvl = 'excellent';
+                else if (pct > 60) lvl = 'good';
+                else if (pct > 30) lvl = 'medium';
+                if (lvl === targetLevelKey && (!best || METHOD_WEIGHTS[name] < best.gainPts)) {
+                    best = { name, gainPts: METHOD_WEIGHTS[name], targetLevelKey };
                 }
             }
             if (!best) {
                 const top = inactive.reduce((b, n) => METHOD_WEIGHTS[n] > METHOD_WEIGHTS[b] ? n : b);
-                best = { name: top, gainPts: METHOD_WEIGHTS[top], targetLevel: null };
+                best = { name: top, gainPts: METHOD_WEIGHTS[top], targetLevelKey: null };
             }
             return best;
         },
@@ -1567,6 +1567,14 @@ const Home = {
 
         methodWeight(name) {
             return METHOD_WEIGHTS[name] || 0;
+        },
+
+        // Résout une clé i18n sous messages.api (chemin pointé) + remplace les placeholders %TOKEN%.
+        tr(path, params) {
+            let s = path.split('.').reduce((o, k) => (o == null ? o : o[k]), this.messages?.api);
+            if (s == null) return path;
+            if (params) for (const k in params) s = s.split('%' + k + '%').join(params[k]);
+            return s;
         },
 
         navigate: function (target) {
