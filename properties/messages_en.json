@@ -18,6 +18,16 @@
   },
   "api": {
 
+    "deactivate": {
+      "confirm_title": "Deactivate this method?",
+      "confirm_html": "Do you really want to deactivate %LABEL%?",
+      "info": "You can re-activate it anytime from your preferences.",
+      "confirm_button": "Deactivate",
+      "error_title": "Deactivation failed",
+      "error_html": "Failed to deactivate %LABEL%. Please retry or contact your administrator.",
+      "toast_success": "Method deactivated"
+    },
+
     "score": {
       "eyebrow": "Weighted security score ·",
       "method_activated_singular": "✓ %COUNT% method enabled",

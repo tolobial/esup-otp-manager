@@ -18,6 +18,16 @@
   },
   "api": {
 
+    "deactivate": {
+      "confirm_title": "Désactiver cette méthode ?",
+      "confirm_html": "Voulez-vous vraiment désactiver %LABEL% ?",
+      "info": "Vous pourrez la réactiver à tout moment depuis vos préférences.",
+      "confirm_button": "Désactiver",
+      "error_title": "Désactivation impossible",
+      "error_html": "La désactivation de %LABEL% a échoué. Veuillez réessayer ou contacter votre administrateur.",
+      "toast_success": "Méthode désactivée"
+    },
+
     "score": {
       "eyebrow": "Score de sécurité pondéré ·",
       "method_activated_singular": "✓ %COUNT% méthode activée",

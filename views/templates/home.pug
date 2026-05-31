@@ -202,7 +202,7 @@ script#home-dashboard(type='text/x-template').
             <div v-if="method.activate && method.authorize"
                  class="bg-white border shadow-md flex flex-row items-stretch transition-all duration-200 hover:shadow-xl hover:-translate-y-0.5 hover:border-ua-blue/50 cursor-pointer"
                  :class="user.methods[method.name]?.active ? 'border-gray-300' : 'border-gray-200 opacity-75 hover:opacity-100'"
-                 @click="navigate(method.name)">
+                 @click="clickMethodCard(method.name)">
 
               <!-- Icône à gauche -->
               <div class="w-16 flex-shrink-0 flex items-center justify-center"
@@ -312,7 +312,7 @@ script#home-dashboard(type='text/x-template').
               <template v-for="name in methodGroups.recommended.filter(n => methods[n] && methods[n].activate && methods[n].authorize)" :key="name">
                 <div class="method-card"
                      :class="{ activated: methodState(name) === 'on' }"
-                     @click="navigate(name)">
+                     @click="clickMethodCard(name)">
                   <div class="method-icon"><method-icon :name="name"></method-icon></div>
                   <div class="method-body">
                     <div class="method-head">
@@ -338,7 +338,7 @@ script#home-dashboard(type='text/x-template').
               <template v-for="name in methodGroups.complementary.filter(n => methods[n] && methods[n].activate && methods[n].authorize)" :key="name">
                 <div class="method-card"
                      :class="{ activated: methodState(name) === 'on' }"
-                     @click="navigate(name)">
+                     @click="clickMethodCard(name)">
                   <div class="method-icon"><method-icon :name="name"></method-icon></div>
                   <div class="method-body">
                     <div class="method-head">
@@ -364,7 +364,7 @@ script#home-dashboard(type='text/x-template').
               <template v-for="name in methodGroups.weak.filter(n => methods[n] && methods[n].activate && methods[n].authorize)" :key="name">
                 <div class="method-card"
                      :class="{ activated: methodState(name) === 'on' }"
-                     @click="navigate(name)">
+                     @click="clickMethodCard(name)">
                   <div class="method-icon"><method-icon :name="name"></method-icon></div>
                   <div class="method-body">
                     <div class="method-head">

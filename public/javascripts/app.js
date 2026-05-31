@@ -786,9 +786,10 @@ const UserDashboard = {
                 throw err;
             });
         },
-        deactivate: function(method) {
-            if (this.user.methods[method].askActivation || window.confirm(this.messages.api.action.confirm_deactivate)) {
-                return fetchApi({
+        deactivate: async function(method) {
+            if (!(this.user.methods[method].askActivation || window.confirm(this.messages.api.action.confirm_deactivate))) return;
+            try {
+                return await fetchApi({
                     method: "PUT",
                     uri: this.formatApiUri("/" + method + "/deactivate"),
                     onSuccess: res => {
@@ -801,9 +802,21 @@ const UserDashboard = {
                             throw new Error("Erreur interne, veuillez réessayer plus tard.");
                         }
                     },
-                }).catch(err => {
-                    toast({ message: err, className: 'red darken-1' });
                 });
+            } catch (err) {
+                console.error('[deactivate] Échec', method, err);
+                const methodLabel = this.methods?.[method]?.label || method;
+                if (window.Swal) {
+                    await Swal.fire({
+                        icon: 'warning',
+                        title: this.messages.api.deactivate.error_title,
+                        html: this.messages.api.deactivate.error_html.split('%LABEL%').join(methodLabel),
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#202E56'
+                    });
+                } else {
+                    alert(this.messages.api.deactivate.error_html.split('%LABEL%').join(methodLabel));
+                }
             }
         },
         generateBypassConfirm : function(){
@@ -1577,6 +1590,77 @@ const Home = {
             return s;
         },
 
+        // Clic sur une carte de méthode (tous thèmes) : méthode active => proposer la
+        // désactivation via Swal ; sinon => configuration (navigate).
+        async clickMethodCard(name) {
+            if (!this.user?.methods?.[name]?.active) {
+                return this.navigate(name);
+            }
+            const methodLabel = (this.methods?.[name] && this.methods[name].label) || name;
+            if (!window.Swal) {
+                if (window.confirm(this.tr('deactivate.confirm_html', { LABEL: methodLabel }))) {
+                    await this.deactivate(name);
+                }
+                return;
+            }
+            const result = await Swal.fire({
+                icon: 'question',
+                title: this.tr('deactivate.confirm_title'),
+                html: this.tr('deactivate.confirm_html', { LABEL: methodLabel })
+                      + '<div class="swal-info-box">' + this.tr('deactivate.info') + '</div>',
+                showCancelButton: true,
+                customClass: { confirmButton: 'swal-btn-deactivate' },
+                confirmButtonText: this.tr('deactivate.confirm_button'),
+                cancelButtonText: this.tr('action.cancel')
+            });
+            if (result.isConfirmed) {
+                await this.deactivate(name);
+                // Toast de succès seulement si la désactivation a abouti (sinon deactivate a déjà
+                // affiché son Swal d'erreur et la méthode est restée active).
+                if (!this.user?.methods?.[name]?.active) {
+                    toast({ message: this.tr('deactivate.toast_success'), className: 'green darken-1' });
+                }
+            }
+        },
+
+        // Désactivation depuis la home (pas de window.confirm : la confirmation se fait en amont
+        // dans clickMethodCard). Même pattern try/catch + Swal d'erreur que activate().
+        async deactivate(name) {
+            try {
+                return await fetchApi({
+                    method: "PUT",
+                    uri: "/api/" + name + "/deactivate",
+                    onSuccess: res => {
+                        const data = res.data;
+                        if (data.code == "Ok") {
+                            if (this.user.methods[name]) {
+                                this.user.methods[name].askActivation = false;
+                                this.user.methods[name].active = false;
+                            }
+                            this.$root.getAndSetUser();
+                        } else {
+                            console.error(JSON.stringify({ code: data.code }));
+                            throw new Error("Erreur interne, veuillez réessayer plus tard.");
+                        }
+                    },
+                });
+            } catch (err) {
+                console.error('[deactivate] Échec', name, err);
+                const methodLabel = (this.methods?.[name] && this.methods[name].label) || name;
+                if (window.Swal) {
+                    await Swal.fire({
+                        icon: 'warning',
+                        title: this.tr('deactivate.error_title'),
+                        html: this.tr('deactivate.error_html', { LABEL: methodLabel }),
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#202E56'
+                    });
+                } else {
+                    alert(this.tr('deactivate.error_html', { LABEL: methodLabel }));
+                }
+            }
+        },
+
         navigate: function (target) {
             // Accepte une chaîne (cartes : @click="navigate(method.name)")
             // ou un événement DOM (sidebar : @click="navigate").
@@ -1636,7 +1720,7 @@ const Home = {
         },
         openBento: function (method) { this.bentoSelected = method; },
         closeBento: function () { this.bentoSelected = null; },
-        bentoManage: function () { var m = this.bentoSelected; this.closeBento(); this.navigate(m.name); },
+        bentoManage: function () { var m = this.bentoSelected; this.closeBento(); this.clickMethodCard(m.name); },
         fanColor: function (i) { return ['bleu', 'navy', 'warm'][i % 3]; },
         fanOff: function (i) {
             var n = this.visibleMethods.length;
@@ -1667,7 +1751,7 @@ const Home = {
         onCardClick: function (i, method) {
             // carte centrale (ou mode "par 2") => on ouvre la méthode ; sinon on la met au centre
             this.fanClearIdle();
-            if (this.fanMode === 'pairs' || this.fanOff(i) === 0) this.navigate(method.name);
+            if (this.fanMode === 'pairs' || this.fanOff(i) === 0) this.clickMethodCard(method.name);
             else this.fanGo(i);
         },
         fanToggleMode: function () { this.fanClearIdle(); this.fanMode = this.fanMode === 'fan' ? 'pairs' : 'fan'; },
