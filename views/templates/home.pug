@@ -197,6 +197,7 @@ script#home-dashboard(type='text/x-template').
           <button type="button" @click="setHomeView('grid')" :class="{active: homeView === 'grid'}">Grille</button>
           <button type="button" @click="setHomeView('fan')"  :class="{active: homeView === 'fan'}">Éventail</button>
           <button type="button" @click="setHomeView('bento')" :class="{active: homeView === 'bento'}">Bento</button>
+          <button type="button" @click="setHomeView('hero')" :class="{active: homeView === 'hero'}">Hero</button>
         </div>
 
         <!-- Grille des méthodes : 2 colonnes, cartes rectangulaires -->
@@ -303,6 +304,89 @@ script#home-dashboard(type='text/x-template').
               </span>
             </div>
           </div>
+        </div>
+
+        <!-- THÈME HERO : méthodes en 3 groupes -->
+        <div v-else-if="homeView === 'hero'" class="space-y-8 mt-8">
+
+          <!-- Groupe 1 : Méthodes recommandées -->
+          <section>
+            <h3 class="section-title">Méthodes recommandées</h3>
+            <div class="methods-grid">
+              <template v-for="name in methodGroups.recommended.filter(n => methods[n] && methods[n].activate && methods[n].authorize)" :key="name">
+                <div class="method-card"
+                     :class="{ activated: methodState(name) === 'on' }"
+                     @click="navigate(name)">
+                  <div class="method-icon"><method-icon :name="name"></method-icon></div>
+                  <div class="method-body">
+                    <div class="method-head">
+                      <span class="method-name">{{ methods[name].label }}</span>
+                      <span class="method-strength strength-high">Forte</span>
+                    </div>
+                    <p class="method-desc">{{ messages.api.home[name] }}</p>
+                    <div class="method-weight">{{ methodWeight(name) }} points</div>
+                  </div>
+                  <div class="tristate" :class="{ on: methodState(name) === 'on' }" aria-hidden="true">
+                    <div class="switch"></div>
+                    <span class="label">{{ methodState(name) === 'on' ? messages.api.home.activated : messages.api.home.deactivated }}</span>
+                  </div>
+                </div>
+              </template>
+            </div>
+          </section>
+
+          <!-- Groupe 2 : Méthodes complémentaires -->
+          <section>
+            <h3 class="section-title">Méthodes complémentaires</h3>
+            <div class="methods-grid">
+              <template v-for="name in methodGroups.complementary.filter(n => methods[n] && methods[n].activate && methods[n].authorize)" :key="name">
+                <div class="method-card"
+                     :class="{ activated: methodState(name) === 'on' }"
+                     @click="navigate(name)">
+                  <div class="method-icon"><method-icon :name="name"></method-icon></div>
+                  <div class="method-body">
+                    <div class="method-head">
+                      <span class="method-name">{{ methods[name].label }}</span>
+                      <span class="method-strength strength-medium">Moyenne</span>
+                    </div>
+                    <p class="method-desc">{{ messages.api.home[name] }}</p>
+                    <div class="method-weight">{{ methodWeight(name) }} points</div>
+                  </div>
+                  <div class="tristate" :class="{ on: methodState(name) === 'on' }" aria-hidden="true">
+                    <div class="switch"></div>
+                    <span class="label">{{ methodState(name) === 'on' ? messages.api.home.activated : messages.api.home.deactivated }}</span>
+                  </div>
+                </div>
+              </template>
+            </div>
+          </section>
+
+          <!-- Groupe 3 : Méthodes à éviter -->
+          <section>
+            <h3 class="section-title faible-group">À éviter en méthode principale</h3>
+            <div class="methods-grid">
+              <template v-for="name in methodGroups.weak.filter(n => methods[n] && methods[n].activate && methods[n].authorize)" :key="name">
+                <div class="method-card"
+                     :class="{ activated: methodState(name) === 'on' }"
+                     @click="navigate(name)">
+                  <div class="method-icon"><method-icon :name="name"></method-icon></div>
+                  <div class="method-body">
+                    <div class="method-head">
+                      <span class="method-name">{{ methods[name].label }}</span>
+                      <span class="method-strength strength-low">Faible</span>
+                    </div>
+                    <p class="method-desc">{{ messages.api.home[name] }}</p>
+                    <div class="method-weight">{{ methodWeight(name) }} points</div>
+                  </div>
+                  <div class="tristate" :class="{ on: methodState(name) === 'on' }" aria-hidden="true">
+                    <div class="switch"></div>
+                    <span class="label">{{ methodState(name) === 'on' ? messages.api.home.activated : messages.api.home.deactivated }}</span>
+                  </div>
+                </div>
+              </template>
+            </div>
+          </section>
+
         </div>
 
         <!-- Modal aperçu (vue bento) -->
