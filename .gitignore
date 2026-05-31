@@ -12,3 +12,9 @@ npm-debug.log
 
 # Sauvegardes manuelles "*.pug.org" (générées en éditant un .pug avec un IDE Vim/Emacs)
 *.pug.org
+
+# Claude Code (artefacts locaux : worktrees, mémoires, hooks)
+.claude/
+
+# Windows Zone.Identifier (fichiers fantômes WSL)
+*:Zone.Identifier

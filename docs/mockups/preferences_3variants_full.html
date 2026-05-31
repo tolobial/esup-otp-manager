@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Page complète - 3 variantes du score panel</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: linear-gradient(180deg, #e2e8f0 0%, #cbd5e1 100%);
+    color: #1e293b;
+    min-height: 100vh;
+  }
+  .container { max-width: 1180px; margin: 0 auto; padding: 48px 32px; }
+
+  /* Bande titre de variante */
+  .variant-strip {
+    background: linear-gradient(135deg, #202E56 0%, #2c4179 100%);
+    color: white;
+    border-radius: 14px;
+    padding: 16px 24px;
+    margin: 56px 0 28px;
+    display: flex; align-items: center; gap: 14px;
+    box-shadow: 0 6px 20px rgba(32,46,86,0.25);
+  }
+  .variant-strip:first-of-type { margin-top: 0; }
+  .variant-strip .v-num {
+    width: 32px; height: 32px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 16px;
+    border: 1px solid rgba(255,255,255,0.2);
+  }
+  .variant-strip h2 { margin: 0; font-size: 16px; font-weight: 700; letter-spacing: 0.02em; }
+  .variant-strip .v-desc { margin-left: 8px; font-size: 13px; opacity: 0.7; font-style: italic; }
+
+  /* HEADER CENTRÉ */
+  .page-header { text-align: center; margin-bottom: 36px; }
+  .page-header h1 { color: #202E56; font-size: 26px; font-weight: 700; letter-spacing: -0.01em; margin: 0 0 12px; }
+  .page-header p { color: #475569; font-size: 15px; line-height: 1.6; margin: 0 auto; max-width: 720px; }
+
+  /* KNOB shared */
+  .knob-stage { position: relative; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .knob-glow { position: absolute; border-radius: 50%; background: #CC5717; filter: blur(40px); opacity: 0; animation: glow-in 1.6s ease-out 0.3s forwards; }
+  @keyframes glow-in { to { opacity: 0.10; } }
+  .knob-svg { position: relative; }
+  .tick { transition: stroke 0.3s ease, filter 0.3s ease; stroke: #cbd5e1; }
+  .tick.active { stroke: #CC5717; filter: drop-shadow(0 0 3px rgba(204,87,23,0.45)); }
+  .knob-body {
+    position: absolute; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    transform: rotate(-135deg);
+    animation: knob-spin 1.8s cubic-bezier(0.22, 1, 0.36, 1) 0.3s forwards;
+    background: radial-gradient(circle at 30% 30%, #f8fafc 0%, #e2e8f0 70%);
+    border: 1px solid #cbd5e1;
+    box-shadow: 0 8px 24px rgba(15,23,42,0.15), inset 0 1px 2px rgba(255,255,255,0.9), inset 0 -2px 4px rgba(15,23,42,0.06);
+  }
+  @keyframes knob-spin { to { transform: rotate(-47deg); } }
+  .knob-cap {
+    width: 64%; height: 64%; border-radius: 50%;
+    position: relative; display: flex; align-items: center; justify-content: center;
+    background: radial-gradient(circle at 30% 30%, #ffffff 0%, #f1f5f9 80%);
+    border: 1px solid #e2e8f0;
+    box-shadow: inset 0 2px 5px rgba(15,23,42,0.08);
+  }
+  .knob-indicator { position: absolute; top: 8px; width: 4px; height: 16px; border-radius: 999px; background: #CC5717; box-shadow: 0 0 10px rgba(204,87,23,0.7); }
+  .knob-cap-label { position: absolute; bottom: 22%; font-family: 'SF Mono', Monaco, monospace; font-size: 8px; letter-spacing: 0.25em; color: #94a3b8; transform: rotate(135deg); }
+  .knob-center-pct { position: absolute; transform: rotate(135deg); font-family: 'SF Mono', Monaco, monospace; font-weight: 800; color: #CC5717; line-height: 1; text-align: center; }
+
+  /* VARIANT A */
+  .variant-a { background: white; border-radius: 20px; padding: 40px 48px; box-shadow: 0 1px 3px rgba(15,23,42,0.08), 0 12px 36px rgba(15,23,42,0.10); display: grid; grid-template-columns: 280px 1fr; gap: 48px; align-items: center; margin-bottom: 48px; }
+  .variant-a .knob-stage { width: 280px; height: 280px; }
+  .variant-a .knob-glow { width: 200px; height: 200px; }
+  .variant-a .knob-svg { width: 280px; height: 280px; }
+  .variant-a .knob-body { inset: 42px; }
+  .variant-a .knob-center-pct { font-size: 42px; padding-top: 4px; }
+  .variant-a .knob-center-pct .pct-sign { font-size: 20px; opacity: 0.5; }
+  .variant-a .hero-content { padding: 8px 0; }
+  .variant-a .eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: #94a3b8; margin-bottom: 10px; }
+  .variant-a .hero-title { color: #202E56; font-size: 28px; font-weight: 800; line-height: 1.2; margin: 0 0 8px; letter-spacing: -0.01em; }
+  .variant-a .hero-title .level-word { color: #CC5717; position: relative; white-space: nowrap; }
+  .variant-a .hero-title .level-word::after { content: ''; position: absolute; bottom: -2px; left: 0; right: 0; height: 3px; background: #CC5717; opacity: 0.3; border-radius: 2px; }
+  .variant-a .subtitle { color: #475569; font-size: 15px; line-height: 1.6; margin: 0 0 24px; }
+  .variant-a .subtitle strong { color: #202E56; }
+  .variant-a .next-step { display: flex; align-items: center; gap: 16px; padding: 18px 20px; background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 14px; border-left: 4px solid #CC5717; }
+  .variant-a .next-step .ns-icon { width: 44px; height: 44px; border-radius: 12px; background: white; display: flex; align-items: center; justify-content: center; color: #CC5717; flex-shrink: 0; box-shadow: 0 2px 8px rgba(204,87,23,0.15); }
+  .variant-a .next-step .ns-body { flex: 1; min-width: 0; }
+  .variant-a .next-step .ns-label { font-size: 10.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #92400e; margin-bottom: 3px; }
+  .variant-a .next-step .ns-text { font-size: 14px; color: #78350f; line-height: 1.45; margin: 0; }
+  .variant-a .next-step .ns-text strong { color: #92400e; font-weight: 700; }
+  .variant-a .cta-btn { background: #202E56; color: white; border: none; padding: 10px 18px; border-radius: 10px; font-size: 12.5px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; cursor: pointer; flex-shrink: 0; box-shadow: 0 2px 8px rgba(32,46,86,0.2); transition: all 0.15s ease; }
+  .variant-a .cta-btn:hover { background: #2A3A6E; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(32,46,86,0.3); }
+
+  /* VARIANT B */
+  .variant-b { background: white; border-radius: 20px; padding: 32px 36px; box-shadow: 0 1px 3px rgba(15,23,42,0.08), 0 12px 36px rgba(15,23,42,0.10); display: grid; grid-template-columns: 220px 1fr 280px; gap: 32px; align-items: center; margin-bottom: 48px; }
+  .variant-b .knob-stage { width: 220px; height: 220px; }
+  .variant-b .knob-glow { width: 160px; height: 160px; }
+  .variant-b .knob-svg { width: 220px; height: 220px; }
+  .variant-b .knob-body { inset: 34px; }
+  .variant-b .knob-center-pct { font-size: 34px; padding-top: 2px; }
+  .variant-b .knob-center-pct .pct-sign { font-size: 16px; opacity: 0.5; }
+  .variant-b .stats-block h3 { color: #94a3b8; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin: 0 0 16px; }
+  .variant-b .stat-row { display: flex; justify-content: space-between; align-items: baseline; padding: 12px 0; border-bottom: 1px solid #f1f5f9; }
+  .variant-b .stat-row:last-child { border-bottom: none; }
+  .variant-b .stat-row .label { color: #64748b; font-size: 13px; }
+  .variant-b .stat-row .value { color: #202E56; font-size: 18px; font-weight: 700; font-family: 'SF Mono', Monaco, monospace; }
+  .variant-b .stat-row .value.highlight { color: #CC5717; }
+  .variant-b .stat-row .value.good { color: #15803d; }
+  .variant-b .pill-moyen { display: inline-block; background: #fef3c7; color: #92400e; padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 700; letter-spacing: 0.04em; }
+  .variant-b .action-card { background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border: 1.5px solid #7dd3fc; border-radius: 14px; padding: 18px; }
+  .variant-b .action-card .ac-eyebrow { font-size: 10.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #0369a1; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .variant-b .action-card .ac-head { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+  .variant-b .action-card .ac-icon { width: 38px; height: 38px; border-radius: 10px; background: linear-gradient(135deg, #202E56 0%, #2c4179 100%); display: flex; align-items: center; justify-content: center; color: white; flex-shrink: 0; box-shadow: 0 2px 8px rgba(32,46,86,0.25); }
+  .variant-b .action-card .ac-name { color: #202E56; font-weight: 700; font-size: 14px; }
+  .variant-b .action-card .ac-gain { color: #0369a1; font-size: 12px; font-weight: 600; margin-top: 2px; }
+  .variant-b .action-card .ac-btn { width: 100%; background: #00A0DC; color: white; border: none; padding: 9px; border-radius: 8px; font-size: 12.5px; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase; cursor: pointer; box-shadow: 0 2px 6px rgba(0,160,220,0.25); }
+
+  /* VARIANT C */
+  .variant-c { background: white; border-radius: 18px; padding: 24px 28px; box-shadow: 0 1px 3px rgba(15,23,42,0.08), 0 8px 24px rgba(15,23,42,0.08); display: grid; grid-template-columns: 160px 1fr; gap: 28px; align-items: center; margin-bottom: 48px; }
+  .variant-c .knob-stage { width: 160px; height: 160px; }
+  .variant-c .knob-glow { width: 110px; height: 110px; }
+  .variant-c .knob-svg { width: 160px; height: 160px; }
+  .variant-c .knob-body { inset: 24px; }
+  .variant-c .knob-center-pct { font-size: 22px; padding-top: 1px; }
+  .variant-c .knob-center-pct .pct-sign { font-size: 10px; opacity: 0.5; }
+  .variant-c .knob-cap-label { display: none; }
+  .variant-c .narrative .title { color: #202E56; font-size: 16px; font-weight: 700; margin: 0 0 6px; display: flex; align-items: center; gap: 10px; }
+  .variant-c .narrative .badge { font-size: 11px; font-weight: 700; background: #fef3c7; color: #92400e; padding: 3px 10px; border-radius: 999px; letter-spacing: 0.03em; }
+  .variant-c .narrative .pts { color: #94a3b8; font-size: 13px; font-family: 'SF Mono', Monaco, monospace; margin-bottom: 12px; }
+  .variant-c .narrative .pts strong { color: #475569; }
+  .variant-c .progress-track { position: relative; height: 6px; background: #f1f5f9; border-radius: 999px; margin-bottom: 6px; }
+  .variant-c .progress-fill { height: 100%; width: 33%; background: linear-gradient(90deg, #CC5717 0%, #f59e0b 100%); border-radius: 999px; }
+  .variant-c .progress-marker { position: absolute; top: -3px; left: 60%; width: 12px; height: 12px; background: white; border: 2px solid #00A0DC; border-radius: 50%; }
+  .variant-c .progress-marker::after { content: 'Bon → 60%'; position: absolute; top: 18px; left: 50%; transform: translateX(-50%); white-space: nowrap; font-size: 10.5px; font-weight: 700; color: #00A0DC; letter-spacing: 0.04em; }
+  .variant-c .suggestion { margin-top: 28px; display: flex; align-items: center; gap: 10px; color: #475569; font-size: 13px; }
+  .variant-c .suggestion .arrow { color: #00A0DC; flex-shrink: 0; }
+  .variant-c .suggestion strong { color: #0369a1; font-weight: 700; }
+  .variant-c .suggestion a { color: #00A0DC; font-weight: 700; text-decoration: none; margin-left: 6px; }
+  .variant-c .suggestion a:hover { text-decoration: underline; }
+
+  /* SECTIONS TITRES groupes méthodes */
+  .section-title { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #475569; margin: 32px 0 18px; padding-left: 4px; display: flex; align-items: center; gap: 10px; }
+  .section-title::after { content: ''; flex: 1; height: 1px; background: #cbd5e1; }
+  .section-title.faible-group { color: #b91c1c; }
+
+  /* MÉTHODES */
+  .methods-grid { display: grid; grid-template-columns: 1fr; gap: 14px; }
+  @media (min-width: 900px) { .methods-grid { grid-template-columns: repeat(2, 1fr); } }
+  .method-card { background: white; border: 1.5px solid #cbd5e1; border-radius: 16px; padding: 20px 22px; display: flex; align-items: center; gap: 18px; transition: all 0.2s ease; cursor: pointer; box-shadow: 0 1px 2px rgba(15,23,42,0.04); }
+  .method-card:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(15,23,42,0.08); }
+  .method-card.activated { border-color: #86efac; background: linear-gradient(180deg, #f0fdf4 0%, #ffffff 70%); }
+  .method-card.activating { border-color: #7dd3fc; background: linear-gradient(180deg, #f0f9ff 0%, #ffffff 70%); }
+  .method-icon { width: 56px; height: 56px; border-radius: 14px; background: linear-gradient(135deg, #202E56 0%, #2c4179 100%); display: flex; align-items: center; justify-content: center; color: white; flex-shrink: 0; box-shadow: 0 4px 12px rgba(32,46,86,0.25); }
+  .method-card.activated .method-icon { background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); box-shadow: 0 4px 12px rgba(22,163,74,0.30); }
+  .method-card.activating .method-icon { background: linear-gradient(135deg, #00A0DC 0%, #0284c7 100%); box-shadow: 0 4px 12px rgba(0,160,220,0.30); }
+  .method-body { flex: 1; min-width: 0; }
+  .method-head { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; flex-wrap: wrap; }
+  .method-name { color: #202E56; font-size: 15px; font-weight: 700; }
+  .method-strength { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; padding: 2px 8px; border-radius: 999px; }
+  .strength-high { background: #dcfce7; color: #15803d; }
+  .strength-medium { background: #fef3c7; color: #92400e; }
+  .strength-low { background: #fee2e2; color: #b91c1c; }
+  .method-desc { color: #64748b; font-size: 13px; line-height: 1.5; margin: 0; }
+  .method-weight { color: #94a3b8; font-size: 11.5px; font-weight: 600; margin-top: 4px; }
+
+  /* TOGGLE 3 ÉTATS */
+  .tristate { display: inline-flex; flex-direction: column; align-items: center; gap: 6px; flex-shrink: 0; min-width: 70px; }
+  .tristate .switch { width: 50px; height: 28px; border-radius: 999px; background: #cbd5e1; position: relative; cursor: pointer; transition: all 0.2s ease; }
+  .tristate .switch::after { content: ''; width: 22px; height: 22px; border-radius: 50%; background: white; position: absolute; top: 3px; left: 3px; transition: all 0.2s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+  .tristate.on .switch { background: #16a34a; }
+  .tristate.on .switch::after { left: 25px; }
+  .tristate.pending .switch { background: #00A0DC; }
+  .tristate.pending .switch::after { left: 14px; box-shadow: 0 0 0 3px rgba(0,160,220,0.25); }
+  .tristate .label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #94a3b8; white-space: nowrap; }
+  .tristate.on .label { color: #15803d; }
+  .tristate.pending .label { color: #0284c7; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="variant-strip">
+    <div class="v-num">A</div>
+    <h2>Hero épuré</h2>
+    <span class="v-desc">score dans le knob, narration directe, prochain palier en CTA</span>
+  </div>
+  
+  <header class="page-header">
+    <h1>UA Manager des Facteurs d'Authentification</h1>
+    <p>Ajoutez un deuxième niveau de protection à votre compte. Avec une authentification à plusieurs facteurs, il devient impossible d'accéder à vos données même si votre mot de passe est compromis.</p>
+  </header>
+
+  
+  <section class="variant-a">
+    <div class="knob-stage">
+      <div class="knob-glow"></div>
+      <svg class="knob-svg knob-a" viewBox="0 0 280 280"></svg>
+      <div class="knob-body">
+        <div class="knob-cap">
+          <div class="knob-indicator"></div>
+        </div>
+      </div>
+      <div class="knob-center-pct"><span class="num-a">033</span><span class="pct-sign">%</span></div>
+    </div>
+
+    <div class="hero-content">
+      <div class="eyebrow">Score de sécurité pondéré · ✓ 2 méthodes activées</div>
+      <h1 class="hero-title">Vous protégez votre compte au niveau <span class="level-word">Moyen</span></h1>
+      <p class="subtitle">Le calcul retient les deux meilleurs facteurs activés. Vous avez <strong>Codes de secours (10 pts)</strong> et <strong>Grille de codes (8 pts)</strong> — total 18/55.</p>
+
+      <div class="next-step">
+        <div class="ns-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="9"/>
+            <polyline points="12 7 12 12 15 14"/>
+          </svg>
+        </div>
+        <div class="ns-body">
+          <div class="ns-label">Pour passer au niveau Bon</div>
+          <p class="ns-text">Activez <strong>Code temporel (TOTP)</strong> — vous gagnerez <strong>+25 points</strong></p>
+        </div>
+        <button class="cta-btn">Configurer</button>
+      </div>
+    </div>
+  </section>
+
+  
+  <h3 class="section-title">Méthodes recommandées</h3>
+  <div class="methods-grid">
+
+    <div class="method-card">
+      <div class="method-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 11c1.93 0 3.5 1.57 3.5 3.5 0 .9-.34 1.71-.9 2.33"/>
+          <path d="M9 14.5C9 12.57 10.57 11 12.5 11"/>
+          <path d="M6.5 17.5c-.96-1.05-1.5-2.45-1.5-4 0-3.32 2.68-6 6-6s6 2.68 6 6"/>
+          <path d="M3 10c0-4.4 3.6-8 8-8s8 3.6 8 8"/>
+        </svg>
+      </div>
+      <div class="method-body">
+        <div class="method-head">
+          <span class="method-name">Facteur physique (WebAuthn)</span>
+          <span class="method-strength strength-high">Forte</span>
+        </div>
+        <p class="method-desc">Empreinte, Windows Hello, TouchID ou clé physique YubiKey. La méthode la plus résistante au phishing.</p>
+        <div class="method-weight">Poids : 30 points</div>
+      </div>
+      <div class="tristate"><div class="switch"></div><span class="label">Désactivé</span></div>
+    </div>
+
+    <div class="method-card">
+      <div class="method-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="9"/>
+          <polyline points="12 7 12 12 15 14"/>
+        </svg>
+      </div>
+      <div class="method-body">
+        <div class="method-head">
+          <span class="method-name">Code temporel (TOTP)</span>
+          <span class="method-strength strength-high">Forte</span>
+        </div>
+        <p class="method-desc">Code généré par une application (Esup Auth, Google Authenticator, etc.). Fonctionne hors-ligne.</p>
+        <div class="method-weight">Poids : 25 points</div>
+      </div>
+      <div class="tristate"><div class="switch"></div><span class="label">Désactivé</span></div>
+    </div>
+
+    <div class="method-card activating">
+      <div class="method-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 16v-5a6 6 0 0 0-12 0v5l-2 2v1h16v-1l-2-2z"/>
+          <path d="M10 21a2 2 0 0 0 4 0"/>
+        </svg>
+      </div>
+      <div class="method-body">
+        <div class="method-head">
+          <span class="method-name">Notification push (Esup Auth)</span>
+          <span class="method-strength strength-high">Forte</span>
+        </div>
+        <p class="method-desc">Notification envoyée sur votre smartphone via l'application Esup Auth. Validation en un tap.</p>
+        <div class="method-weight">Poids : 20 points</div>
+      </div>
+      <div class="tristate pending"><div class="switch"></div><span class="label">Activation…</span></div>
+    </div>
+
+  </div>
+
+  <h3 class="section-title">Méthodes complémentaires</h3>
+  <div class="methods-grid">
+
+    <div class="method-card activated">
+      <div class="method-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="8" cy="15" r="4"/>
+          <path d="M10.85 12.15L19 4"/>
+          <path d="M18 5l2 2"/>
+          <path d="M15 8l2 2"/>
+        </svg>
+      </div>
+      <div class="method-body">
+        <div class="method-head">
+          <span class="method-name">Codes de secours</span>
+          <span class="method-strength strength-medium">Moyenne</span>
+        </div>
+        <p class="method-desc">Liste de codes à usage unique imprimable. À conserver hors-ligne en cas de perte de vos autres facteurs.</p>
+        <div class="method-weight">Poids : 10 points</div>
+      </div>
+      <div class="tristate on"><div class="switch"></div><span class="label">Activé</span></div>
+    </div>
+
+    <div class="method-card activated">
+      <div class="method-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7" rx="1"/>
+          <rect x="14" y="3" width="7" height="7" rx="1"/>
+          <rect x="3" y="14" width="7" height="7" rx="1"/>
+          <rect x="14" y="14" width="7" height="7" rx="1"/>
+        </svg>
+      </div>
+      <div class="method-body">
+        <div class="method-head">
+          <span class="method-name">Grille de codes</span>
+          <span class="method-strength strength-medium">Moyenne</span>
+        </div>
+        <p class="method-desc">Grille imprimable de coordonnées (A1, B3…). Pratique en mobilité sans smartphone.</p>
+        <div class="method-weight">Poids : 8 points</div>
+      </div>
+      <div class="tristate on"><div class="switch"></div><span class="label">Activé</span></div>
+    </div>
+
+  </div>
+
+  <h3 class="section-title faible-group">Méthodes à éviter en méthode principale</h3>
+  <div class="methods-grid">
+
+    <div class="method-card">
+      <div class="method-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="5" width="18" height="14" rx="2"/>
+          <polyline points="3 7 12 13 21 7"/>
+        </svg>
+      </div>
+      <div class="method-body">
+        <div class="method-head">
+          <span class="method-name">Code par courriel</span>
+          <span class="method-strength strength-low">Faible</span>
+        </div>
+        <p class="method-desc">Code à usage unique envoyé sur votre adresse e-mail. Dépend de la sécurité de votre messagerie.</p>
+        <div class="method-weight">Poids : 5 points</div>
+      </div>
+      <div class="tristate"><div class="switch"></div><span class="label">Désactivé</span></div>
+    </div>
+
+    <div class="method-card">
+      <div class="method-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+        </svg>
+      </div>
+      <div class="method-body">
+        <div class="method-head">
+          <span class="method-name">Code par SMS</span>
+          <span class="method-strength strength-low">Faible</span>
+        </div>
+        <p class="method-desc">Code envoyé par SMS. Vulnérable au SIM swapping et à l'interception réseau.</p>
+        <div class="method-weight">Poids : 2 points</div>
+      </div>
+      <div class="tristate"><div class="switch"></div><span class="label">Désactivé</span></div>
+    </div>
+
+  </div>
+
+
+  <div class="variant-strip">
+    <div class="v-num">B</div>
+    <h2>Trois colonnes</h2>
+    <span class="v-desc">jauge + stats clés + action recommandée à droite</span>
+  </div>
+  
+  <header class="page-header">
+    <h1>UA Manager des Facteurs d'Authentification</h1>
+    <p>Ajoutez un deuxième niveau de protection à votre compte. Avec une authentification à plusieurs facteurs, il devient impossible d'accéder à vos données même si votre mot de passe est compromis.</p>
+  </header>
+
+  
+  <section class="variant-b">
+    <div class="knob-stage">
+      <div class="knob-glow"></div>
+      <svg class="knob-svg knob-b" viewBox="0 0 220 220"></svg>
+      <div class="knob-body">
+        <div class="knob-cap">
+          <div class="knob-indicator"></div>
+          <span class="knob-cap-label">SÉCURITÉ</span>
+        </div>
+      </div>
+      <div class="knob-center-pct"><span class="num-b">033</span><span class="pct-sign">%</span></div>
+    </div>
+
+    <div class="stats-block">
+      <h3>Score de sécurité pondéré</h3>
+      <div class="stat-row">
+        <span class="label">Niveau actuel</span>
+        <span class="pill-moyen">Moyen</span>
+      </div>
+      <div class="stat-row">
+        <span class="label">Méthodes activées</span>
+        <span class="value good">2<span style="color:#94a3b8;font-weight:400;font-size:13px;font-family:inherit;"> / 2 recommandées</span></span>
+      </div>
+      <div class="stat-row">
+        <span class="label">Points cumulés</span>
+        <span class="value">18<span style="color:#94a3b8;font-weight:400;font-size:13px;font-family:inherit;"> / 55</span></span>
+      </div>
+      <div class="stat-row">
+        <span class="label">Pour passer à <strong style="color:#0369a1;">Bon</strong></span>
+        <span class="value highlight">+15 pts</span>
+      </div>
+    </div>
+
+    <div class="action-card">
+      <div class="ac-eyebrow">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+        </svg>
+        Action recommandée
+      </div>
+      <div class="ac-head">
+        <div class="ac-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="9"/>
+            <polyline points="12 7 12 12 15 14"/>
+          </svg>
+        </div>
+        <div>
+          <div class="ac-name">Code temporel (TOTP)</div>
+          <div class="ac-gain">+25 points · 2 min de configuration</div>
+        </div>
+      </div>
+      <button class="ac-btn">Activer cette méthode</button>
+    </div>
+  </section>
+
+  
+  <h3 class="section-title">Méthodes recommandées</h3>
+  <div class="methods-grid">
+
+    <div class="method-card">
+      <div class="method-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 11c1.93 0 3.5 1.57 3.5 3.5 0 .9-.34 1.71-.9 2.33"/>
+          <path d="M9 14.5C9 12.57 10.57 11 12.5 11"/>
+          <path d="M6.5 17.5c-.96-1.05-1.5-2.45-1.5-4 0-3.32 2.68-6 6-6s6 2.68 6 6"/>
+          <path d="M3 10c0-4.4 3.6-8 8-8s8 3.6 8 8"/>
+        </svg>
+      </div>
+      <div class="method-body">
+        <div class="method-head">
+          <span class="method-name">Facteur physique (WebAuthn)</span>
+          <span class="method-strength strength-high">Forte</span>
+        </div>
+        <p class="method-desc">Empreinte, Windows Hello, TouchID ou clé physique YubiKey. La méthode la plus résistante au phishing.</p>
+        <div class="method-weight">Poids : 30 points</div>
+      </div>
+      <div class="tristate"><div class="switch"></div><span class="label">Désactivé</span></div>
+    </div>
+
+    <div class="method-card">
+      <div class="method-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="9"/>
+          <polyline points="12 7 12 12 15 14"/>
+        </svg>
+      </div>
+      <div class="method-body">
+        <div class="method-head">
+          <span class="method-name">Code temporel (TOTP)</span>
+          <span class="method-strength strength-high">Forte</span>
+        </div>
+        <p class="method-desc">Code généré par une application (Esup Auth, Google Authenticator, etc.). Fonctionne hors-ligne.</p>
+        <div class="method-weight">Poids : 25 points</div>
+      </div>
+      <div class="tristate"><div class="switch"></div><span class="label">Désactivé</span></div>
+    </div>
+
+    <div class="method-card activating">
+      <div class="method-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 16v-5a6 6 0 0 0-12 0v5l-2 2v1h16v-1l-2-2z"/>
+          <path d="M10 21a2 2 0 0 0 4 0"/>
+        </svg>
+      </div>
+      <div class="method-body">
+        <div class="method-head">
+          <span class="method-name">Notification push (Esup Auth)</span>
+          <span class="method-strength strength-high">Forte</span>
+        </div>
+        <p class="method-desc">Notification envoyée sur votre smartphone via l'application Esup Auth. Validation en un tap.</p>
+        <div class="method-weight">Poids : 20 points</div>
+      </div>
+      <div class="tristate pending"><div class="switch"></div><span class="label">Activation…</span></div>
+    </div>
+
+  </div>
+
+  <h3 class="section-title">Méthodes complémentaires</h3>
+  <div class="methods-grid">
+
+    <div class="method-card activated">
+      <div class="method-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="8" cy="15" r="4"/>
+          <path d="M10.85 12.15L19 4"/>
+          <path d="M18 5l2 2"/>
+          <path d="M15 8l2 2"/>
+        </svg>
+      </div>
+      <div class="method-body">
+        <div class="method-head">
+          <span class="method-name">Codes de secours</span>
+          <span class="method-strength strength-medium">Moyenne</span>
+        </div>
+        <p class="method-desc">Liste de codes à usage unique imprimable. À conserver hors-ligne en cas de perte de vos autres facteurs.</p>
+        <div class="method-weight">Poids : 10 points</div>
+      </div>
+      <div class="tristate on"><div class="switch"></div><span class="label">Activé</span></div>
+    </div>
+
+    <div class="method-card activated">
+      <div class="method-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7" rx="1"/>
+          <rect x="14" y="3" width="7" height="7" rx="1"/>
+          <rect x="3" y="14" width="7" height="7" rx="1"/>
+          <rect x="14" y="14" width="7" height="7" rx="1"/>
+        </svg>
+      </div>
+      <div class="method-body">
+        <div class="method-head">
+          <span class="method-name">Grille de codes</span>
+          <span class="method-strength strength-medium">Moyenne</span>
+        </div>
+        <p class="method-desc">Grille imprimable de coordonnées (A1, B3…). Pratique en mobilité sans smartphone.</p>
+        <div class="method-weight">Poids : 8 points</div>
+      </div>
+      <div class="tristate on"><div class="switch"></div><span class="label">Activé</span></div>
+    </div>
+
+  </div>
+
+  <h3 class="section-title faible-group">Méthodes à éviter en méthode principale</h3>
+  <div class="methods-grid">
+
+    <div class="method-card">
+      <div class="method-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="5" width="18" height="14" rx="2"/>
+          <polyline points="3 7 12 13 21 7"/>
+        </svg>
+      </div>
+      <div class="method-body">
+        <div class="method-head">
+          <span class="method-name">Code par courriel</span>
+          <span class="method-strength strength-low">Faible</span>
+        </div>
+        <p class="method-desc">Code à usage unique envoyé sur votre adresse e-mail. Dépend de la sécurité de votre messagerie.</p>
+        <div class="method-weight">Poids : 5 points</div>
+      </div>
+      <div class="tristate"><div class="switch"></div><span class="label">Désactivé</span></div>
+    </div>
+
+    <div class="method-card">
+      <div class="method-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+        </svg>
+      </div>
+      <div class="method-body">
+        <div class="method-head">
+          <span class="method-name">Code par SMS</span>
+          <span class="method-strength strength-low">Faible</span>
+        </div>
+        <p class="method-desc">Code envoyé par SMS. Vulnérable au SIM swapping et à l'interception réseau.</p>
+        <div class="method-weight">Poids : 2 points</div>
+      </div>
+      <div class="tristate"><div class="switch"></div><span class="label">Désactivé</span></div>
+    </div>
+
+  </div>
+
+
+  <div class="variant-strip">
+    <div class="v-num">C</div>
+    <h2>Compact narratif</h2>
+    <span class="v-desc">condensé, barre de progression avec marqueur du palier suivant</span>
+  </div>
+  
+  <header class="page-header">
+    <h1>UA Manager des Facteurs d'Authentification</h1>
+    <p>Ajoutez un deuxième niveau de protection à votre compte. Avec une authentification à plusieurs facteurs, il devient impossible d'accéder à vos données même si votre mot de passe est compromis.</p>
+  </header>
+
+  
+  <section class="variant-c">
+    <div class="knob-stage">
+      <div class="knob-glow"></div>
+      <svg class="knob-svg knob-c" viewBox="0 0 160 160"></svg>
+      <div class="knob-body">
+        <div class="knob-cap">
+          <div class="knob-indicator"></div>
+        </div>
+      </div>
+      <div class="knob-center-pct"><span class="num-c">033</span><span class="pct-sign">%</span></div>
+    </div>
+
+    <div class="narrative">
+      <h3 class="title">Score de sécurité <span class="badge">Moyen</span></h3>
+      <div class="pts"><strong>18 points</strong> cumulés sur 55 possibles · 2 méthodes activées</div>
+
+      <div class="progress-track">
+        <div class="progress-fill"></div>
+        <div class="progress-marker"></div>
+      </div>
+
+      <div class="suggestion">
+        <svg class="arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+        </svg>
+        Activez <strong>TOTP</strong> pour passer au niveau Bon (+25 pts)
+        <a href="#">Configurer →</a>
+      </div>
+    </div>
+  </section>
+
+  
+  <h3 class="section-title">Méthodes recommandées</h3>
+  <div class="methods-grid">
+
+    <div class="method-card">
+      <div class="method-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 11c1.93 0 3.5 1.57 3.5 3.5 0 .9-.34 1.71-.9 2.33"/>
+          <path d="M9 14.5C9 12.57 10.57 11 12.5 11"/>
+          <path d="M6.5 17.5c-.96-1.05-1.5-2.45-1.5-4 0-3.32 2.68-6 6-6s6 2.68 6 6"/>
+          <path d="M3 10c0-4.4 3.6-8 8-8s8 3.6 8 8"/>
+        </svg>
+      </div>
+      <div class="method-body">
+        <div class="method-head">
+          <span class="method-name">Facteur physique (WebAuthn)</span>
+          <span class="method-strength strength-high">Forte</span>
+        </div>
+        <p class="method-desc">Empreinte, Windows Hello, TouchID ou clé physique YubiKey. La méthode la plus résistante au phishing.</p>
+        <div class="method-weight">Poids : 30 points</div>
+      </div>
+      <div class="tristate"><div class="switch"></div><span class="label">Désactivé</span></div>
+    </div>
+
+    <div class="method-card">
+      <div class="method-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="9"/>
+          <polyline points="12 7 12 12 15 14"/>
+        </svg>
+      </div>
+      <div class="method-body">
+        <div class="method-head">
+          <span class="method-name">Code temporel (TOTP)</span>
+          <span class="method-strength strength-high">Forte</span>
+        </div>
+        <p class="method-desc">Code généré par une application (Esup Auth, Google Authenticator, etc.). Fonctionne hors-ligne.</p>
+        <div class="method-weight">Poids : 25 points</div>
+      </div>
+      <div class="tristate"><div class="switch"></div><span class="label">Désactivé</span></div>
+    </div>
+
+    <div class="method-card activating">
+      <div class="method-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 16v-5a6 6 0 0 0-12 0v5l-2 2v1h16v-1l-2-2z"/>
+          <path d="M10 21a2 2 0 0 0 4 0"/>
+        </svg>
+      </div>
+      <div class="method-body">
+        <div class="method-head">
+          <span class="method-name">Notification push (Esup Auth)</span>
+          <span class="method-strength strength-high">Forte</span>
+        </div>
+        <p class="method-desc">Notification envoyée sur votre smartphone via l'application Esup Auth. Validation en un tap.</p>
+        <div class="method-weight">Poids : 20 points</div>
+      </div>
+      <div class="tristate pending"><div class="switch"></div><span class="label">Activation…</span></div>
+    </div>
+
+  </div>
+
+  <h3 class="section-title">Méthodes complémentaires</h3>
+  <div class="methods-grid">
+
+    <div class="method-card activated">
+      <div class="method-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="8" cy="15" r="4"/>
+          <path d="M10.85 12.15L19 4"/>
+          <path d="M18 5l2 2"/>
+          <path d="M15 8l2 2"/>
+        </svg>
+      </div>
+      <div class="method-body">
+        <div class="method-head">
+          <span class="method-name">Codes de secours</span>
+          <span class="method-strength strength-medium">Moyenne</span>
+        </div>
+        <p class="method-desc">Liste de codes à usage unique imprimable. À conserver hors-ligne en cas de perte de vos autres facteurs.</p>
+        <div class="method-weight">Poids : 10 points</div>
+      </div>
+      <div class="tristate on"><div class="switch"></div><span class="label">Activé</span></div>
+    </div>
+
+    <div class="method-card activated">
+      <div class="method-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7" rx="1"/>
+          <rect x="14" y="3" width="7" height="7" rx="1"/>
+          <rect x="3" y="14" width="7" height="7" rx="1"/>
+          <rect x="14" y="14" width="7" height="7" rx="1"/>
+        </svg>
+      </div>
+      <div class="method-body">
+        <div class="method-head">
+          <span class="method-name">Grille de codes</span>
+          <span class="method-strength strength-medium">Moyenne</span>
+        </div>
+        <p class="method-desc">Grille imprimable de coordonnées (A1, B3…). Pratique en mobilité sans smartphone.</p>
+        <div class="method-weight">Poids : 8 points</div>
+      </div>
+      <div class="tristate on"><div class="switch"></div><span class="label">Activé</span></div>
+    </div>
+
+  </div>
+
+  <h3 class="section-title faible-group">Méthodes à éviter en méthode principale</h3>
+  <div class="methods-grid">
+
+    <div class="method-card">
+      <div class="method-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="5" width="18" height="14" rx="2"/>
+          <polyline points="3 7 12 13 21 7"/>
+        </svg>
+      </div>
+      <div class="method-body">
+        <div class="method-head">
+          <span class="method-name">Code par courriel</span>
+          <span class="method-strength strength-low">Faible</span>
+        </div>
+        <p class="method-desc">Code à usage unique envoyé sur votre adresse e-mail. Dépend de la sécurité de votre messagerie.</p>
+        <div class="method-weight">Poids : 5 points</div>
+      </div>
+      <div class="tristate"><div class="switch"></div><span class="label">Désactivé</span></div>
+    </div>
+
+    <div class="method-card">
+      <div class="method-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+        </svg>
+      </div>
+      <div class="method-body">
+        <div class="method-head">
+          <span class="method-name">Code par SMS</span>
+          <span class="method-strength strength-low">Faible</span>
+        </div>
+        <p class="method-desc">Code envoyé par SMS. Vulnérable au SIM swapping et à l'interception réseau.</p>
+        <div class="method-weight">Poids : 2 points</div>
+      </div>
+      <div class="tristate"><div class="switch"></div><span class="label">Désactivé</span></div>
+    </div>
+
+  </div>
+
+
+</div>
+<script>
+  const TOTAL_TICKS = 40;
+  const MIN_DEG = -135, MAX_DEG = 135;
+  const TARGET_PCT = 33;
+  const ACTIVE_TICKS = Math.round((TARGET_PCT / 100) * TOTAL_TICKS);
+
+  const config = [
+    { sel: '.knob-a', size: 280, rInner: 118, rOuter: 132 },
+    { sel: '.knob-b', size: 220, rInner: 92,  rOuter: 104 },
+    { sel: '.knob-c', size: 160, rInner: 66,  rOuter: 75  }
+  ];
+
+  config.forEach(({ sel, size, rInner, rOuter }) => {
+    const svg = document.querySelector(sel);
+    if (!svg) return;
+    const cx = size/2, cy = size/2;
+    for (let i = 0; i <= TOTAL_TICKS; i++) {
+      const angle = MIN_DEG + (i / TOTAL_TICKS) * (MAX_DEG - MIN_DEG);
+      const rad = (angle - 90) * Math.PI / 180;
+      const x1 = cx + Math.cos(rad) * rInner;
+      const y1 = cy + Math.sin(rad) * rInner;
+      const x2 = cx + Math.cos(rad) * rOuter;
+      const y2 = cy + Math.sin(rad) * rOuter;
+      const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      line.setAttribute('x1', x1); line.setAttribute('y1', y1);
+      line.setAttribute('x2', x2); line.setAttribute('y2', y2);
+      line.setAttribute('stroke-width', size < 200 ? 2 : 3);
+      line.setAttribute('stroke-linecap', 'round');
+      line.setAttribute('class', 'tick');
+      svg.appendChild(line);
+    }
+    const ticks = svg.querySelectorAll('.tick');
+    setTimeout(() => {
+      ticks.forEach((t, i) => {
+        setTimeout(() => { if (i <= ACTIVE_TICKS) t.classList.add('active'); }, i * 35);
+      });
+    }, 300);
+  });
+
+  document.querySelectorAll('[class^="num-"]').forEach(el => {
+    let v = 0;
+    const step = () => {
+      v += 1;
+      el.textContent = String(v).padStart(3, '0');
+      if (v < TARGET_PCT) setTimeout(step, 1500 / TARGET_PCT);
+    };
+    setTimeout(step, 300);
+  });
+</script>
+</body>
+</html>
