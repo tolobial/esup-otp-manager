@@ -715,19 +715,39 @@ const UserDashboard = {
             return '/api' + uri;
         },
         activate: async function(method) {
-            switch (method) {
-                case 'push':
-                    return this.askPushActivation();
-                case 'bypass':
-                    await this.standardActivate(method);
-                    return this.generateBypass();
-                case 'passcode_grid':
-                    const { data } = await this.standardActivate(method);
-                    return this.setPasscodeGrid(data);
-                case 'totp':
-                    return this.generateTotp();
-                default:
-                    return this.standardActivate(method);
+            try {
+                switch (method) {
+                    case 'push':
+                        return await this.askPushActivation();
+                    case 'bypass':
+                        await this.standardActivate(method);
+                        return await this.generateBypass();
+                    case 'passcode_grid':
+                        const { data } = await this.standardActivate(method);
+                        return this.setPasscodeGrid(data);
+                    case 'totp':
+                        return await this.generateTotp();
+                    default:
+                        return await this.standardActivate(method);
+                }
+            } catch (err) {
+                console.error('[activate] Échec activation', method, err);
+                const methodLabel = this.methods?.[method]?.label || method;
+                if (window.Swal) {
+                    await Swal.fire({
+                        icon: 'warning',
+                        title: 'Méthode non disponible',
+                        html: `La méthode <strong>${methodLabel}</strong> n'est pas activable actuellement.<br><br>Elle est probablement non configurée sur ce serveur. Contactez votre administrateur si le problème persiste.`,
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#202E56'
+                    });
+                } else {
+                    alert(`La méthode "${methodLabel}" n'est pas disponible actuellement.`);
+                }
+                // Rollback : retour à la home. currentmethod est une PROP (lecture seule) ;
+                // c'est le composant racine qui pilote l'affichage via currentView.
+                // On simule un clic sidebar « Accueil » (event-like : { currentTarget: { name, text } }).
+                this.$root.navigate({ currentTarget: { name: 'home', text: this.messages?.api?.menu?.home || 'Accueil' } });
             }
         },
         askPushActivation: function() {
@@ -747,8 +767,6 @@ const UserDashboard = {
                         throw new Error(JSON.stringify({ code: data.code }));
                     }
                 },
-            }).catch(err => {
-                toast({ message: 'Erreur interne, veuillez réessayer plus tard.', className: 'red darken-1' });
             });
         },
         standardActivate: function(method) {
