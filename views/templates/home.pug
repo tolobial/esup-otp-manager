@@ -178,12 +178,17 @@ script#home-dashboard(type='text/x-template').
                 <div class="ns-label" v-else>{{ messages.api.score.next_step.label_default }}</div>
                 <p class="ns-text" v-html="tr('score.next_step.text', { LABEL: (methods[nextLevelSuggestion.name] && methods[nextLevelSuggestion.name].label) || nextLevelSuggestion.name, GAIN_PTS: nextLevelSuggestion.gainPts })"></p>
               </div>
-              <button class="cta-btn" @click="navigate(nextLevelSuggestion.name)">{{ messages.api.score.cta }}</button>
+              <button class="cta-btn" @click="clickConfigureBtn(nextLevelSuggestion.name)">{{ messages.api.score.cta }}</button>
             </div>
 
             <!-- EXCELLENT MESSAGE (palier max atteint) -->
             <div v-else-if="weightedScore.levelKey === 'excellent'" class="excellent-message">
               {{ messages.api.score.excellent_message }}
+            </div>
+
+            <!-- MESSAGE NEUTRE : toutes les recommandées disponibles sont activées (sans atteindre 100%) -->
+            <div v-else class="score-message-neutral">
+              {{ messages.api.score.all_recommended_active }}
             </div>
           </div>
         </section>
@@ -307,7 +312,7 @@ script#home-dashboard(type='text/x-template').
 
           <!-- Groupe 1 : Méthodes recommandées -->
           <section>
-            <h3 class="section-title">{{ messages.api.groups.recommended }}</h3>
+            <h3 class="section-title section-title-recommended">{{ messages.api.groups.recommended }}</h3>
             <div class="methods-grid">
               <template v-for="name in methodGroups.recommended.filter(n => methods[n] && methods[n].activate && methods[n].authorize)" :key="name">
                 <div class="method-card"

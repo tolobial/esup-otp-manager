@@ -18,6 +18,16 @@
   },
   "api": {
 
+    "activate": {
+      "confirm_title": "Activer cette méthode ?",
+      "confirm_html": "Voulez-vous activer %LABEL% ? Vous gagnerez %GAIN% au niveau de sécurité.",
+      "info_simple": "L'activation est immédiate — aucune configuration supplémentaire requise.",
+      "confirm_button": "Activer",
+      "error_title": "Activation impossible",
+      "error_html": "L'activation de %LABEL% a échoué. Veuillez réessayer ou contacter votre administrateur.",
+      "toast_success": "Méthode activée"
+    },
+
     "deactivate": {
       "confirm_title": "Désactiver cette méthode ?",
       "confirm_html": "Voulez-vous vraiment désactiver %LABEL% ?",
@@ -37,6 +47,7 @@
       "cta": "Configurer",
       "excellent_message": "✓ Votre compte est protégé au maximum.",
       "points": "points",
+      "all_recommended_active": "Toutes les méthodes recommandées disponibles sont activées 👍",
       "next_step": {
         "label_target": "Pour passer au niveau %TARGET_LEVEL%",
         "label_default": "Pour améliorer votre niveau",

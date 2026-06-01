@@ -1426,6 +1426,9 @@ const METHOD_GROUPS = {
   weak:          ['random_code_mail', 'random_code']
 };
 
+// Méthodes activables en 1 clic depuis la home (aucune saisie utilisateur).
+const SIMPLE_ACTIVATE_METHODS = ['bypass', 'passcode_grid', 'esupnfc'];
+
 /** Admin **/
 const Home = {
     props: {
@@ -1479,12 +1482,17 @@ const Home = {
             if (this.weightedScore.levelKey === 'excellent') return null;
             const activeNames = Object.entries(this.user?.methods || {})
                 .filter(([_, m]) => m?.active).map(([n]) => n);
-            const inactive = Object.keys(METHOD_WEIGHTS).filter(n => !activeNames.includes(n));
-            if (inactive.length === 0) return null;
+            const eligible = METHOD_GROUPS.recommended.filter(name => {
+                if (activeNames.includes(name)) return false;          // déjà active
+                if (!(this.methods?.[name]?.activate)) return false;   // désactivée globalement (admin)
+                if (!(this.methods?.[name]?.authorize)) return false;  // non autorisée pour l'utilisateur (ACL)
+                return true;
+            });
+            if (eligible.length === 0) return null;
             const levels = ['disabled', 'weak', 'medium', 'good', 'excellent'];
             const targetLevelKey = levels[levels.indexOf(this.weightedScore.levelKey) + 1];
             let best = null;
-            for (const name of inactive) {
+            for (const name of eligible) {
                 const sim = [...activeNames, name].map(n => METHOD_WEIGHTS[n] || 0)
                     .sort((a, b) => b - a).slice(0, 2).reduce((s, w) => s + w, 0);
                 const pct = Math.round((sim / 55) * 100);
@@ -1497,7 +1505,7 @@ const Home = {
                 }
             }
             if (!best) {
-                const top = inactive.reduce((b, n) => METHOD_WEIGHTS[n] > METHOD_WEIGHTS[b] ? n : b);
+                const top = eligible.reduce((b, n) => METHOD_WEIGHTS[n] > METHOD_WEIGHTS[b] ? n : b);
                 best = { name: top, gainPts: METHOD_WEIGHTS[top], targetLevelKey: null };
             }
             return best;
@@ -1658,6 +1666,79 @@ const Home = {
                 } else {
                     alert(this.tr('deactivate.error_html', { LABEL: methodLabel }));
                 }
+            }
+        },
+
+        // Bouton CONFIGURER du next-step : méthode simple => activation 1-clic (Swal vert) ;
+        // méthode complexe => navigation vers la page de configuration dédiée.
+        async clickConfigureBtn(method) {
+            if (!SIMPLE_ACTIVATE_METHODS.includes(method)) {
+                return this.navigate(method);
+            }
+            const methodLabel = (this.methods?.[method] && this.methods[method].label) || method;
+            const gainStr = '+' + (METHOD_WEIGHTS[method] || 0) + ' ' + this.tr('score.points');
+            let confirmed;
+            if (window.Swal) {
+                const result = await Swal.fire({
+                    icon: 'question',
+                    title: this.tr('activate.confirm_title'),
+                    html: this.tr('activate.confirm_html', { LABEL: methodLabel, GAIN: gainStr })
+                          + '<div class="swal-info-box-blue">' + this.tr('activate.info_simple') + '</div>',
+                    showCancelButton: true,
+                    customClass: { confirmButton: 'swal-btn-activate' },
+                    confirmButtonText: this.tr('activate.confirm_button'),
+                    cancelButtonText: this.tr('action.cancel')
+                });
+                confirmed = result.isConfirmed;
+            } else {
+                confirmed = window.confirm(this.tr('activate.confirm_html', { LABEL: methodLabel, GAIN: gainStr }));
+            }
+            if (!confirmed) return;
+            if (method === 'esupnfc') {
+                // Aucun artefact à afficher : activation en place + toast, on reste sur la home.
+                const ok = await this.activate(method);
+                if (ok) toast({ message: this.tr('activate.toast_success'), className: 'green darken-1' });
+            } else {
+                // bypass / passcode_grid : la navigation déclenche l'activation complète
+                // (PUT /activate + génération des codes/grille) via le watcher currentmethod
+                // de UserDashboard, et affiche l'artefact sur la page dédiée.
+                this.navigate(method);
+            }
+        },
+
+        // Activation 1-clic (esupnfc) depuis la home. Même pattern try/catch + Swal d'erreur.
+        async activate(method) {
+            try {
+                await fetchApi({
+                    method: "PUT",
+                    uri: "/api/" + method + "/activate",
+                    onSuccess: res => {
+                        const data = res.data;
+                        if (data.code == "Ok") {
+                            if (this.user.methods[method]) this.user.methods[method].active = true;
+                            this.$root.getAndSetUser();
+                        } else {
+                            console.error(JSON.stringify({ code: data.code }));
+                            throw new Error("Erreur interne, veuillez réessayer plus tard.");
+                        }
+                    },
+                });
+                return true;
+            } catch (err) {
+                console.error('[Home.activate] Échec', method, err);
+                const methodLabel = (this.methods?.[method] && this.methods[method].label) || method;
+                if (window.Swal) {
+                    await Swal.fire({
+                        icon: 'warning',
+                        title: this.tr('activate.error_title'),
+                        html: this.tr('activate.error_html', { LABEL: methodLabel }),
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#202E56'
+                    });
+                } else {
+                    alert(this.tr('activate.error_html', { LABEL: methodLabel }));
+                }
+                return false;
             }
         },
 
