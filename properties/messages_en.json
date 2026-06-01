@@ -98,7 +98,37 @@
           "manual": "<strong>Manually register</strong> the key <code>%SECRET%</code> in your favorite TOTP app (%AUTHENTICATORS%)."
         },
         "howToActivate": "<strong>Then</strong>, to validate the TOTP activation, enter below the 6-digit code displayed on your application",
-        "enter_code": "Enter the 6-digit code"
+        "enter_code": "Enter the 6-digit code",
+        "step1": {
+          "title": "Install the application on your phone",
+          "description": "If not already done, download %BRAND_APP% (recommended) or a compatible TOTP application.",
+          "compat_label": "Compatible apps",
+          "compat_list": "Google Authenticator, Microsoft Authenticator, Aegis Authenticator, FreeOTP, Apple « Passwords » app.",
+          "skip_label": "I already have a TOTP application installed",
+          "skip_helper": "Check to skip directly to step 2",
+          "collapsed_summary": "TOTP application already installed",
+          "reopen_btn": "Change my choice"
+        },
+        "step2": {
+          "title": "Scan the QR code with your application",
+          "description": "Open the application you just installed and use its \"<strong>Scan a QR code</strong>\" feature to register your account.",
+          "manual_key_label": "If you can't scan, display the manual key.",
+          "manual_key_btn": "Show manual key",
+          "manual_key_intro": "<strong>Key</strong> (enter manually in your app if you can't scan):"
+        },
+        "step3": {
+          "title": "Enter the code displayed by the application",
+          "description": "The application displays a <strong>6-digit code</strong> that changes every 30 seconds. Enter it below to finalize activation.",
+          "field_placeholder": "000 000",
+          "validate_btn": "Validate activation"
+        },
+        "instruction_banner": "Follow the 3 steps below in order to activate this method",
+        "instruction_banner_skipped": "TOTP application already installed — go directly to step 2",
+        "stepper": {
+          "step1": "Install the application",
+          "step2": "Scan the QR code",
+          "step3": "Validate your code"
+        }
       },
       "random_code": {
         "name": "One time password",

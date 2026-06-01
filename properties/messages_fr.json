@@ -98,7 +98,37 @@
           "manual": "<strong>Enregistrez manuellement</strong> la clé <code>%SECRET%</code> dans votre application TOTP favorite (%AUTHENTICATORS%)."
         },
         "howToActivate": "<strong>Puis</strong>, pour valider l’activation du TOTP, saisissez ci-dessous le code à 6 chiffres affiché sur votre application",
-        "enter_code": "Saisissez le code de 6 chiffres"
+        "enter_code": "Saisissez le code de 6 chiffres",
+        "step1": {
+          "title": "Installez l'application sur votre téléphone",
+          "description": "Si ce n'est pas déjà fait, téléchargez %BRAND_APP% (recommandée) ou une application TOTP compatible.",
+          "compat_label": "Apps compatibles",
+          "compat_list": "Google Authenticator, Microsoft Authenticator, Aegis Authenticator, FreeOTP, l'app Apple « Mots de passe ».",
+          "skip_label": "J'ai déjà une application TOTP installée",
+          "skip_helper": "Coche pour passer directement à l'étape 2",
+          "collapsed_summary": "Application TOTP déjà installée",
+          "reopen_btn": "Modifier mon choix"
+        },
+        "step2": {
+          "title": "Scannez le QR code avec votre application",
+          "description": "Ouvrez l'application que vous venez d'installer et utilisez sa fonction « <strong>Scanner un QR code</strong> » pour enregistrer votre compte.",
+          "manual_key_label": "Si vous ne pouvez pas scanner, affichez la clé manuelle.",
+          "manual_key_btn": "Afficher la clé manuelle",
+          "manual_key_intro": "<strong>Clé</strong> (à saisir manuellement dans votre app si vous ne pouvez pas scanner) :"
+        },
+        "step3": {
+          "title": "Saisissez le code affiché par l'application",
+          "description": "L'application affiche un <strong>code à 6 chiffres</strong> qui change toutes les 30 secondes. Saisissez-le ci-dessous pour finaliser l'activation.",
+          "field_placeholder": "000 000",
+          "validate_btn": "Valider l'activation"
+        },
+        "instruction_banner": "Suivez les 3 étapes ci-dessous dans l'ordre pour activer cette méthode",
+        "instruction_banner_skipped": "Application TOTP déjà installée — directement à l'étape 2",
+        "stepper": {
+          "step1": "Installer l'application",
+          "step2": "Scanner le QR code",
+          "step3": "Valider votre code"
+        }
       },
       "random_code": {
         "name": "Code par SMS",

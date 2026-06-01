@@ -2,63 +2,125 @@ script#totp-method(type='text/x-template').
   <div class="space-y-5">
 
     <!-- ═══════════════════════════════════════════════════ -->
-    <!-- État : enregistrement du TOTP en cours              -->
+    <!-- État : enregistrement du TOTP en cours (3 étapes)   -->
     <!-- ═══════════════════════════════════════════════════ -->
-    <div v-if="user.methods.totp.askActivation" class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+    <div v-if="user.methods.totp.askActivation">
 
-      <!-- Colonne 1 : enregistrement -->
-      <div class="bg-white border border-gray-300 shadow-sm p-5">
-        <h4 class="font-display font-bold text-ua-navy text-sm uppercase tracking-wide mb-1">1. Enregistrer la clé</h4>
-        <p class="text-xs text-gray-500 mb-4">Choisissez la méthode adaptée à votre appareil :</p>
-
-        <ol class="space-y-4 list-decimal list-inside text-sm text-gray-700 marker:text-ua-blue marker:font-semibold">
-          <li v-if="user.methods.totp.deepLink && infos.mobile"
-              v-html="messages.api.methods.totp.registration_instructions.deeplink.replace('%DEEPLINK%', user.methods.totp.deepLink).replace('%ESUP_AUTH%', infos.esup_auth_download_link)"></li>
-
-          <li v-if="user.methods.totp.uri && infos.mobile"
-              v-html="messages.api.methods.totp.registration_instructions.otpauth_uri.replace('%URI%', user.methods.totp.uri).replace('%AUTHENTICATORS%', authentificators)"></li>
-
-          <li v-if="!infos.mobile || !user.methods.totp.deepLink">
-            <span v-html="messages.api.methods.totp.registration_instructions.qrcode.replace('%AUTHENTICATORS%', authentificators)"></span>
-            <div class="totp-qrcode mt-3 p-3 inline-flex items-center justify-center bg-white border border-gray-200" v-html="user.methods.totp.qrCode"></div>
-          </li>
-
-          <li v-if="user.methods.totp.uri && (infos.isMacOs || infos.mobile == 'ios')"
-              v-html="messages.api.methods.totp.registration_instructions.apple_otpauth_uri.replace('%URI%', 'apple-' + user.methods.totp.uri)"></li>
-
-          <li v-html="messages.api.methods.totp.registration_instructions.manual.replace('%SECRET%', user.methods.totp.secret).replace('%AUTHENTICATORS%', authentificators)"></li>
-        </ol>
+      <!-- 1. STEPPER VISUEL -->
+      <div class="stepper">
+        <div class="step-item" :class="{ skipped: step1Skipped }">
+          <div class="step-circle"><span class="step-circle-num">1</span></div>
+          <div class="step-line"></div>
+          <div class="step-label">{{ messages.api.methods.totp.stepper.step1 }}</div>
+        </div>
+        <div class="step-item">
+          <div class="step-circle">2</div>
+          <div class="step-line"></div>
+          <div class="step-label">{{ messages.api.methods.totp.stepper.step2 }}</div>
+        </div>
+        <div class="step-item">
+          <div class="step-circle">3</div>
+          <div class="step-label">{{ messages.api.methods.totp.stepper.step3 }}</div>
+        </div>
       </div>
 
-      <!-- Colonne 2 : validation -->
-      <div v-if="user.methods.totp.qrCode" class="bg-white border border-gray-300 shadow-sm p-5">
-        <h4 class="font-display font-bold text-ua-navy text-sm uppercase tracking-wide mb-1">2. Valider votre code</h4>
-        <div class="text-sm text-gray-700 mb-4" v-html="messages.api.methods.totp.howToActivate"></div>
+      <!-- 2. BANDEAU D'INSTRUCTION -->
+      <div class="instruction-banner">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <circle cx="12" cy="12" r="9"></circle>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 11v5M12 8h.01"></path>
+        </svg>
+        <span>{{ step1Skipped ? messages.api.methods.totp.instruction_banner_skipped : messages.api.methods.totp.instruction_banner }}</span>
+      </div>
 
-        <form @submit.prevent="validate" class="flex flex-col gap-3">
-          <div>
-            <label for="totpCode-input" class="block text-xs font-medium text-ua-navy uppercase tracking-wide mb-2">
-              {{messages.api.methods.totp.enter_code}}
-            </label>
-            <input type="text"
-                   inputmode="numeric"
-                   v-model="user.methods.totp.validation_code"
-                   id="totpCode-input"
-                   required
-                   maxlength="6"
-                   pattern="[0-9]{6}"
-                   placeholder="000000"
-                   autocomplete="one-time-code"
-                   class="w-full px-3 py-3 border border-gray-300 focus:border-ua-blue focus:outline-none focus:ring-2 focus:ring-ua-blue/20 text-2xl font-mono tabular-nums text-center tracking-widest text-ua-navy">
+      <!-- 3. CASE À COCHER pour skip étape 1 -->
+      <label class="skip-toggle" for="skipCheckbox">
+        <input type="checkbox" id="skipCheckbox" v-model="step1Skipped" @change="onSkipChange">
+        <span class="skip-toggle-label">
+          <strong>{{ messages.api.methods.totp.step1.skip_label }}</strong>
+        </span>
+        <span class="helper-text">{{ messages.api.methods.totp.step1.skip_helper }}</span>
+      </label>
+
+      <!-- 4. CONTAINER DES 3 CARDS -->
+      <div class="steps-container">
+
+        <!-- Card 1 : installer l'application (repliable) -->
+        <div class="step-card" :class="{ collapsed: step1Skipped }" @click="step1Skipped && reopenStep1()">
+          <div class="step-number"><span class="step-number-text">1</span></div>
+          <div class="step-content">
+            <h3>{{ messages.api.methods.totp.step1.title }}</h3>
+            <p v-html="messages.api.methods.totp.step1.description.replace('%BRAND_APP%', '<strong>Esup Auth</strong>')"></p>
+            <div class="install-buttons">
+              <a class="install-btn" href="https://play.google.com/store/apps/details?id=org.esupportail.esupAuth" target="_blank" rel="noopener" title="Esup Auth — Google Play">
+                <span class="install-btn-icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3.8 2.1c-.5.3-.8.8-.8 1.4v17c0 .6.3 1.1.8 1.4l9.6-9.9L3.8 2.1zm11 8.5 2.3 1.1c.8.4.8 1.6 0 2l-2.3 1.1-2.6-2.1 2.6-2.1zm-1.4-1.1L6 3.1l8.5 5 .9.5-2-1zm0 5.9 1.9-.9-.9.5-8.4 4.9 7.4-4.5z"/></svg>
+                </span>
+                <span class="install-btn-text"><span>DISPONIBLE SUR</span><span>Google Play</span></span>
+              </a>
+              <a class="install-btn" href="https://apps.apple.com/fr/app/esup-auth/id1563904941" target="_blank" rel="noopener" title="Esup Auth — App Store">
+                <span class="install-btn-icon">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.4 12.8c0-2.1 1.7-3.1 1.8-3.2-1-1.4-2.5-1.6-3-1.6-1.3-.1-2.5.8-3.1.8-.6 0-1.6-.7-2.7-.7-1.4 0-2.7.8-3.4 2-1.5 2.5-.4 6.3 1 8.3.7 1 1.5 2.1 2.6 2.1 1 0 1.4-.7 2.7-.7 1.2 0 1.6.7 2.7.6 1.1 0 1.8-1 2.5-2 .8-1.2 1.1-2.3 1.1-2.4-.1 0-2.1-.8-2.2-3.2zM14.3 6.6c.6-.7 1-1.7.9-2.6-.8 0-1.9.6-2.5 1.3-.5.6-1 1.6-.9 2.5.9.1 1.8-.5 2.5-1.2z"/></svg>
+                </span>
+                <span class="install-btn-text"><span>TÉLÉCHARGER DANS</span><span>l'App Store</span></span>
+              </a>
+            </div>
+            <div class="compat-note">
+              <strong>{{ messages.api.methods.totp.step1.compat_label }} :</strong> {{ messages.api.methods.totp.step1.compat_list }}
+            </div>
+            <div class="collapsed-summary">✓ {{ messages.api.methods.totp.step1.collapsed_summary }}</div>
+            <button class="reopen-btn" @click.stop="reopenStep1">{{ messages.api.methods.totp.step1.reopen_btn }}</button>
           </div>
-          <button type="submit"
-                  class="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white font-semibold text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-600 focus-visible:ring-offset-2">
-            <span>{{messages.api.action.validate}}</span>
-            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
-            </svg>
-          </button>
-        </form>
+        </div>
+
+        <!-- Card 2 : scanner le QR code + clé manuelle -->
+        <div class="step-card">
+          <div class="step-number">2</div>
+          <div class="step-content">
+            <h3>{{ messages.api.methods.totp.step2.title }}</h3>
+            <p v-html="messages.api.methods.totp.step2.description"></p>
+            <div class="qr-area">
+              <div class="qr-img" v-html="user.methods.totp.qrCode"></div>
+              <div>
+                <p>{{ messages.api.methods.totp.step2.manual_key_label }}</p>
+                <button type="button" class="manual-key-btn" @click="showManualKey = !showManualKey">
+                  🔑 {{ messages.api.methods.totp.step2.manual_key_btn }}
+                </button>
+                <div class="manual-key-display" v-if="showManualKey">
+                  <span v-html="messages.api.methods.totp.step2.manual_key_intro"></span> {{ user.methods.totp.secret }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 3 : saisir le code -->
+        <div class="step-card">
+          <div class="step-number">3</div>
+          <div class="step-content">
+            <h3>{{ messages.api.methods.totp.step3.title }}</h3>
+            <p v-html="messages.api.methods.totp.step3.description"></p>
+            <form @submit.prevent="validate">
+              <input type="text"
+                     class="otp-field"
+                     inputmode="numeric"
+                     v-model="user.methods.totp.validation_code"
+                     id="totpCode-input"
+                     required
+                     maxlength="6"
+                     pattern="[0-9]{6}"
+                     autocomplete="one-time-code"
+                     :placeholder="messages.api.methods.totp.step3.field_placeholder">
+              <button type="submit" class="validate-btn">
+                <span>{{ messages.api.methods.totp.step3.validate_btn }}</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
+                </svg>
+              </button>
+            </form>
+          </div>
+        </div>
+
       </div>
     </div>
 
@@ -77,22 +139,6 @@ script#totp-method(type='text/x-template').
         </svg>
         <span>{{messages.api.action.generate_qrcode}}</span>
       </button>
-    </div>
-
-    <!-- Badges App Stores (Esup Auth) -->
-    <div role="list" lang="fr" class="flex flex-wrap items-center justify-center gap-4 pt-3">
-      <a role="listitem" target="_blank" rel="noopener"
-         title="Esup Auth — disponible sur Google Play pour Android"
-         href="https://play.google.com/store/apps/details?id=org.esupportail.esupAuth"
-         class="inline-block hover:opacity-80 transition-opacity">
-        <img src="images/play-store.png" alt="Disponible sur Google Play" width="150" class="block">
-      </a>
-      <a role="listitem" target="_blank" rel="noopener"
-         title="Esup Auth — Télécharger dans l'App Store pour iOS"
-         href="https://apps.apple.com/fr/app/esup-auth/id1563904941"
-         class="inline-block hover:opacity-80 transition-opacity">
-        <img src="images/app-store.png" alt="Télécharger dans l'App Store" width="150" class="block">
-      </a>
     </div>
 
   </div>

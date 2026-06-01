@@ -219,6 +219,13 @@ const TotpMethod = {
         'infos': Object,
         'formatApiUri': Function,
     },
+    data: function () {
+        return {
+            // Étape 1 conditionnelle : mémorise si l'utilisateur a déjà une app TOTP.
+            step1Skipped: (function () { try { return localStorage.getItem('hasInstalledOtpApp') === 'true'; } catch (e) { return false; } })(),
+            showManualKey: false,
+        };
+    },
     computed: {
         EsupAuth() {
             if (!this.infos.mobile) {
@@ -247,6 +254,13 @@ const TotpMethod = {
         }
     },
     methods: {
+        onSkipChange: function () {
+            try { localStorage.setItem('hasInstalledOtpApp', this.step1Skipped.toString()); } catch (e) {}
+        },
+        reopenStep1: function () {
+            this.step1Skipped = false;
+            try { localStorage.setItem('hasInstalledOtpApp', 'false'); } catch (e) {}
+        },
         validate: function() {
             const totpCode = this.user.methods.totp.validation_code;
             this.user.methods.totp.validation_code = '';
@@ -260,6 +274,8 @@ const TotpMethod = {
                         this.user.methods.totp.askActivation = false;
                         this.user.methods.totp.qrCode = '';
                         this.user.methods.totp.message = '';
+                        // L'activation a réussi : l'utilisateur a forcément une app TOTP installée.
+                        try { localStorage.setItem('hasInstalledOtpApp', 'true'); } catch (e) {}
                         toast({ message: 'Code validé', className: 'green contrasted' });
                     }
                 },
