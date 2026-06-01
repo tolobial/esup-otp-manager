@@ -2037,7 +2037,8 @@ Vue.createApp({
                 this.currentView = 'preferences';
             }
 
-            document.title = "ESUP OTP Manager - " + this.messages.api.menu[this.currentView];
+            const appTitle = this.messages?.api?.title || "Manager des Facteurs d'Authentification";
+            document.title = appTitle + " — " + this.messages.api.menu[this.currentView];
             if(this.currentView == 'preferences') {
                 document.title += " - " + this.messages.api.methods[this.currentMethod].name;
             }
