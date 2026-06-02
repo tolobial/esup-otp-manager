@@ -243,7 +243,8 @@
       "activated": "Activé",
       "deactivated": "Désactivé",
       "activating": "Suivez les étapes ci-dessous pour finaliser l’activation",
-      "note": "Dans vos préférences, nous vous conseillons fortement de paramétrer au moins 2 méthodes afin de pouvoir assurer la continuité d’utilisation des services numériques."
+      "note": "Dans vos préférences, nous vous conseillons fortement de paramétrer au moins 2 méthodes afin de pouvoir assurer la continuité d’utilisation des services numériques.",
+      "help_methods": "Besoin d'aide pour activer une méthode ?"
     },
     "index": "sécuriser l’accès à vos données.",
     "action": {

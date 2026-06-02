@@ -2026,17 +2026,6 @@ Vue.createApp({
             this.navLevel = 'root';
         },
 
-        handleDockHover: function(event) {
-            const icon = event.currentTarget;
-            const rect = icon.getBoundingClientRect();
-            const ratio = (event.clientX - rect.left) / rect.width;
-            const shift = ((Math.min(1, Math.max(0, ratio)) - 0.5) * 6).toFixed(1);
-            icon.style.setProperty('--dock-shift', shift + 'px');
-        },
-        resetDockHover: function(event) {
-            event.currentTarget.style.removeProperty('--dock-shift');
-        },
-
         // Helper centralisé : affiche un Swal d'erreur user-friendly et cohérent avec
         // activate/deactivate. methodKey optionnel -> libellé de la méthode, sinon « Système ».
         showInternalError: function (methodKey) {

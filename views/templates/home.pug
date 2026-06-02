@@ -131,6 +131,9 @@ script#home-dashboard(type='text/x-template').
           <p class="text-base text-slate-600 leading-normal max-w-3xl mx-auto">
             {{messages.api.home.description}}
           </p>
+          <p class="text-xs text-slate-400 leading-normal max-w-3xl mx-auto mt-3">
+            {{messages.api.home.note}}
+          </p>
         </div>
 
         <!-- SCORE PANEL HERO -->
@@ -412,11 +415,9 @@ script#home-dashboard(type='text/x-template').
           </div>
         </div>
 
-        <p class="text-gray-400 text-xs mt-4">{{messages.api.home.note}}</p>
-
         <!-- Dock : tutos d'activation par méthode -->
         <footer class="mt-10 pt-6 border-t border-gray-200 print:hidden">
-          <p class="text-center text-xs text-gray-500 mb-1">{{messages.api?.home?.help_methods || "Besoin d'aide pour activer une méthode ?"}}</p>
+          <p class="text-center text-xs text-gray-500 mb-3">{{messages.api?.home?.help_methods || "Besoin d'aide pour activer une méthode ?"}}</p>
           <nav class="ua-dock" aria-label="Tutoriels d'activation des méthodes">
             <template v-for="method in methods">
               <a v-if="method.activate && method.authorize"
@@ -424,12 +425,9 @@ script#home-dashboard(type='text/x-template').
                  :href="$root.tutoLinks[method.name] || '#'"
                  :target="$root.tutoLinks[method.name] ? '_blank' : '_self'"
                  rel="noopener"
-                 @mousemove="$root.handleDockHover"
-                 @mouseleave="$root.resetDockHover"
                  :aria-label="'Tutoriel : ' + (method.label || method.name)">
                 <span class="ua-dock-tip">{{method.label || method.name}}</span>
                 <span class="ua-dock-box"><method-icon :name="method.name" :size="'6'" /></span>
-                <span class="ua-dock-lbl">{{method.label || method.name}}</span>
               </a>
             </template>
           </nav>
