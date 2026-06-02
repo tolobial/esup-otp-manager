@@ -123,7 +123,30 @@ function toast({ message, displayLength = 9 /*seconds*/ * 1000, className }) {
 /** Vue.JS **/
 
 /** User **/
+
+// Mixin Vue : saut d'étape « application déjà installée ».
+// Persisté dans localStorage['hasInstalledOtpApp'] — même clé que le composant
+// TOTP, donc l'état « déjà installé » est partagé entre Push et TOTP au runtime.
+// Absorbé par PushMethod uniquement (TotpMethod garde sa copie inline).
+const stepSkipMixin = {
+    data: function () {
+        return {
+            step1Skipped: (function () { try { return localStorage.getItem('hasInstalledOtpApp') === 'true'; } catch (e) { return false; } })(),
+        };
+    },
+    methods: {
+        onSkipChange: function () {
+            try { localStorage.setItem('hasInstalledOtpApp', this.step1Skipped.toString()); } catch (e) {}
+        },
+        reopenStep1: function () {
+            this.step1Skipped = false;
+            try { localStorage.setItem('hasInstalledOtpApp', 'false'); } catch (e) {}
+        },
+    },
+};
+
 const PushMethod = {
+    mixins: [stepSkipMixin],
     props: {
         'user': Object,
         'getAndSetUser': Function,
@@ -135,6 +158,7 @@ const PushMethod = {
     data() {
         return {
             'socket': Object,
+            showManual: false,
         };
     },
     watch: {

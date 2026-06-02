@@ -194,7 +194,27 @@
           "  <li>'<span lang='fr'>Adresse</span>': %API_URL%</li>",
           "</ul>",
           "Then click on '<span lang='fr'>Activer</span>'."
-        ]
+        ],
+        "stepper": {
+          "step1": "Install the app",
+          "step2": "Pair your device"
+        },
+        "instruction_banner": "Follow the 2 steps below in order to activate this method",
+        "instruction_banner_skipped": "Esup Auth app already installed — go straight to step 2",
+        "step1": {
+          "title": "Install the Esup Auth app on your phone",
+          "description": "If you haven't already, download %BRAND_APP% on your smartphone.",
+          "compat_label": "Required app",
+          "compat_list": "Esup Auth.",
+          "skip_label": "I already have the Esup Auth app installed",
+          "skip_helper": "Check to skip directly to step 2",
+          "collapsed_summary": "Esup Auth app already installed",
+          "reopen_btn": "Change my choice"
+        },
+        "step2": {
+          "title": "Pair your device with Esup Auth",
+          "manual_btn": "Show manual activation"
+        }
       },
       "esupnfc": {
         "name": "EsupNFC",

@@ -194,7 +194,27 @@
           "  <li>« Adresse » : %API_URL%</li>",
           "</ul>",
           "Puis cliquez sur « Activer »."
-        ]
+        ],
+        "stepper": {
+          "step1": "Installer l'application",
+          "step2": "Pairer votre appareil"
+        },
+        "instruction_banner": "Suivez les 2 étapes ci-dessous dans l'ordre pour activer cette méthode",
+        "instruction_banner_skipped": "Application Esup Auth déjà installée — directement à l'étape 2",
+        "step1": {
+          "title": "Installez l'application Esup Auth sur votre téléphone",
+          "description": "Si ce n'est pas déjà fait, téléchargez %BRAND_APP% sur votre smartphone.",
+          "compat_label": "Application requise",
+          "compat_list": "Esup Auth.",
+          "skip_label": "J'ai déjà l'application Esup Auth installée",
+          "skip_helper": "Coche pour passer directement à l'étape 2",
+          "collapsed_summary": "Application Esup Auth déjà installée",
+          "reopen_btn": "Modifier mon choix"
+        },
+        "step2": {
+          "title": "Pairez votre appareil avec Esup Auth",
+          "manual_btn": "Afficher l'activation manuelle"
+        }
       },
       "esupnfc": {
         "name": "Ma carte UA",
