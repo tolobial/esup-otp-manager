@@ -416,21 +416,29 @@ script#home-dashboard(type='text/x-template').
         </div>
 
         <!-- Dock : tutos d'activation par méthode -->
-        <footer class="mt-10 pt-6 border-t border-gray-200 print:hidden">
-          <p class="text-center text-xs text-gray-500 mb-3">{{messages.api?.home?.help_methods || "Besoin d'aide pour activer une méthode ?"}}</p>
-          <nav class="ua-dock" aria-label="Tutoriels d'activation des méthodes">
-            <template v-for="method in methods">
-              <a v-if="method.activate && method.authorize"
-                 class="ua-dock-icon"
-                 :href="$root.tutoLinks[method.name] || '#'"
-                 :target="$root.tutoLinks[method.name] ? '_blank' : '_self'"
-                 rel="noopener"
-                 :aria-label="'Tutoriel : ' + (method.label || method.name)">
-                <span class="ua-dock-tip">{{method.label || method.name}}</span>
-                <span class="ua-dock-box"><method-icon :name="method.name" :size="'6'" /></span>
-              </a>
-            </template>
-          </nav>
+        <footer class="mt-10 print:hidden">
+          <div class="ua-help-sep">
+            <span class="ua-help-sep-line"></span>
+            <span class="ua-help-sep-label">{{messages.api.home.help_label}}</span>
+            <span class="ua-help-sep-line"></span>
+          </div>
+          <div class="ua-help">
+            <p class="text-center text-sm font-semibold text-ua-navy mb-1">{{messages.api?.home?.help_methods || "Besoin d'aide pour activer une méthode ?"}}</p>
+            <p class="text-center text-xs text-gray-500 mb-4">{{messages.api.home.help_hint}}</p>
+            <nav class="ua-dock" aria-label="Tutoriels d'activation des méthodes">
+              <template v-for="method in methods">
+                <a v-if="method.activate && method.authorize"
+                   class="ua-dock-icon"
+                   :href="$root.tutoLinks[method.name] || '#'"
+                   :target="$root.tutoLinks[method.name] ? '_blank' : '_self'"
+                   rel="noopener"
+                   :aria-label="'Tutoriel : ' + (method.label || method.name)">
+                  <span class="ua-dock-tip">{{method.label || method.name}}</span>
+                  <span class="ua-dock-box"><method-icon :name="method.name" :size="'6'" /></span>
+                </a>
+              </template>
+            </nav>
+          </div>
         </footer>
       </div>
     </div>

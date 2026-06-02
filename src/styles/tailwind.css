@@ -156,10 +156,16 @@ body:has([data-tw]) main > .container {
 }
 
 @layer components {
-  /* Dock léger : panneau autonome (fond/bordure/ombre), centré, indépendant du border-t du footer. */
-  .ua-dock { display: flex; align-items: flex-end; justify-content: center; gap: 10px; width: fit-content; margin: 0 auto; padding: 14px 18px; background: #fff; border: 1px solid #e2e5ea; border-radius: calc(var(--radius) * 2); box-shadow: 0 4px 16px rgba(15,23,42,.08); }
+  /* Bloc d'aide : séparateur « AIDE » + carte en relief contenant le dock. */
+  .ua-help { width: fit-content; max-width: 640px; margin: 0 auto; padding: 28px 40px 32px; background: #fff; border: 1px solid #e2e5ea; border-radius: calc(var(--radius) * 2); box-shadow: 0 12px 32px -12px rgba(32,46,86,.24); }
+  .ua-help-sep { display: flex; align-items: center; justify-content: center; gap: 14px; max-width: 720px; margin: 0 auto 22px; }
+  .ua-help-sep-line { flex: 1; height: 1px; background: #d4d9e2; }
+  .ua-help-sep-label { font-size: .75rem; line-height: 1rem; text-transform: uppercase; letter-spacing: .12em; color: #00A0DC; font-weight: 600; }
+
+  /* Dock : bande gris clair en creux, tuiles blanches qui ressortent. */
+  .ua-dock { display: flex; align-items: flex-end; justify-content: center; gap: 10px; width: fit-content; margin: 46px auto 0; padding: 14px 18px; background: #edf0f5; border: 1px solid #dde2ea; border-radius: calc(var(--radius) * 2); box-shadow: inset 0 1px 3px rgba(32,46,86,.07); }
   .ua-dock-icon { position: relative; display: flex; align-items: center; justify-content: center; cursor: pointer; text-decoration: none; color: var(--color-ua-navy); }
-  .ua-dock-box { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; background: #f3f4f6; color: #6b7280; border: 1px solid #e2e5ea; border-radius: var(--radius); transition: transform 160ms cubic-bezier(0.25,1,0.5,1), background-color 160ms, color 160ms, box-shadow 160ms; transform-origin: bottom center; }
+  .ua-dock-box { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; background: #fff; color: #6b7280; border: 1px solid #dde2ea; border-radius: var(--radius); box-shadow: 0 1px 2px rgba(32,46,86,.08); transition: transform 160ms cubic-bezier(0.25,1,0.5,1), background-color 160ms, color 160ms, box-shadow 160ms; transform-origin: bottom center; }
   .ua-dock-tip { position: absolute; bottom: calc(100% + 20px); left: 50%; transform: translateX(-50%); background: var(--color-ua-navy); color: #fff; font-size: 11px; padding: 4px 9px; border-radius: var(--radius); white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity 160ms; z-index: 50; }
   .ua-dock-tip::after { content: ""; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 5px solid transparent; border-top-color: var(--color-ua-navy); }
   /* On scale uniquement la tuile, pas le .ua-dock-icon : le tooltip reste ancré à un parent non transformé. */

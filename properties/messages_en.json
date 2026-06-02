@@ -244,7 +244,9 @@
       "deactivated": "Deactivated",
       "activating": "Follow the steps below to complete the activation process",
       "note": "In your preferences, we strongly recommend setting up at least 2 methods to ensure continuous access to digital services.",
-      "help_methods": "Need help activating a method?"
+      "help_methods": "Need help activating a method?",
+      "help_label": "Help",
+      "help_hint": "Hover an icon for its name, click for the tutorial."
     },
     "index": "secure access to your data.",
     "action": {
