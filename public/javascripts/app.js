@@ -966,18 +966,19 @@ const ManagerDashboard = {
         'methods': Object,
         'messages': Object,
         'infos': Object,
-        'user': Object,
     },
     components: {
         "user-view": UserView
     },
     data: function () {
         return {
+            // `user` est l'état local du Manager (utilisateur sélectionné via getAndSetUser),
+            // pas une prop : il doit rester réassignable par setUser. uid vide = empty-state.
             user: {
-                uid: String,
-                displayName: String,
-                methods: Object,
-                transports: Object
+                uid: '',
+                displayName: '',
+                methods: {},
+                transports: {}
             },
             users: [],
             requestedUid: '',
