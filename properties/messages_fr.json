@@ -246,7 +246,16 @@
       "note": "Dans vos préférences, nous vous conseillons fortement de paramétrer au moins 2 méthodes afin de pouvoir assurer la continuité d’utilisation des services numériques.",
       "help_methods": "Besoin d'aide pour activer une méthode ?",
       "help_label": "Aide",
-      "help_hint": "Survolez une icône pour son nom, cliquez pour le tutoriel."
+      "help_hint": "Survolez une icône pour son nom, cliquez pour le tutoriel.",
+      "support_intro": "Toujours bloqué ?",
+      "support_cta": "Contacter le support DSIN",
+      "support_faq": "consulter la FAQ"
+    },
+    "footer": {
+      "legal": "Mentions légales",
+      "accessibility": "Accessibilité",
+      "privacy": "Données personnelles",
+      "credit": "Propulsé par DSIN@Esup-Portail"
     },
     "index": "sécuriser l’accès à vos données.",
     "action": {

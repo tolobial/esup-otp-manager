@@ -121,7 +121,7 @@ script#home-dashboard(type='text/x-template').
 
     <!-- Contenu principal -->
     <div class="flex-1 min-w-0 overflow-y-auto">
-      <div class="p-6 lg:p-8">
+      <div class="p-6 lg:p-8 max-w-[1120px] mx-auto">
 
         <!-- En-tête page -->
         <div class="text-center mb-10">
@@ -438,8 +438,32 @@ script#home-dashboard(type='text/x-template').
                 </a>
               </template>
             </nav>
+
+            <!-- Escalade : contact support DSIN -->
+            <div class="mt-8 pt-5 border-t border-gray-200 text-center text-sm text-gray-600">
+              <span>{{messages.api.home.support_intro}}</span>
+              <a class="ua-support-btn" href="mailto:support@univ-antilles.fr">{{messages.api.home.support_cta}}</a>
+              <span class="block mt-3 text-xs text-gray-500">
+                <a href="#" class="underline hover:text-ua-blue">{{messages.api.home.support_faq}}</a>
+                <span class="mx-1.5 text-gray-300">·</span>
+                <span>0596 XX XX XX</span>
+              </span>
+            </div>
           </div>
-        </footer>
+
+          <!-- Footer institutionnel : barre claire sur une ligne -->
+          <footer class="ua-footer mt-12">
+            <div class="flex items-center gap-2.5">
+              <span class="ua-logo"></span>
+              <span class="text-xs font-semibold text-[#202E56]">Université des Antilles · DSIN</span>
+            </div>
+            <nav class="flex items-center gap-4 text-xs" aria-label="Liens institutionnels">
+              <a href="#" class="ua-footer-link">{{messages.api.footer.legal}}</a>
+              <a href="#" class="ua-footer-link">{{messages.api.footer.accessibility}}</a>
+              <a href="#" class="ua-footer-link">{{messages.api.footer.privacy}}</a>
+            </nav>
+            <span class="text-xs text-gray-400">© 2026 · {{messages.api.footer.credit}}</span>
+          </footer>
       </div>
     </div>
   </div>

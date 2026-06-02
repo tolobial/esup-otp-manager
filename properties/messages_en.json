@@ -246,7 +246,16 @@
       "note": "In your preferences, we strongly recommend setting up at least 2 methods to ensure continuous access to digital services.",
       "help_methods": "Need help activating a method?",
       "help_label": "Help",
-      "help_hint": "Hover an icon for its name, click for the tutorial."
+      "help_hint": "Hover an icon for its name, click for the tutorial.",
+      "support_intro": "Still stuck?",
+      "support_cta": "Contact DSIN support",
+      "support_faq": "check the FAQ"
+    },
+    "footer": {
+      "legal": "Legal notice",
+      "accessibility": "Accessibility",
+      "privacy": "Personal data",
+      "credit": "Propulsé par DSIN@Esup-Portail"
     },
     "index": "secure access to your data.",
     "action": {
