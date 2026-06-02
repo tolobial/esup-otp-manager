@@ -183,7 +183,7 @@
         "description": "Method for connecting via smartphone notifications with Esup Auth",
         "esup_auth_download_link": "Esup Auth on <a href='%ANDROID_URL%' target='_blank'>Android</a> or <a href='%IOS_URL%' target='_blank'>IOS</a>",
         "esup_Auth_installation_instructions": "After installing the %ESUP_AUTH% app",
-        "deeplink_instructions": "<strong><a href='%DEEP_LINK%'>Click here</a></strong>,",
+        "deeplink_instructions": "<strong><a href='%DEEPLINK%'>Click here</a></strong>,",
         "qrcode_instructions": "Scan the QR code below using the Esup Auth app.",
         "manual_activation_instructions": [
           "If you encounter any difficulties,<br />",
