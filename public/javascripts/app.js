@@ -586,7 +586,7 @@ const RandomCodeMethod = {
                 });
                 const data = res.data;
                 if (data.code != "Ok") {
-                    toast({ message: 'Erreur interne, veuillez réessayer plus tard.', className: 'red darken-1' });
+                    this.$root.showInternalError(transport === 'mail' ? 'random_code_mail' : 'random_code');
                 } else {
                     const expected = data.otp;
 
@@ -618,7 +618,8 @@ const RandomCodeMethod = {
                     });
                 }
             } catch (err) {
-                toast({ message: err, className: 'red darken-1' });
+                console.error('[testAndSaveTransport] Échec', transport, err);
+                this.$root.showInternalError(transport === 'mail' ? 'random_code_mail' : 'random_code');
             };
         },
         saveTransport: async function(transport) {
@@ -629,7 +630,7 @@ const RandomCodeMethod = {
             });
             const data = res.data;
             if (data.code != "Ok") {
-                toast({ message: 'Erreur interne, veuillez réessayer plus tard.', className: 'red darken-1' });
+                this.$root.showInternalError(transport === 'mail' ? 'random_code_mail' : 'random_code');
             } else {
                 this.user.transports[transport] = new_transport;
                 document.getElementById(transport + '-input').value = '';
@@ -798,7 +799,6 @@ const UserDashboard = {
                     }
                 },
             }).catch(err => {
-                toast({ message: 'Erreur interne, veuillez réessayer plus tard.', className: 'red darken-1' });
                 throw err;
             });
         },
@@ -1063,7 +1063,7 @@ const AdminDashboard = {
             }).catch(err => {
                 event.target.checked = false;
                 this.methods[event.target.name].activate = false;
-                toast({ message: 'Erreur interne, veuillez réessayer plus tard.', className: 'red darken-1' });
+                this.$root.showInternalError(event.target.name);
             });
         },
         deactivate: function(event) {
@@ -1082,7 +1082,7 @@ const AdminDashboard = {
             }).catch(err => {
                 event.target.checked = true;
                 this.methods[event.target.name].activate = true;
-                toast({ message: 'Erreur interne, veuillez réessayer plus tard.', className: 'red darken-1' });
+                this.$root.showInternalError(event.target.name);
             });
         },
         activateTransport: function(method, transport) {
@@ -1098,7 +1098,7 @@ const AdminDashboard = {
                     }
                 },
             }).catch(err => {
-                toast({ message: 'Erreur interne, veuillez réessayer plus tard.', className: 'red darken-1' });
+                this.$root.showInternalError(method);
             });
         },
         deactivateTransport: function(method, transport) {
@@ -1117,7 +1117,7 @@ const AdminDashboard = {
                     }
                 },
             }).catch(err => {
-                toast({ message: 'Erreur interne, veuillez réessayer plus tard.', className: 'red darken-1' });
+                this.$root.showInternalError(method);
             });
         },
     }
@@ -1172,7 +1172,7 @@ const StatsDashboard = {
                     await this.renderChart(); // appel une fois le DOM mis à jour
                 },
             }).catch(err => {
-                toast({ message: 'Erreur interne, veuillez réessayer plus tard.', className: 'red darken-1' });
+                this.$root.showInternalError(null);
             });
         },
         async renderChart() {
@@ -2011,6 +2011,26 @@ Vue.createApp({
         },
         resetDockHover: function(event) {
             event.currentTarget.style.removeProperty('--dock-shift');
+        },
+
+        // Helper centralisé : affiche un Swal d'erreur user-friendly et cohérent avec
+        // activate/deactivate. methodKey optionnel -> libellé de la méthode, sinon « Système ».
+        showInternalError: function (methodKey) {
+            console.error('[showInternalError]', methodKey || 'unknown');
+            let label = 'Système';
+            if (methodKey && this.messages?.api?.methods?.[methodKey]?.name) {
+                label = this.messages.api.methods[methodKey].name;
+            }
+            if (window.Swal && this.messages?.api?.activate) {
+                return Swal.fire({
+                    icon: 'warning',
+                    title: this.messages.api.activate.error_title,
+                    html: this.messages.api.activate.error_html.split('%LABEL%').join(label),
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#202E56'
+                });
+            }
+            alert(`Erreur : ${label}`);
         },
 
         navigate: function(event) {
