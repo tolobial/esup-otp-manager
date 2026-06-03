@@ -424,7 +424,7 @@ script#home-dashboard(type='text/x-template').
           </div>
           <div class="ua-help">
             <p class="text-center text-sm font-semibold text-ua-navy mb-1">{{messages.api?.home?.help_methods || "Besoin d'aide pour activer une méthode ?"}}</p>
-            <p class="text-center text-xs text-gray-500 mb-4">{{messages.api.home.help_hint}}</p>
+            <p class="text-center text-xs text-gray-500 mb-3">{{messages.api.home.help_hint}}</p>
             <nav class="ua-dock" aria-label="Tutoriels d'activation des méthodes">
               <template v-for="method in methods">
                 <a v-if="method.activate && method.authorize"
@@ -440,10 +440,10 @@ script#home-dashboard(type='text/x-template').
             </nav>
 
             <!-- Escalade : contact support DSIN -->
-            <div class="mt-8 pt-5 border-t border-gray-200 text-center text-sm text-gray-600">
+            <div class="mt-6 pt-4 border-t border-gray-200 text-center text-sm text-gray-600">
               <span>{{messages.api.home.support_intro}}</span>
               <a class="ua-support-btn" href="mailto:svpcompte@univ-antilles.fr?subject=Assistance%20MFA">{{messages.api.home.support_cta}}</a>
-              <span class="block mt-3 text-xs text-gray-500">
+              <span class="block mt-2 text-xs text-gray-500">
                 <a href="#" class="underline hover:text-ua-blue">{{messages.api.home.support_faq}}</a>
                 <span class="mx-1.5 text-gray-300">·</span>
                 <span>0596 XX XX XX</span>
