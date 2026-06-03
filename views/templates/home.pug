@@ -137,20 +137,16 @@ script#home-dashboard(type='text/x-template').
         </div>
 
         <!-- SCORE PANEL HERO -->
-        <section class="bg-white rounded-2xl shadow-xl p-10 mb-12 grid md:grid-cols-[280px_1fr] gap-10 items-center">
+        <section class="bg-white rounded-2xl shadow-xl p-7 mb-8 grid md:grid-cols-[140px_1fr] gap-8 items-center">
 
-          <!-- KNOB -->
-          <div class="knob-stage">
-            <div class="knob-glow"></div>
-            <svg class="knob-svg" viewBox="0 0 280 280"></svg>
-            <div class="knob-body">
-              <div class="knob-cap">
-                <div class="knob-indicator"></div>
-              </div>
-            </div>
-            <div class="knob-center-pct">
-              <span>{{ String(knobPct).padStart(3, '0') }}</span><span class="pct-sign">%</span>
-            </div>
+          <!-- JAUGE : anneau SVG plein, piloté par weightedScore.pct (gaugeOffset) -->
+          <div class="score-ring">
+            <svg class="score-ring-svg" width="120" height="120" viewBox="0 0 120 120" aria-hidden="true">
+              <circle class="score-ring-track" cx="60" cy="60" r="52" fill="none"></circle>
+              <circle class="score-ring-fill" cx="60" cy="60" r="52" fill="none"
+                      :stroke-dasharray="gaugeCirc" :stroke-dashoffset="gaugeOffset"></circle>
+            </svg>
+            <div class="score-ring-pct"><span>{{ knobPct }}</span><span class="pct-sign">%</span></div>
           </div>
 
           <!-- NARRATION -->
@@ -172,7 +168,7 @@ script#home-dashboard(type='text/x-template').
             <!-- NEXT STEP CARD -->
             <div v-if="nextLevelSuggestion" class="next-step">
               <div class="ns-icon">
-                <method-icon :name="nextLevelSuggestion.name"></method-icon>
+                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0"/></svg>
               </div>
               <div class="ns-body">
                 <div class="ns-label" v-if="nextLevelSuggestion.targetLevelKey">

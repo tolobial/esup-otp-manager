@@ -1554,6 +1554,14 @@ const Home = {
 
         methodGroups() {
             return METHOD_GROUPS;
+        },
+
+        // Géométrie de l'anneau de score (r=52 dans le viewBox 120x120).
+        gaugeCirc() {
+            return 2 * Math.PI * 52;
+        },
+        gaugeOffset() {
+            return this.gaugeCirc * (1 - this.weightedScore.pct / 100);
         }
     },
     watch: {
@@ -1565,54 +1573,13 @@ const Home = {
             this.$nextTick(() => this.animateKnob());
         }
     },
-    mounted: function () { this.fanAutoStart(); this.$nextTick(() => this.initKnob()); },
+    mounted: function () { this.fanAutoStart(); this.$nextTick(() => this.animateKnob()); },
     beforeUnmount: function () { this.fanAutoStop(); this.fanClearIdle(); },
     methods: {
-        initKnob() {
-            const svg = document.querySelector('.knob-svg');
-            if (!svg) return;
-            // Nettoie les ticks éventuellement déjà présents (cas re-init)
-            svg.querySelectorAll('.tick').forEach(t => t.remove());
-            const TOTAL_TICKS = 40, MIN_DEG = -135, MAX_DEG = 135;
-            const cx = 140, cy = 140, rInner = 118, rOuter = 132;
-            for (let i = 0; i <= TOTAL_TICKS; i++) {
-                const angle = MIN_DEG + (i / TOTAL_TICKS) * (MAX_DEG - MIN_DEG);
-                const rad = (angle - 90) * Math.PI / 180;
-                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-                line.setAttribute('x1', cx + Math.cos(rad) * rInner);
-                line.setAttribute('y1', cy + Math.sin(rad) * rInner);
-                line.setAttribute('x2', cx + Math.cos(rad) * rOuter);
-                line.setAttribute('y2', cy + Math.sin(rad) * rOuter);
-                line.setAttribute('stroke-width', 3);
-                line.setAttribute('stroke-linecap', 'round');
-                line.setAttribute('class', 'tick');
-                svg.appendChild(line);
-            }
-            this.animateKnob();
-        },
-
+        // Compteur animé du centre de l'anneau (0 → score réel). Le remplissage de
+        // l'anneau lui-même est piloté en CSS via gaugeOffset (stroke-dashoffset).
         animateKnob() {
             const target = this.weightedScore.pct;
-            // Rotation de l'aiguille vers l'angle final correspondant au pct
-            const body = document.querySelector('.knob-body');
-            if (body) {
-                const finalAngle = -135 + (target / 100) * 270;
-                // Reset à -135° puis transition vers la cible (forcer le replay)
-                body.style.transform = 'rotate(-135deg)';
-                // Petit délai pour que le navigateur applique le reset avant la cible
-                setTimeout(() => {
-                    body.style.transform = `rotate(${finalAngle}deg)`;
-                }, 50);
-            }
-            const ACTIVE_TICKS = Math.round((target / 100) * 40);
-            const ticks = this.$el?.querySelectorAll('.knob-svg .tick') || [];
-            ticks.forEach(t => t.classList.remove('active'));
-            setTimeout(() => {
-                ticks.forEach((t, i) => {
-                    setTimeout(() => { if (i <= ACTIVE_TICKS) t.classList.add('active'); }, i * 35);
-                });
-            }, 300);
-            // Compteur animé
             this.knobPct = 0;
             if (target === 0) return;
             const step = () => {
