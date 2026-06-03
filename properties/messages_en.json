@@ -257,6 +257,14 @@
       "privacy": "Personal data",
       "credit": "Propulsé par DSIN@Esup-Portail"
     },
+    "print": {
+      "codes_title": "Backup codes",
+      "codes_intro": "Keep these codes in a safe place. Each code works only once and lets you authenticate if your other methods are unavailable. Tick each code once used.",
+      "grid_title": "Code grid",
+      "grid_intro": "When a code is requested, find the cell at the intersection of the given row and column. Keep this grid in a safe place.",
+      "security": "Sensitive document: do not share it with anyone. DSIN will never ask you for these codes. If lost or in doubt, regenerate them from your MFA area.",
+      "footer": "University of the Antilles — DSIN · Confidential document"
+    },
     "index": "secure access to your data.",
     "action": {
       "connection": "Login",

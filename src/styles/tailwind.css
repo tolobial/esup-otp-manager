@@ -249,78 +249,78 @@ body:has([data-tw]) main > .container {
   }
 }
 
-/*
- * Mode impression : 2 patterns distincts pour les codes
- * - bypass (codes de secours)  : liste verticale, grande police
- * - passcode_grid (grille)     : tableau compact 1 page portrait
- * Plus tout le chrome (sidebar, nav, contrôles) caché.
- */
+/* ═══════════════════════════════════════════════════════════════════
+ * IMPRESSION MFA — custom UA : feuilles A4 brandées (codes de secours
+ * + grille de codes). Bloc print UNIQUE. Aucune feuille print legacy,
+ * aucun visibility:hidden : on masque le chrome + le contenu écran, et
+ * on ne montre que .ua-print-sheet (rendu « hidden print:block »).
+ * ═══════════════════════════════════════════════════════════════════ */
+@page { size: A4; margin: 16mm 14mm; }
+
 @media print {
-  /* Cacher tout le chrome (navigation, contrôles non-imprimables) */
+  /* Chrome applicatif + bandeaux d'alerte masqués */
   [data-tw] .sidebar,
   #slide-out,
   .top-nav,
   body > header,
   body > footer,
-  [data-tw] [role="alert"],
-  .print\:hidden {
+  [data-tw] [role="alert"] {
     display: none !important;
   }
 
-  /* Contenu pleine largeur, pas de fond */
+  /* Conteneurs racine en pleine page, sans fond */
   [data-tw],
   [data-tw] > div,
   [data-tw] .flex-1 {
     display: block !important;
     width: 100% !important;
     min-height: 0 !important;
-    background: white !important;
+    background: #fff !important;
     padding: 0 !important;
   }
 
-  /* === BYPASS (codes de secours) : liste verticale, GRANDE police === */
-  .bypass-method-codes {
-    page-break-inside: avoid !important;
-    overflow: visible !important;
-    width: 100% !important;
-    list-style: none !important;
-    padding: 0 !important;
-    margin: 0 !important;
-  }
-  .bypass-method-codes li {
-    font-size: 22pt !important;
-    font-family: monospace !important;
-    padding: 10pt 0 !important;
-    letter-spacing: 2pt;
-    border-bottom: 1px solid #ccc !important;
-    page-break-inside: avoid;
-    color: #202E56 !important;
+  /* La carte écran qui enveloppe la feuille : aucun chrome imprimé */
+  [data-tw] :has(> .ua-print-sheet) {
+    border: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
   }
 
-  /* === PASSCODE_GRID (grille) : tableau compact 1 page portrait === */
-  .passcode_grid-method-codes {
-    page-break-inside: avoid !important;
-    overflow: visible !important;
-    width: 100% !important;
+  /* ── Feuille imprimable ─────────────────────────────────────────── */
+  .ua-print-sheet {
+    display: block !important;
+    color: #202E56;
+    font-family: "Open Sans", system-ui, sans-serif;
   }
-  .passcode_grid-method-codes table {
-    table-layout: fixed !important;
-    width: 100% !important;
-    font-size: 9pt !important;
-    border-collapse: collapse !important;
-  }
-  .passcode_grid-method-codes td,
-  .passcode_grid-method-codes th {
-    padding: 5pt 3pt !important;
-    border: 1px solid #999 !important;
-    text-align: center !important;
-    word-break: break-all;
-    color: #202E56 !important;
-  }
-  .passcode_grid-method-codes thead th {
-    background: #f3f4f6 !important;
-    font-weight: bold !important;
-  }
+  .ua-print-sheet * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+  /* En-tête : logo couleur + organisation + tag MFA */
+  .ua-print-head { display: flex; align-items: center; gap: 12px; padding-bottom: 10px; border-bottom: 2px solid #00A0DC; }
+  .ua-print-logo { height: 46px; width: auto; }
+  .ua-print-org { display: flex; flex-direction: column; line-height: 1.2; }
+  .ua-print-org-name { font-weight: 700; font-size: 13pt; color: #202E56; }
+  .ua-print-org-sub { font-size: 9pt; color: #475569; }
+  .ua-print-tag { margin-left: auto; font-size: 8.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: #fff; background: #202E56; padding: 4px 10px; border-radius: 3px; }
+
+  .ua-print-title { font-size: 19pt; font-weight: 800; color: #202E56; margin: 16px 0 4px; }
+  .ua-print-intro { font-size: 10pt; line-height: 1.5; color: #334155; margin: 0 0 14px; max-width: 155mm; }
+
+  /* Codes de secours : 2 colonnes, mono + cases à cocher */
+  .ua-print-codes { list-style: none; padding: 0; margin: 0; columns: 2; column-gap: 14mm; }
+  .ua-print-codes li { display: flex; align-items: center; gap: 9px; padding: 6pt 0; break-inside: avoid; border-bottom: 1px solid #e2e8f0; }
+  .ua-print-check { flex: none; width: 12pt; height: 12pt; border: 1.2pt solid #94a3b8; border-radius: 2px; }
+  .ua-print-code { font-family: monospace; font-size: 14pt; letter-spacing: 1.5pt; color: #202E56; }
+
+  /* Grille : tableau en-tête navy, lignes alternées */
+  .ua-print-grid { width: 100%; border-collapse: collapse; table-layout: fixed; margin: 0; }
+  .ua-print-grid th, .ua-print-grid td { border: 1px solid #cbd5e1; padding: 5pt 3pt; text-align: center; font-size: 10pt; word-break: break-all; }
+  .ua-print-grid thead th, .ua-print-grid tbody th { background: #202E56 !important; color: #fff !important; font-weight: 700; }
+  .ua-print-grid td { font-family: monospace; color: #202E56; }
+  .ua-print-grid tbody tr:nth-child(even) td { background: #f1f5f9 !important; }
+
+  /* Encart sécurité + pied confidentiel */
+  .ua-print-security { margin-top: 16px; padding: 10px 12px; border-left: 3px solid #CC5717; background: #fff7ed !important; font-size: 9pt; line-height: 1.45; color: #7c2d12; break-inside: avoid; }
+  .ua-print-foot { margin-top: 14px; padding-top: 8px; border-top: 1px solid #cbd5e1; font-size: 8pt; color: #64748b; text-align: center; }
 }
 
 @media (prefers-reduced-motion: reduce) {

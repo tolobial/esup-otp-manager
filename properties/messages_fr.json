@@ -257,6 +257,14 @@
       "privacy": "Données personnelles",
       "credit": "Propulsé par DSIN@Esup-Portail"
     },
+    "print": {
+      "codes_title": "Codes de secours",
+      "codes_intro": "Conservez ces codes en lieu sûr. Chaque code ne fonctionne qu'une seule fois et permet de vous authentifier si vos autres méthodes sont indisponibles. Cochez chaque code après l'avoir utilisé.",
+      "grid_title": "Grille de codes",
+      "grid_intro": "Lorsqu'un code vous est demandé, repérez la case à l'intersection de la ligne et de la colonne indiquées. Conservez cette grille en lieu sûr.",
+      "security": "Document sensible : ne le partagez avec personne. La DSIN ne vous demandera jamais ces codes. En cas de perte ou de doute, régénérez-les depuis votre espace MFA.",
+      "footer": "Université des Antilles — DSIN · Document confidentiel"
+    },
     "index": "sécuriser l’accès à vos données.",
     "action": {
       "connection": "Se connecter",

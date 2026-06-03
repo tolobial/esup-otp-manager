@@ -30,11 +30,8 @@ script#passcode_grid-method(type='text/x-template').
         </button>
       </div>
 
-      <!-- Stylesheet d'impression (préservée) -->
-      <link rel="stylesheet" href="/stylesheets/style-print-passcode_grid-method-codes.css" media="print"/>
-
-      <!-- Grille (table sémantique avec en-têtes lignes/colonnes) -->
-      <div class="passcode_grid-method-codes overflow-x-auto">
+      <!-- Grille (table sémantique avec en-têtes lignes/colonnes) — écran uniquement -->
+      <div class="passcode_grid-method-codes overflow-x-auto print:hidden">
         <table class="w-full" aria-label="Grille de codes de passe">
           <thead>
             <tr class="bg-gray-50 border-b border-gray-200">
@@ -65,15 +62,45 @@ script#passcode_grid-method(type='text/x-template').
           </tbody>
         </table>
       </div>
+
+      <!-- ░░ Feuille imprimable A4 brandée — grille de codes (custom UA) ░░ -->
+      <div class="ua-print-sheet hidden print:block" aria-hidden="true">
+        <header class="ua-print-head">
+          <img src="/images/logo_ua.png" alt="Université des Antilles" class="ua-print-logo">
+          <div class="ua-print-org">
+            <span class="ua-print-org-name">Université des Antilles</span>
+            <span class="ua-print-org-sub">Direction du Numérique — DSIN</span>
+          </div>
+          <span class="ua-print-tag">MFA · {{ messages.api.print.grid_title }}</span>
+        </header>
+        <h1 class="ua-print-title">{{ messages.api.print.grid_title }}</h1>
+        <p class="ua-print-intro">{{ messages.api.print.grid_intro }}</p>
+        <table class="ua-print-grid">
+          <thead>
+            <tr>
+              <th></th>
+              <th v-for="(code, colIndex) in user.methods.passcode_grid.grid[0]" :key="'pcol-' + colIndex">{{ colIndex + 1 }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(line, lineIndex) in user.methods.passcode_grid.grid" :key="'prow-' + lineIndex">
+              <th>{{ String.fromCharCode(lineIndex + 'A'.charCodeAt(0)) }}</th>
+              <td v-for="(code, colIndex) in line" :key="'pcell-' + colIndex">{{ code }}</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="ua-print-security">{{ messages.api.print.security }}</div>
+        <footer class="ua-print-foot">{{ messages.api.print.footer }}</footer>
+      </div>
     </div>
 
     <!-- Date de dernière génération -->
-    <p v-if="user.methods.passcode_grid.generation_date" class="text-xs text-gray-500 italic">
+    <p v-if="user.methods.passcode_grid.generation_date" class="text-xs text-gray-500 italic print:hidden">
       {{ messages.api.methods.passcode_grid.generation_date.replace("%DATE%", generationDateString) }}
     </p>
 
     <!-- Bouton (re)générer -->
-    <div class="flex justify-center pt-2">
+    <div class="flex justify-center pt-2 print:hidden">
       <button type="button"
               @click="generate_passcode_grid"
               class="inline-flex items-center gap-2 px-6 py-3 bg-ua-navy hover:bg-ua-indigo text-white font-semibold text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-navy focus-visible:ring-offset-2">
