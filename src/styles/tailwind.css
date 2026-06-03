@@ -95,6 +95,15 @@ body:has([data-tw]) main > .container {
   opacity: 0;
   display: none;
 }
+/* Logo topbar : responsive, ratio toujours préservé (jamais déformé ni écrasé).
+   Déplié : hauteur fixe ~48px, largeur auto. Garde-fous max-width/object-fit. */
+.ua-topbar-logo { display: block; height: 48px; width: auto; max-width: 100%; object-fit: contain; }
+/* Plié (rail étroit) : on contraint par la largeur de la colonne, hauteur auto. */
+[data-tw]:not(:has(#sidebar-toggle:checked)) .sidebar .ua-topbar-logo {
+  height: auto;
+  width: 100%;
+  min-width: 0;
+}
 /* Icône toggle : flèche direction */
 [data-tw]:has(#sidebar-toggle:checked) .sidebar .toggle-expand {
   display: none;
@@ -137,6 +146,12 @@ body:has([data-tw]) main > .container {
   [data-tw]:not(:has(#sidebar-toggle:checked)) .sidebar:focus-within .ua-nav-back span {
     opacity: 1;
     display: inline;
+  }
+  /* Sidebar redéployée au survol : le logo retrouve sa taille dépliée. */
+  [data-tw]:not(:has(#sidebar-toggle:checked)) .sidebar:hover .ua-topbar-logo,
+  [data-tw]:not(:has(#sidebar-toggle:checked)) .sidebar:focus-within .ua-topbar-logo {
+    height: 48px;
+    width: auto;
   }
   [data-tw]:not(:has(#sidebar-toggle:checked)) .sidebar:hover .ua-nav-count,
   [data-tw]:not(:has(#sidebar-toggle:checked)) .sidebar:focus-within .ua-nav-count,
@@ -221,6 +236,12 @@ body:has([data-tw]) main > .container {
   }
   [data-tw] .sidebar .sidebar-label {
     display: none !important;
+  }
+  /* Rail toujours étroit sur mobile : logo responsive quel que soit l'état du toggle. */
+  [data-tw] .sidebar .ua-topbar-logo {
+    height: auto !important;
+    width: 100%;
+    min-width: 0;
   }
   [data-tw] .sidebar .toggle-expand,
   [data-tw] .sidebar .toggle-collapse {
