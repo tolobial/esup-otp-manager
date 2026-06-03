@@ -157,7 +157,7 @@ body:has([data-tw]) main > .container {
 
 @layer components {
   /* Bloc d'aide : séparateur « AIDE » + carte en relief contenant le dock. */
-  .ua-help { margin: 0 auto; padding: 20px 40px 22px; background: #fff; border: 1px solid #e2e5ea; border-radius: calc(var(--radius) * 2); box-shadow: 0 12px 32px -12px rgba(32,46,86,.24); }
+  .ua-help { width: 100%; margin: 0 auto; padding: 20px 40px 22px; background: #fff; border: 1px solid #e2e5ea; border-radius: calc(var(--radius) * 2); box-shadow: 0 12px 32px -12px rgba(32,46,86,.24); }
   .ua-help-sep { display: flex; align-items: center; justify-content: center; gap: 14px; max-width: 720px; margin: 0 auto 16px; }
   .ua-help-sep-line { flex: 1; height: 1px; background: #d4d9e2; }
   .ua-help-sep-label { font-size: .75rem; line-height: 1rem; text-transform: uppercase; letter-spacing: .12em; color: #00A0DC; font-weight: 600; }
