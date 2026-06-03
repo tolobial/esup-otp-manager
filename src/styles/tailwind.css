@@ -177,10 +177,10 @@ body:has([data-tw]) main > .container {
   .ua-support-btn:hover { background: #b34a13; box-shadow: 0 4px 12px rgba(204,87,23,.30); }
 
   /* Footer institutionnel : barre claire sur une ligne. */
-  .ua-footer { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin: 0 auto; padding: 12px 22px; border-radius: 12px; background: #f5f6f8; border: 1px solid #e7eaef; }
+  .ua-footer { display: flex; flex-direction: column; gap: 8px; margin: 0 auto; padding: 12px 22px; border-radius: 12px; background: #f5f6f8; border: 1px solid #e7eaef; }
   .ua-footer-link { color: #6b7280; text-decoration: none; transition: color 160ms; }
   .ua-footer-link:hover { color: var(--color-ua-blue); }
-  .ua-logo { display: inline-block; width: 38px; height: 26px; border: 1px dashed #c2c8d4; border-radius: var(--radius); flex-shrink: 0; }
+  .ua-logo { height: 30px; width: auto; display: block; }
 
   .ua-nav-item { display:flex; align-items:center; gap:11px; padding:5px 10px; border-radius:3px; color:rgba(255,255,255,.62); font-size:13px; text-decoration:none; transition:background .15s,color .15s; }
   .ua-nav-item:hover { background:rgba(255,255,255,.06); color:#fff; }
