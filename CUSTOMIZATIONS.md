@@ -29,7 +29,9 @@ CR80** pour la grille.
    dimensions fixes 85,6 × 54 mm (mini-branding + grille compacte ou 10 codes mono sur
    2 colonnes) imprimé sur page standard, à découper. Piloté par `printMode`
    (`'sheet'` | `'card'`) posé avant `window.print()`, sur `BypassMethod` et
-   `PasscodeGridMethod`.
+   `PasscodeGridMethod`. La carte porte un **contour de découpe en pointillés** au bord
+   exact + de discrets **repères de coupe** aux 4 coins (`.ua-print-cr80::after`,
+   `@media print` uniquement — n'affecte pas l'A4).
 
 ### Fichiers touchés
 - `views/templates/bypass-method.pug` — bloc `.ua-print-sheet` (sous-blocs `.ua-print-a4`

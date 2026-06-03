@@ -327,9 +327,27 @@ body:has([data-tw]) main > .container {
   .ua-print--card .ua-print-a4 { display: none; }
   /* Carte format CR80 (85,6 × 54 mm), imprimée sur page standard, à découper */
   .ua-print-cr80 {
+    position: relative;
     box-sizing: border-box; width: 85.6mm; height: 53.98mm; padding: 3mm;
-    border: 1px solid #94a3b8; border-radius: 3mm; overflow: hidden;
+    border: 1px dashed #94a3b8; border-radius: 3mm; overflow: visible;
     display: flex; flex-direction: column; color: #202E56;
+  }
+  /* Repères de coupe discrets aux 4 coins (impression uniquement, n'affecte pas l'A4) */
+  .ua-print-cr80::after {
+    content: ""; position: absolute; inset: -2.5mm; pointer-events: none;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+    background-repeat: no-repeat;
+    background-image:
+      linear-gradient(#9ca3af, #9ca3af), linear-gradient(#9ca3af, #9ca3af),
+      linear-gradient(#9ca3af, #9ca3af), linear-gradient(#9ca3af, #9ca3af),
+      linear-gradient(#9ca3af, #9ca3af), linear-gradient(#9ca3af, #9ca3af),
+      linear-gradient(#9ca3af, #9ca3af), linear-gradient(#9ca3af, #9ca3af);
+    background-size:
+      3mm .25mm, .25mm 3mm, 3mm .25mm, .25mm 3mm,
+      3mm .25mm, .25mm 3mm, 3mm .25mm, .25mm 3mm;
+    background-position:
+      left top, left top, right top, right top,
+      left bottom, left bottom, right bottom, right bottom;
   }
   .ua-print-cr80-head { display: flex; align-items: center; gap: 2mm; margin-bottom: 1.5mm; }
   .ua-print-cr80-logo { height: 7mm; width: auto; }
