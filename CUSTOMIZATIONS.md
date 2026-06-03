@@ -25,18 +25,21 @@ CR80** pour la grille.
    Antilles / Direction du Numérique — DSIN » + tag « MFA · {titre} » ; titre + mode
    d'emploi ; codes (mono, 2 colonnes, cases à cocher) ou grille (tableau en-tête navy,
    lignes alternées) ; encart sécurité ; pied « … · Document confidentiel ».
-2. **Carte CR80** (grille uniquement) : 2ᵉ bouton « Carte » ; élément à dimensions fixes
-   85,6 × 54 mm (mini-branding + grille compacte) imprimé sur page standard, à découper.
-   Piloté par `printMode` (`'sheet'` | `'card'`) posé avant `window.print()`.
+2. **Carte CR80** (grille **et** codes de secours) : 2ᵉ bouton « Carte » ; élément à
+   dimensions fixes 85,6 × 54 mm (mini-branding + grille compacte ou 10 codes mono sur
+   2 colonnes) imprimé sur page standard, à découper. Piloté par `printMode`
+   (`'sheet'` | `'card'`) posé avant `window.print()`, sur `BypassMethod` et
+   `PasscodeGridMethod`.
 
 ### Fichiers touchés
-- `views/templates/bypass-method.pug` — bloc `.ua-print-sheet` A4 ; `print:hidden` sur
-  les éléments écran (KPI, liste, date, bouton régénérer).
+- `views/templates/bypass-method.pug` — bloc `.ua-print-sheet` (sous-blocs `.ua-print-a4`
+  + `.ua-print-cr80`) ; 2 boutons (`printAs('sheet'|'card')`) ; `print:hidden` sur les
+  éléments écran (KPI, liste, date, bouton régénérer).
 - `views/templates/passcode_grid-method.pug` — bloc `.ua-print-sheet` (sous-blocs
   `.ua-print-a4` + `.ua-print-cr80`) ; 2 boutons (`printAs('sheet'|'card')`) ;
   `print:hidden` sur les éléments écran.
-- `public/javascripts/app.js` — `PasscodeGridMethod` : `data.printMode` + méthode
-  `printAs(mode)` (pose le mode puis `$nextTick(window.print)`).
+- `public/javascripts/app.js` — `BypassMethod` et `PasscodeGridMethod` : `data.printMode`
+  + méthode `printAs(mode)` (pose le mode puis `$nextTick(window.print)`).
 - `src/styles/tailwind.css` — bloc **unique** `@media print` balisé « IMPRESSION MFA —
   custom UA » + `@page { size: A4; margin: 16mm 14mm }`. (Le CSS servi
   `public/stylesheets/tailwind.css` est régénéré par le hook de pré-commit ; ne pas le
@@ -55,7 +58,7 @@ CR80** pour la grille.
 `ua-print-grid`, `ua-print-security`, `ua-print-foot` ; variante carte :
 `ua-print--sheet`/`ua-print--card`, `ua-print-a4`, `ua-print-cr80`,
 `ua-print-cr80-head`, `ua-print-cr80-logo`, `ua-print-cr80-tag`,
-`ua-print-cr80-grid`.
+`ua-print-cr80-grid`, `ua-print-cr80-codes`.
 
 ### Legacy retiré
 - `<link rel="stylesheet" media="print">` supprimés des 2 templates.

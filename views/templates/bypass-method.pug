@@ -27,15 +27,27 @@ script#bypass-method(type='text/x-template').
       <!-- En-tête : titre + bouton IMPRIMER bien visible (AJOUT UX) -->
       <div class="px-4 py-3 border-b border-gray-200 flex items-center justify-between gap-3 print:hidden">
         <h4 class="font-semibold text-ua-navy text-sm">{{messages.api.methods.bypass.generated_codes}}</h4>
-        <button type="button"
-                onclick="window.print()"
-                class="inline-flex items-center gap-2 px-5 py-2.5 bg-ua-blue hover:bg-ua-indigo text-white font-semibold text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue focus-visible:ring-offset-2"
-                aria-label="Imprimer les codes de secours">
-          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0 1 10.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0 .229 2.523a1.125 1.125 0 0 1-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0 0 21 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 0 0-1.913-.247M6.34 18H5.25A2.25 2.25 0 0 1 3 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 0 1 1.913-.247m10.5 0a48.536 48.536 0 0 0-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5Zm-3 0h.008v.008H15V10.5Z"/>
-          </svg>
-          <span>Imprimer</span>
-        </button>
+        <div class="flex items-center gap-2">
+          <button type="button"
+                  @click="printAs('sheet')"
+                  class="inline-flex items-center gap-2 px-5 py-2.5 bg-ua-blue hover:bg-ua-indigo text-white font-semibold text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-blue focus-visible:ring-offset-2"
+                  aria-label="Imprimer les codes de secours au format A4">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0 1 10.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0 .229 2.523a1.125 1.125 0 0 1-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0 0 21 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 0 0-1.913-.247M6.34 18H5.25A2.25 2.25 0 0 1 3 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 0 1 1.913-.247m10.5 0a48.536 48.536 0 0 0-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5Zm-3 0h.008v.008H15V10.5Z"/>
+            </svg>
+            <span>Imprimer (A4)</span>
+          </button>
+          <button type="button"
+                  @click="printAs('card')"
+                  class="inline-flex items-center gap-2 px-5 py-2.5 bg-ua-navy hover:bg-ua-indigo text-white font-semibold text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-navy focus-visible:ring-offset-2"
+                  aria-label="Imprimer les codes de secours au format carte (CR80)">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+              <rect x="3" y="5" width="18" height="14" rx="2"></rect>
+              <path stroke-linecap="round" d="M3 9.5h18"></path>
+            </svg>
+            <span>Carte</span>
+          </button>
+        </div>
       </div>
 
       <!-- Liste verticale des codes (écran uniquement) -->
@@ -47,26 +59,44 @@ script#bypass-method(type='text/x-template').
         </li>
       </ul>
 
-      <!-- ░░ Feuille imprimable A4 brandée — codes de secours (custom UA) ░░ -->
-      <div class="ua-print-sheet hidden print:block" aria-hidden="true">
-        <header class="ua-print-head">
-          <img src="/images/logo_ua.png" alt="Université des Antilles" class="ua-print-logo">
-          <div class="ua-print-org">
-            <span class="ua-print-org-name">Université des Antilles</span>
-            <span class="ua-print-org-sub">Direction du Numérique — DSIN</span>
+      <!-- ░░ Feuille imprimable — codes de secours (custom UA).
+           printMode='sheet' → A4 brandée ; printMode='card' → carte CR80. ░░ -->
+      <div class="ua-print-sheet hidden print:block"
+           :class="printMode === 'card' ? 'ua-print--card' : 'ua-print--sheet'"
+           aria-hidden="true">
+
+        <!-- Format A4 brandé -->
+        <div class="ua-print-a4">
+          <header class="ua-print-head">
+            <img src="/images/logo_ua.png" alt="Université des Antilles" class="ua-print-logo">
+            <div class="ua-print-org">
+              <span class="ua-print-org-name">Université des Antilles</span>
+              <span class="ua-print-org-sub">Direction du Numérique — DSIN</span>
+            </div>
+            <span class="ua-print-tag">MFA · {{ messages.api.print.codes_title }}</span>
+          </header>
+          <h1 class="ua-print-title">{{ messages.api.print.codes_title }}</h1>
+          <p class="ua-print-intro">{{ messages.api.print.codes_intro }}</p>
+          <ul class="ua-print-codes">
+            <li v-for="code in user.methods.bypass.codes" :key="'p-' + code">
+              <span class="ua-print-check" aria-hidden="true"></span>
+              <span class="ua-print-code">{{ code }}</span>
+            </li>
+          </ul>
+          <div class="ua-print-security">{{ messages.api.print.security }}</div>
+          <footer class="ua-print-foot">{{ messages.api.print.footer }}</footer>
+        </div>
+
+        <!-- Format carte CR80 (85,6 × 54 mm) — mini-branding + 10 codes mono, à découper -->
+        <div class="ua-print-cr80">
+          <div class="ua-print-cr80-head">
+            <img src="/images/logo_ua.png" alt="Université des Antilles" class="ua-print-cr80-logo">
+            <span class="ua-print-cr80-tag">UA · MFA</span>
           </div>
-          <span class="ua-print-tag">MFA · {{ messages.api.print.codes_title }}</span>
-        </header>
-        <h1 class="ua-print-title">{{ messages.api.print.codes_title }}</h1>
-        <p class="ua-print-intro">{{ messages.api.print.codes_intro }}</p>
-        <ul class="ua-print-codes">
-          <li v-for="code in user.methods.bypass.codes" :key="'p-' + code">
-            <span class="ua-print-check" aria-hidden="true"></span>
-            <span class="ua-print-code">{{ code }}</span>
-          </li>
-        </ul>
-        <div class="ua-print-security">{{ messages.api.print.security }}</div>
-        <footer class="ua-print-foot">{{ messages.api.print.footer }}</footer>
+          <ul class="ua-print-cr80-codes">
+            <li v-for="code in user.methods.bypass.codes" :key="'c-' + code">{{ code }}</li>
+          </ul>
+        </div>
       </div>
     </div>
 
