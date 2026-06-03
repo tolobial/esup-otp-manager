@@ -321,6 +321,23 @@ body:has([data-tw]) main > .container {
   /* Encart sécurité + pied confidentiel */
   .ua-print-security { margin-top: 16px; padding: 10px 12px; border-left: 3px solid #CC5717; background: #fff7ed !important; font-size: 9pt; line-height: 1.45; color: #7c2d12; break-inside: avoid; }
   .ua-print-foot { margin-top: 14px; padding-top: 8px; border-top: 1px solid #cbd5e1; font-size: 8pt; color: #64748b; text-align: center; }
+
+  /* ── Grille : bascule A4 ↔ carte CR80 (selon printMode) ─────────── */
+  .ua-print--sheet .ua-print-cr80 { display: none; }
+  .ua-print--card .ua-print-a4 { display: none; }
+  /* Carte format CR80 (85,6 × 54 mm), imprimée sur page standard, à découper */
+  .ua-print-cr80 {
+    box-sizing: border-box; width: 85.6mm; height: 53.98mm; padding: 3mm;
+    border: 1px solid #94a3b8; border-radius: 3mm; overflow: hidden;
+    display: flex; flex-direction: column; color: #202E56;
+  }
+  .ua-print-cr80-head { display: flex; align-items: center; gap: 2mm; margin-bottom: 1.5mm; }
+  .ua-print-cr80-logo { height: 7mm; width: auto; }
+  .ua-print-cr80-tag { margin-left: auto; font-size: 6pt; font-weight: 700; letter-spacing: .06em; color: #202E56; }
+  .ua-print-cr80-grid { flex: 1; width: 100%; border-collapse: collapse; table-layout: fixed; }
+  .ua-print-cr80-grid th, .ua-print-cr80-grid td { border: .4pt solid #cbd5e1; padding: .4mm; text-align: center; font-size: 5.5pt; word-break: break-all; }
+  .ua-print-cr80-grid thead th, .ua-print-cr80-grid tbody th { background: #202E56 !important; color: #fff !important; font-weight: 700; }
+  .ua-print-cr80-grid td { font-family: monospace; }
 }
 
 @media (prefers-reduced-motion: reduce) {

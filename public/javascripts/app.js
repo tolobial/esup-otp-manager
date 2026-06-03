@@ -224,11 +224,22 @@ const PasscodeGridMethod = {
         'messages': Object,
         'infos': Object,
     },
+    data: function () {
+        // Format d'impression de la grille : 'sheet' (A4 brandée) | 'card' (carte CR80).
+        return { printMode: 'sheet' };
+    },
     computed: {
         generationDateString() {
             const date = new Date(this.user.methods.passcode_grid.generation_date);
             return date.toLocaleDateString(this.infos.lang || "en", dateTimeFormatOptions)
         },
+    },
+    methods: {
+        // Sélectionne le format puis imprime une fois le DOM à jour.
+        printAs: function (mode) {
+            this.printMode = mode;
+            this.$nextTick(function () { window.print(); });
+        }
     },
     template: '#passcode_grid-method'
 };
