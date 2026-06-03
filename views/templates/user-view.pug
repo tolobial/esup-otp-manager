@@ -28,8 +28,8 @@ script#user-view(type='text/x-template').
              class="bg-white border border-gray-200 transition-colors"
              :class="user.methods[method.name].active && !user.methods[method.name].askActivation ? 'border-l-[3px] border-l-ua-blue' : (user.methods[method.name].askActivation ? 'border-l-[3px] border-l-ua-orange' : 'border-l-[3px] border-l-gray-300')">
 
-          <!-- Header carte méthode -->
-          <div class="px-5 py-4 flex items-center justify-between gap-4">
+          <!-- Header carte méthode (écran uniquement) -->
+          <div class="px-5 py-4 flex items-center justify-between gap-4 print:hidden">
             <div class="flex-1 min-w-0">
               <h3 class="font-semibold text-ua-navy text-sm">{{method.label || method.name}}</h3>
               <p class="text-xs mt-0.5">

@@ -119,14 +119,14 @@ script#user-dashboard(type='text/x-template').
         <template v-for="method in methods" :key="method.name">
           <div v-if="method.activate && currentmethod === method.name" autofocus aria-live="assertive" class="space-y-6">
 
-            <!-- En-tête méthode -->
-            <div>
+            <!-- En-tête méthode (écran uniquement : la feuille brandée porte son propre titre) -->
+            <div class="print:hidden">
               <h2 class="font-display font-bold text-2xl text-ua-navy uppercase tracking-wide">{{method.label || method.name}}</h2>
               <p class="text-gray-500 text-sm mt-1">{{messages.api.methods[method.name].description}}</p>
             </div>
 
-            <!-- Carte switch d'activation (3 états : off / askActivation / on) -->
-            <div class="bg-white border border-gray-200 p-4 flex items-center justify-between gap-4">
+            <!-- Carte switch d'activation (3 états : off / askActivation / on) — écran uniquement -->
+            <div class="bg-white border border-gray-200 p-4 flex items-center justify-between gap-4 print:hidden">
               <div class="flex-1 min-w-0">
                 <p class="text-sm">
                   <span v-if="user.methods[method.name].active && !user.methods[method.name].askActivation" class="font-medium text-green-600 inline-flex items-center gap-2">

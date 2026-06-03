@@ -48,6 +48,9 @@ CR80** pour la grille.
   recompiler à la main.)
 - `properties/messages_fr.json`, `properties/messages_en.json` — bloc additif
   `api.print`.
+- `views/templates/user-dashboard.pug`, `views/templates/user-view.pug` — `print:hidden`
+  sur l'en-tête méthode (titre / description / badge Activé / interrupteur) afin de ne
+  garder que la feuille brandée à l'impression.
 
 ### Clés i18n ajoutées (additives, sous `api.print`)
 `codes_title`, `codes_intro`, `grid_title`, `grid_intro`, `security`, `footer`
