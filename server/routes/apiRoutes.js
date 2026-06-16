@@ -156,7 +156,21 @@ async function request_otp_api(req, res, opts_) {
     // kind of frustrating.
     res.status(response.statusCode);
     /** @type {Object} */
-    const infos = await response.body.json();
+    let infos;
+    try {
+        infos = await response.body.json();
+    } catch (error) {
+        // L'API a répondu autre chose que du JSON (page d'erreur, API
+        // injoignable derrière un proxy, etc.). Sans ce catch, le rejet
+        // remonte non géré et tue le process (les handlers de route
+        // n'attendent pas request_otp_api).
+        logger.error(`Invalid JSON from api (${opts_.relUrl}): ${error.message}`);
+        res.status(502);
+        return res.send({
+            "code": "Error",
+            "message": "Api did not give a valid JSON response"
+        });
+    }
     logger.debug(infos);
     res.send(infos);
 }
