@@ -60,13 +60,13 @@ script#user-view(type='text/x-template').
                      :aria-label="method.label"
                      :checked="user.methods[method.name].active && !user.methods[method.name].askActivation"
                      class="sr-only peer">
-              <span class="w-12 h-6 transition-colors duration-200 inline-block"
+              <span class="w-12 h-6 transition-colors duration-200 inline-block rounded-full"
                     :class="{
                       'bg-gray-300': !user.methods[method.name].active,
                       'bg-ua-orange': user.methods[method.name].askActivation,
                       'bg-ua-blue': user.methods[method.name].active && !user.methods[method.name].askActivation
                     }"></span>
-              <span class="absolute top-0.5 w-5 h-5 bg-white transition-all duration-200 pointer-events-none"
+              <span class="absolute top-0.5 w-5 h-5 bg-white transition-all duration-200 pointer-events-none rounded-full"
                     :class="{
                       'left-0.5': !user.methods[method.name].active && !user.methods[method.name].askActivation,
                       'left-3': user.methods[method.name].askActivation,
