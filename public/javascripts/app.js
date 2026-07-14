@@ -1093,7 +1093,77 @@ const AdminDashboard = {
         'user': Object,
     },
     template: '#admin-dashboard',
+    data: function () {
+        return {
+            // Thème partagé avec la home ('fan' | 'hero' | 'legacy'), relu depuis le même localStorage.
+            homeView: (function () {
+                var allowed = ['fan', 'hero', 'legacy'];
+                try {
+                    var v = localStorage.getItem('ua-home-view');
+                    return allowed.indexOf(v) !== -1 ? v : 'fan';
+                } catch (e) { return 'fan'; }
+            })(),
+            fanActive: 0,
+            fanMode: 'grid'   // 'grid' (par 3, défaut) | 'fan' (éventail). Pas d'auto-animation : page de config.
+        };
+    },
+    computed: {
+        // Admin : on affiche TOUTES les méthodes (même désactivées) pour pouvoir les (ré)activer.
+        visibleMethods: function () {
+            var m = this.methods || {};
+            return Object.keys(m).map(function (k) { return m[k]; });
+        },
+        methodGroups: function () { return METHOD_GROUPS; }
+    },
     methods: {
+        // --- Thème (miroir léger de Home, sémantique admin) ---
+        methodWeight: function (name) { return METHOD_WEIGHTS[name] || 0; },
+        setHomeView: function (v) {
+            this.homeView = v;
+            try { localStorage.setItem('ua-home-view', v); } catch (e) {}
+            if (v === 'fan') this.fanMode = 'grid';
+        },
+        fanColor: function (i) { return ['bleu', 'navy', 'warm'][i % 3]; },
+        fanOff: function (i) {
+            var n = this.visibleMethods.length;
+            var r = i - this.fanActive;
+            var alt = r > 0 ? r - n : r + n;
+            return Math.abs(alt) < Math.abs(r) ? alt : r;
+        },
+        fanStageStyle: function () {
+            if (this.fanMode !== 'grid') return {};
+            var rows = Math.max(1, Math.ceil(this.visibleMethods.length / 3));
+            var rowStep = 168 * 0.9 + 26;
+            return { height: (rows * rowStep + 60) + 'px' };
+        },
+        fanSlotStyle: function (i) {
+            var H = 168, maxOff = 2, spacing = 152, step = 10, depth = 140;
+            if (this.fanMode === 'grid') {
+                var n = this.visibleMethods.length, cols = 3, s = 0.9;
+                var spacingX = 356, rowStepY = H * s + 26;
+                var rows = Math.ceil(n / cols);
+                var r = Math.floor(i / cols), posInRow = i - r * cols;
+                var itemsInRow = Math.min(cols, n - r * cols);
+                var x = (posInRow - (itemsInRow - 1) / 2) * spacingX;
+                var y = (r - (rows - 1) / 2) * rowStepY;
+                return { transform: 'translate(-50%,-50%) translateX(' + x + 'px) translateY(' + y + 'px) scale(' + s + ')', opacity: 1, zIndex: 10, pointerEvents: 'auto' };
+            }
+            var o = this.fanOff(i), a = Math.abs(o), vis = a <= maxOff, lift = o === 0 ? -14 : 0;
+            return {
+                transform: 'translate(-50%,-50%) translateX(' + (o * spacing) + 'px) translateY(' + (a * 8 + lift) + 'px) translateZ(' + (-a * depth) + 'px) rotateZ(' + (o * step) + 'deg) scale(' + (o === 0 ? 1 : 0.9) + ')',
+                opacity: vis ? 1 : 0,
+                zIndex: 100 - a,
+                pointerEvents: vis ? 'auto' : 'none'
+            };
+        },
+        fanGo: function (i) { if (this.fanMode === 'fan') this.fanActive = i; },
+        fanPrev: function () { if (this.fanMode === 'fan') { var n = this.visibleMethods.length; this.fanActive = (this.fanActive - 1 + n) % n; } },
+        fanNext: function () { if (this.fanMode === 'fan') { var n = this.visibleMethods.length; this.fanActive = (this.fanActive + 1) % n; } },
+        fanToggleMode: function () { this.fanMode = (this.fanMode === 'fan') ? 'grid' : 'fan'; },
+        // Clic sur une carte : en éventail on la recentre. Aucune (dés)activation par clic sur la carte
+        // (l'admin bascule uniquement via le switch dédié — évite un toggle global accidentel).
+        onCardClick: function (i) { if (this.fanMode === 'fan') this.fanGo(i); },
+
         activate: function(event) {
             event.target.checked = true;
             return fetchApi({
@@ -1489,6 +1559,9 @@ const METHOD_GROUPS = {
   weak:          ['random_code_mail', 'random_code']
 };
 
+// Nombre minimum de méthodes recommandé (« paramétrez au moins N méthodes »).
+const RECOMMENDED_MIN = 2;
+
 // Méthodes activables en 1 clic depuis la home (aucune saisie utilisateur).
 const SIMPLE_ACTIVATE_METHODS = ['bypass', 'passcode_grid', 'esupnfc'];
 
@@ -1502,17 +1575,25 @@ const Home = {
     },
     data: function () {
         return {
-            // 'grid' (gestion, défaut) | 'fan' (vitrine)
-            homeView: (function () { try { return localStorage.getItem('ua-home-view') || 'grid'; } catch (e) { return 'grid'; } })(),
-            bentoSelected: null,
+            // 'fan' (vitrine, défaut) | 'hero' | 'legacy' (origine)
+            homeView: (function () {
+                var allowed = ['fan', 'hero', 'legacy'];
+                try {
+                    var v = localStorage.getItem('ua-home-view');
+                    return allowed.indexOf(v) !== -1 ? v : 'fan';
+                } catch (e) { return 'fan'; }
+            })(),
             fanActive: 0,
-            fanMode: 'fan',     // 'fan' | 'pairs'
+            fanMode: 'grid',        // 'grid' (icônes alignées par 3, défaut) | 'fan' (éventail animé)
+            fanManualFan: false,    // true si l'éventail a été activé manuellement (ne pas revenir en grille sur activité)
             _fanIdle: null,
-            fanHover: false,
-            fanInterval: 3000,      // vitesse du défilement (ms entre 2 cartes)
-            fanIdleDelay: 10000,    // délai de survol avant passage en 2 colonnes
+            _activityHandler: null,
+            _lastAct: 0,
+            fanInterval: 3000,      // vitesse du défilement de l'éventail (ms entre 2 cartes)
+            fanIdleDelay: 180000,   // inactivité avant passage automatique en éventail (3 min)
             _fanAuto: null,
-            knobPct: 0
+            knobPct: 0,
+            supportOpen: false
         };
     },
     computed: {
@@ -1538,7 +1619,7 @@ const Home = {
                 else if (pct <= 89) { levelKey = 'good';      color = '#00A0DC'; }
                 else                { levelKey = 'excellent'; color = '#16a34a'; }
             }
-            return { pct, levelKey, color, count: active.length, sum, objective: active.length >= 2 };
+            return { pct, levelKey, color, count: active.length, recommended: RECOMMENDED_MIN, sum, objective: active.length >= RECOMMENDED_MIN };
         },
 
         nextLevelSuggestion() {
@@ -1588,15 +1669,15 @@ const Home = {
     },
     watch: {
         fanMode: function (m) {
-            if (m === 'pairs') this.fanAutoStop();
-            else if (!this.fanHover) this.fanAutoStart();
+            if (m === 'fan') this.fanAutoStart();
+            else this.fanAutoStop();
         },
         'weightedScore.pct'() {
             this.$nextTick(() => this.animateKnob());
         }
     },
-    mounted: function () { this.fanAutoStart(); this.$nextTick(() => this.animateKnob()); },
-    beforeUnmount: function () { this.fanAutoStop(); this.fanClearIdle(); },
+    mounted: function () { this.startIdleWatch(); this.$nextTick(() => this.animateKnob()); },
+    beforeUnmount: function () { this.fanAutoStop(); this.stopIdleWatch(); },
     methods: {
         // Compteur animé du centre de l'anneau (0 → score réel). Le remplissage de
         // l'anneau lui-même est piloté en CSS via gaugeOffset (stroke-dashoffset).
@@ -1807,7 +1888,7 @@ const Home = {
         fanAutoStart: function () {
             this.fanAutoStop();
             if (this.homeView !== 'fan' || this.fanMode !== 'fan') return;
-            if (this.fanHover || this.fanReducedMotion()) return;
+            if (this.fanReducedMotion()) return;
             if (this.visibleMethods.length < 2) return;
             var self = this;
             this._fanAuto = setInterval(function () {
@@ -1821,17 +1902,16 @@ const Home = {
         setHomeView: function (v) {
             this.homeView = v;
             try { localStorage.setItem('ua-home-view', v); } catch (e) {}
-            if (v === 'fan') this.fanAutoStart(); else this.fanAutoStop();
+            if (v === 'fan') {
+                // On (re)part toujours sur la grille par 3 ; l'éventail reviendra après inactivité.
+                this.fanMode = 'grid';
+                this.fanManualFan = false;
+                this.fanAutoStop();
+                this.resetIdleTimer();
+            } else {
+                this.fanAutoStop();
+            }
         },
-        // --- Vue bento (option B : aperçu en modal) ---
-        bentoSpan: function (i) {
-            var pattern = [ {c:2,r:2}, {c:2,r:1}, {c:1,r:1}, {c:1,r:1}, {c:2,r:1}, {c:1,r:1} ];
-            var p = pattern[i % pattern.length];
-            return { gridColumn: 'span ' + p.c, gridRow: 'span ' + p.r };
-        },
-        openBento: function (method) { this.bentoSelected = method; },
-        closeBento: function () { this.bentoSelected = null; },
-        bentoManage: function () { var m = this.bentoSelected; this.closeBento(); this.clickMethodCard(m.name); },
         fanColor: function (i) { return ['bleu', 'navy', 'warm'][i % 3]; },
         fanOff: function (i) {
             var n = this.visibleMethods.length;
@@ -1839,14 +1919,25 @@ const Home = {
             var alt = r > 0 ? r - n : r + n;
             return Math.abs(alt) < Math.abs(r) ? alt : r;
         },
+        // Hauteur du stage : dynamique en mode grille (selon le nombre de lignes), CSS sinon.
+        fanStageStyle: function () {
+            if (this.fanMode !== 'grid') return {};
+            var rows = Math.max(1, Math.ceil(this.visibleMethods.length / 3));
+            var rowStep = 168 * 0.9 + 26;
+            return { height: (rows * rowStep + 60) + 'px' };
+        },
         fanSlotStyle: function (i) {
             var W = 360, H = 168, maxOff = 2, spacing = 152, step = 10, depth = 140;
-            if (this.fanMode === 'pairs') {
-                var n = this.visibleMethods.length, rows = Math.ceil(n / 2);
-                var r = Math.floor(i / 2), c = i % 2, last = (i === n - 1 && n % 2 === 1);
-                var x = last ? 0 : (c === 0 ? -(W / 2 + 11) : (W / 2 + 11));
-                var y = (r - (rows - 1) / 2) * (H + 22);
-                return { transform: 'translate(-50%,-50%) translateX(' + x + 'px) translateY(' + y + 'px) scale(1)', opacity: 1, zIndex: 10, pointerEvents: 'auto' };
+            if (this.fanMode === 'grid') {
+                // Icônes alignées par 3, chaque ligne centrée, cartes légèrement réduites.
+                var n = this.visibleMethods.length, cols = 3, s = 0.9;
+                var spacingX = 356, rowStepY = H * s + 26;
+                var rows = Math.ceil(n / cols);
+                var r = Math.floor(i / cols), posInRow = i - r * cols;
+                var itemsInRow = Math.min(cols, n - r * cols);
+                var x = (posInRow - (itemsInRow - 1) / 2) * spacingX;
+                var y = (r - (rows - 1) / 2) * rowStepY;
+                return { transform: 'translate(-50%,-50%) translateX(' + x + 'px) translateY(' + y + 'px) scale(' + s + ')', opacity: 1, zIndex: 10, pointerEvents: 'auto' };
             }
             var o = this.fanOff(i), a = Math.abs(o), vis = a <= maxOff, lift = o === 0 ? -14 : 0;
             return {
@@ -1860,27 +1951,63 @@ const Home = {
         fanPrev: function () { if (this.fanMode === 'fan') { var n = this.visibleMethods.length; this.fanActive = (this.fanActive - 1 + n) % n; } },
         fanNext: function () { if (this.fanMode === 'fan') { var n = this.visibleMethods.length; this.fanActive = (this.fanActive + 1) % n; } },
         onCardClick: function (i, method) {
-            // carte centrale (ou mode "par 2") => on ouvre la méthode ; sinon on la met au centre
-            this.fanClearIdle();
-            if (this.fanMode === 'pairs' || this.fanOff(i) === 0) this.clickMethodCard(method.name);
+            // Grille (ou carte centrale de l'éventail) => on ouvre la méthode ; sinon on la met au centre.
+            if (this.fanMode !== 'fan' || this.fanOff(i) === 0) this.clickMethodCard(method.name);
             else this.fanGo(i);
         },
-        fanToggleMode: function () { this.fanClearIdle(); this.fanMode = this.fanMode === 'fan' ? 'pairs' : 'fan'; },
-        fanStartIdle: function () {
-            this.fanHover = true;
-            this.fanAutoStop();
-            this.fanClearIdle();
+        fanToggleMode: function () {
             if (this.fanMode === 'fan') {
-                var self = this;
-                this._fanIdle = setTimeout(function () { self.fanMode = 'pairs'; }, this.fanIdleDelay);
+                this.fanMode = 'grid';
+                this.fanManualFan = false;
+                this.fanAutoStop();
+            } else {
+                this.fanMode = 'fan';
+                this.fanManualFan = true;   // choix explicite : ne pas revenir en grille sur simple activité
+                this.fanAutoStart();
             }
+            this.resetIdleTimer();
         },
-        fanClearIdle: function () { if (this._fanIdle) { clearTimeout(this._fanIdle); this._fanIdle = null; } },
-        fanLeave: function () {
-            this.fanHover = false;
-            this.fanClearIdle();
-            if (this.fanMode === 'pairs') this.fanMode = 'fan';
-            this.fanAutoStart();
+
+        // --- Inactivité globale : bascule automatique en éventail après fanIdleDelay ---
+        startIdleWatch: function () {
+            if (this._activityHandler) return;
+            var self = this;
+            this._activityHandler = function () { self.onUserActivity(); };
+            ['mousemove', 'mousedown', 'keydown', 'scroll', 'touchstart'].forEach(function (ev) {
+                window.addEventListener(ev, self._activityHandler, { passive: true });
+            });
+            this.resetIdleTimer();
+        },
+        stopIdleWatch: function () {
+            if (this._activityHandler) {
+                var self = this;
+                ['mousemove', 'mousedown', 'keydown', 'scroll', 'touchstart'].forEach(function (ev) {
+                    window.removeEventListener(ev, self._activityHandler);
+                });
+                this._activityHandler = null;
+            }
+            if (this._fanIdle) { clearTimeout(this._fanIdle); this._fanIdle = null; }
+        },
+        onUserActivity: function () {
+            var now = Date.now();
+            if (this._lastAct && (now - this._lastAct) < 800) return;   // throttle
+            this._lastAct = now;
+            // Si l'éventail s'était activé tout seul (inactivité), on revient à la grille.
+            if (this.homeView === 'fan' && this.fanMode === 'fan' && !this.fanManualFan) {
+                this.fanMode = 'grid';
+                this.fanAutoStop();
+            }
+            this.resetIdleTimer();
+        },
+        resetIdleTimer: function () {
+            if (this._fanIdle) { clearTimeout(this._fanIdle); this._fanIdle = null; }
+            var self = this;
+            this._fanIdle = setTimeout(function () {
+                if (self.homeView === 'fan') {
+                    self.fanManualFan = false;
+                    self.fanMode = 'fan';   // le watcher fanMode déclenche fanAutoStart()
+                }
+            }, this.fanIdleDelay);
         }
     },
     template: '#home-dashboard'

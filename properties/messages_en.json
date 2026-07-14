@@ -39,9 +39,11 @@
     },
 
     "score": {
-      "eyebrow": "Weighted security score ·",
+      "eyebrow": "Weighted security score",
       "method_activated_singular": "✓ %COUNT% method enabled",
       "method_activated_plural": "✓ %COUNT% methods enabled",
+      "recommended_word_singular": "recommended",
+      "recommended_word_plural": "recommended",
       "title_prefix": "You are protecting your account at level",
       "subtitle": "The score keeps your two strongest enabled factors. Total: <strong>%SUM%/55 points</strong>.",
       "cta": "Configure",
@@ -67,10 +69,9 @@
       "weak": "Avoid as primary method"
     },
     "themes": {
-      "grid": "Grid",
       "fan": "Fan",
-      "bento": "Bento",
-      "hero": "Hero"
+      "hero": "Hero",
+      "legacy": "Original"
     },
     "method_strength": {
       "strong": "Strong",
@@ -78,8 +79,8 @@
       "weak": "Weak"
     },
     "views": {
-      "fan_align_pairs": "Align in pairs",
-      "fan_back_to_fan": "Back to fan",
+      "fan_align_grid": "Align by 3",
+      "fan_show_fan": "Fan view",
       "prev": "Previous",
       "next": "Next",
       "bento_manage": "Manage this method",
@@ -230,7 +231,7 @@
       }
     },
     "home": {
-      "description": "ESUP-OTP permits you to add a second level of protection to your account. You can, for example, set a single-use code sent to you by SMS in addition to your username and password. Thus, a third can not access your account with the same password.",
+      "description": "Add a second level of protection to your account (two-factor authentication).",
       "methods": "You can set up:",
       "push": "Notification to Esup Auth (Android, iOS).",
       "totp": "TOTP code into an application (Esup Auth, Authenticator...).",
@@ -247,9 +248,15 @@
       "help_methods": "Need help activating a method?",
       "help_label": "Help",
       "help_hint": "Hover an icon for its name, click for the tutorial.",
-      "support_intro": "Still stuck?",
-      "support_cta": "Contact DSIN support",
-      "support_faq": "check the FAQ"
+      "support": {
+        "cta": "Contact DSIN support",
+        "mail_title": "By email",
+        "mail_address": "svpcompte@univ-antilles.fr",
+        "mail_subject": "MFA ua-otp - support request",
+        "ticket_title": "Via MesDemandes",
+        "ticket_desc": "Open a tracked ticket",
+        "ticket_url": "https://mesdemandes.univ-antilles.fr"
+      }
     },
     "footer": {
       "legal": "Legal notice",

@@ -39,9 +39,11 @@
     },
 
     "score": {
-      "eyebrow": "Score de sécurité pondéré ·",
+      "eyebrow": "Score de sécurité pondéré",
       "method_activated_singular": "✓ %COUNT% méthode activée",
       "method_activated_plural": "✓ %COUNT% méthodes activées",
+      "recommended_word_singular": "recommandée",
+      "recommended_word_plural": "recommandées",
       "title_prefix": "Vous protégez votre compte au niveau",
       "subtitle": "Le calcul retient les deux meilleurs facteurs activés. Total : <strong>%SUM%/55 points</strong>.",
       "cta": "Configurer",
@@ -67,10 +69,9 @@
       "weak": "À éviter en méthode principale"
     },
     "themes": {
-      "grid": "Grille",
       "fan": "Éventail",
-      "bento": "Bento",
-      "hero": "Hero"
+      "hero": "Hero",
+      "legacy": "Origine"
     },
     "method_strength": {
       "strong": "Forte",
@@ -78,8 +79,8 @@
       "weak": "Faible"
     },
     "views": {
-      "fan_align_pairs": "Aligner par 2",
-      "fan_back_to_fan": "Revenir à l'éventail",
+      "fan_align_grid": "Aligner par 3",
+      "fan_show_fan": "Voir en éventail",
       "prev": "Précédent",
       "next": "Suivant",
       "bento_manage": "Gérer cette méthode",
@@ -230,7 +231,7 @@
       }
     },
     "home": {
-      "description": "Vous permet d’ajouter un deuxième niveau de protection à votre compte (authentification double facteur). Ainsi, il sera impossible d’accéder à votre compte même avec votre mot de passe.",
+      "description": "Ajoutez un deuxième niveau de protection à votre compte (authentification double facteur).",
       "methods": "Vous pouvez définir :",
       "push": "qu’une notification / push soit envoyée sur l’application Esup Auth (Android, iOS).",
       "totp": "qu’un code (TOTP) soit généré dans une application (Esup Auth, Authenticator, Plugin OTP...).",
@@ -247,9 +248,15 @@
       "help_methods": "Besoin d'aide pour activer une méthode ?",
       "help_label": "Aide",
       "help_hint": "Survolez une icône pour son nom, cliquez pour le tutoriel.",
-      "support_intro": "Toujours bloqué ?",
-      "support_cta": "Contacter le support DSIN",
-      "support_faq": "consulter la FAQ"
+      "support": {
+        "cta": "Contacter le support DSIN",
+        "mail_title": "Par mail",
+        "mail_address": "svpcompte@univ-antilles.fr",
+        "mail_subject": "MFA ua-otp - demande d'assistance",
+        "ticket_title": "Via MesDemandes",
+        "ticket_desc": "Ouvrir un ticket suivi",
+        "ticket_url": "https://mesdemandes.univ-antilles.fr"
+      }
     },
     "footer": {
       "legal": "Mentions légales",

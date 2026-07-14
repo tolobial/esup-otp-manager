@@ -133,105 +133,147 @@ script#admin-dashboard(type='text/x-template').
           <p class="text-gray-500 text-sm mt-1">Contrôle global des méthodes — modifications appliquées à tous les utilisateurs.</p>
         </div>
 
-        <!-- Liste des méthodes (cartes) -->
-        <div class="space-y-3">
-          <template v-for="method in methods" :key="method.name">
-            <div class="bg-white border border-gray-200 transition-colors"
-                 :class="methods[method.name].activate ? 'border-l-[3px] border-l-ua-blue' : 'border-l-[3px] border-l-gray-300'">
+        <!-- Sélecteur de thème (aligné sur la home : éventail / hero / origine) -->
+        <div class="ua-view-switch">
+          <button type="button" @click="setHomeView('fan')"    :class="{active: homeView === 'fan'}">{{ messages.api.themes.fan }}</button>
+          <button type="button" @click="setHomeView('hero')"   :class="{active: homeView === 'hero'}">{{ messages.api.themes.hero }}</button>
+          <button type="button" @click="setHomeView('legacy')" :class="{active: homeView === 'legacy'}">{{ messages.api.themes.legacy }}</button>
+        </div>
 
-              <!-- Header carte méthode -->
-              <div class="px-5 py-4 flex items-center justify-between gap-4">
-                <div class="flex items-center gap-3 flex-1 min-w-0">
-                  <!-- Icône (AJOUT UX : repères visuels par méthode) -->
-                  <div class="flex-shrink-0 w-10 h-10 flex items-center justify-center transition-colors"
-                       :class="methods[method.name].activate ? 'bg-blue-50' : 'bg-gray-50'">
-                    <method-icon :name="method.name" :class="methods[method.name].activate ? 'text-ua-blue' : 'text-gray-400'" />
-                  </div>
-                  <div class="flex-1 min-w-0">
-                    <h4 class="font-semibold text-ua-navy text-sm">{{method.label || method.name}}</h4>
-                    <p class="text-xs mt-0.5 flex items-center gap-1.5">
-                      <span v-if="methods[method.name].activate" class="text-green-600 font-medium inline-flex items-center gap-1.5">
-                        <span class="inline-block w-1.5 h-1.5 bg-green-600"></span>
-                        Activée pour tous
+        <!-- ═══ THÈME ÉVENTAIL ═══ -->
+        <div v-if="homeView === 'fan'" class="ua-fan-zone">
+          <div class="ua-fan-controls">
+            <button type="button" class="ua-fan-btn" @click="fanToggleMode">
+              {{ fanMode === 'fan' ? messages.api.views.fan_align_grid : messages.api.views.fan_show_fan }}
+            </button>
+          </div>
+          <div class="ua-fan-stage" :class="{grid: fanMode === 'grid'}" :style="fanStageStyle()">
+            <div class="ua-fan">
+              <div v-for="(method, i) in visibleMethods" :key="method.name"
+                   class="ua-slot" :style="fanSlotStyle(i)">
+                <div class="ua-inner">
+                  <span class="ua-spot"></span>
+                  <div class="ua-card" :class="'g-' + fanColor(i)" @click="onCardClick(i)">
+                    <div class="ua-ic"><method-icon :name="method.name" :size="'8'"></method-icon></div>
+                    <div class="ua-meta">
+                      <h3>{{ method.label || method.name }}</h3>
+                      <p>{{ messages.api.home[method.name] }}</p>
+                    </div>
+                    <div class="flex flex-col items-end gap-1.5 flex-shrink-0">
+                      <label class="relative inline-flex items-center cursor-pointer" @click.stop>
+                        <input v-if="methods[method.name].activate" type="checkbox" @click="deactivate" :name="method.name" checked class="sr-only peer" :aria-label="`Désactiver globalement ${method.label || method.name}`">
+                        <input v-else type="checkbox" @click="activate" :name="method.name" class="sr-only peer" :aria-label="`Activer globalement ${method.label || method.name}`">
+                        <span class="w-12 h-6 bg-white/30 rounded-full peer-checked:bg-white/90 transition-colors duration-200 inline-block"></span>
+                        <span class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full peer-checked:bg-ua-navy transition-transform duration-200 peer-checked:translate-x-6 pointer-events-none"></span>
+                      </label>
+                      <span class="ua-badge" :class="{ on: methods[method.name].activate }">
+                        {{ methods[method.name].activate ? messages.api.home.activated : messages.api.home.deactivated }}
                       </span>
-                      <span v-else class="text-gray-400 inline-flex items-center gap-1.5">
-                        <span class="inline-block w-1.5 h-1.5 bg-gray-300"></span>
-                        Désactivée
-                      </span>
-                    </p>
-                  </div>
-                </div>
-
-                <!-- Switch global activation -->
-                <label class="relative inline-flex items-center cursor-pointer flex-shrink-0">
-                  <input v-if="methods[method.name].activate"
-                         type="checkbox"
-                         @click="deactivate"
-                         :name="method.name"
-                         checked
-                         :aria-label="`Désactiver globalement ${method.label || method.name}`"
-                         class="sr-only peer">
-                  <input v-else
-                         type="checkbox"
-                         @click="activate"
-                         :name="method.name"
-                         :aria-label="`Activer globalement ${method.label || method.name}`"
-                         class="sr-only peer">
-                  <span class="w-12 h-6 bg-gray-300 peer-checked:bg-ua-blue transition-colors duration-200 inline-block"></span>
-                  <span class="absolute top-0.5 left-0.5 w-5 h-5 bg-white transition-transform duration-200 peer-checked:translate-x-6 pointer-events-none"></span>
-                </label>
-              </div>
-
-              <!-- Sous-section : transports (uniquement pour random_code) -->
-              <div v-if="method.name === 'random_code'" class="border-t border-gray-100 px-5 py-3 bg-gray-50">
-                <h5 class="text-xs font-semibold text-ua-navy uppercase tracking-wide mb-3">Transports activables</h5>
-                <div class="space-y-2.5">
-                  <!-- SMS -->
-                  <div class="flex items-center justify-between gap-3">
-                    <span class="text-sm text-gray-700">{{messages.api.transports.sms}}</span>
-                    <label class="relative inline-flex items-center cursor-pointer flex-shrink-0">
-                      <input v-if="methods[method.name].transports.includes('sms')"
-                             type="checkbox"
-                             @click="deactivateTransport(method.name, 'sms')"
-                             :name="method.name"
-                             checked
-                             :aria-label="`Désactiver SMS pour ${method.label}`"
-                             class="sr-only peer">
-                      <input v-else
-                             type="checkbox"
-                             @click="activateTransport(method.name, 'sms')"
-                             :name="method.name"
-                             :aria-label="`Activer SMS pour ${method.label}`"
-                             class="sr-only peer">
-                      <span class="w-10 h-5 bg-gray-300 peer-checked:bg-ua-blue transition-colors duration-200 inline-block"></span>
-                      <span class="absolute top-0.5 left-0.5 w-4 h-4 bg-white transition-transform duration-200 peer-checked:translate-x-5 pointer-events-none"></span>
-                    </label>
-                  </div>
-                  <!-- Mail -->
-                  <div class="flex items-center justify-between gap-3">
-                    <span class="text-sm text-gray-700">{{messages.api.transports.mail}}</span>
-                    <label class="relative inline-flex items-center cursor-pointer flex-shrink-0">
-                      <input v-if="methods[method.name].transports.includes('mail')"
-                             type="checkbox"
-                             @click="deactivateTransport(method.name, 'mail')"
-                             :name="method.name"
-                             checked
-                             :aria-label="`Désactiver email pour ${method.label}`"
-                             class="sr-only peer">
-                      <input v-else
-                             type="checkbox"
-                             @click="activateTransport(method.name, 'mail')"
-                             :name="method.name"
-                             :aria-label="`Activer email pour ${method.label}`"
-                             class="sr-only peer">
-                      <span class="w-10 h-5 bg-gray-300 peer-checked:bg-ua-blue transition-colors duration-200 inline-block"></span>
-                      <span class="absolute top-0.5 left-0.5 w-4 h-4 bg-white transition-transform duration-200 peer-checked:translate-x-5 pointer-events-none"></span>
-                    </label>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
+          </div>
+          <div class="ua-fan-nav" v-if="fanMode === 'fan'">
+            <button type="button" @click="fanPrev" :aria-label="messages.api.views.prev">‹</button>
+            <span class="ua-fan-dots">
+              <button v-for="(method, i) in visibleMethods" :key="'dot-' + method.name"
+                      type="button" :class="{ on: fanOff(i) === 0 }"
+                      @click="fanGo(i)" :aria-label="method.label || method.name"></button>
+            </span>
+            <button type="button" @click="fanNext" :aria-label="messages.api.views.next">›</button>
+          </div>
+        </div>
+
+        <!-- ═══ THÈME HERO : 3 groupes ═══ -->
+        <div v-else-if="homeView === 'hero'" class="space-y-8 mt-2">
+          <template v-for="grp in [
+            { key: 'recommended', title: messages.api.groups.recommended, cls: 'section-title-recommended', str: 'strength-high', strLabel: messages.api.method_strength.strong },
+            { key: 'complementary', title: messages.api.groups.complementary, cls: '', str: 'strength-medium', strLabel: messages.api.method_strength.medium },
+            { key: 'weak', title: messages.api.groups.weak, cls: 'faible-group', str: 'strength-low', strLabel: messages.api.method_strength.weak }
+          ]" :key="grp.key">
+            <section>
+              <h3 class="section-title" :class="grp.cls">{{ grp.title }}</h3>
+              <div class="methods-grid">
+                <template v-for="name in methodGroups[grp.key].filter(n => methods[n])" :key="name">
+                  <div class="method-card" :class="{ activated: methods[name].activate }">
+                    <div class="method-icon"><method-icon :name="name"></method-icon></div>
+                    <div class="method-body">
+                      <div class="method-head">
+                        <span class="method-name">{{ methods[name].label || name }}</span>
+                        <span class="method-strength" :class="grp.str">{{ grp.strLabel }}</span>
+                      </div>
+                      <p class="method-desc">{{ messages.api.home[name] }}</p>
+                      <div class="method-weight">{{ methodWeight(name) }} {{ messages.api.score.points }}</div>
+                    </div>
+                    <div class="flex flex-col items-end gap-1.5 flex-shrink-0">
+                      <label class="relative inline-flex items-center cursor-pointer">
+                        <input v-if="methods[name].activate" type="checkbox" @click="deactivate" :name="name" checked class="sr-only peer" :aria-label="`Désactiver globalement ${methods[name].label || name}`">
+                        <input v-else type="checkbox" @click="activate" :name="name" class="sr-only peer" :aria-label="`Activer globalement ${methods[name].label || name}`">
+                        <span class="w-12 h-6 bg-gray-300 peer-checked:bg-ua-blue transition-colors duration-200 inline-block"></span>
+                        <span class="absolute top-0.5 left-0.5 w-5 h-5 bg-white transition-transform duration-200 peer-checked:translate-x-6 pointer-events-none"></span>
+                      </label>
+                      <span class="text-[11px] font-semibold whitespace-nowrap" :class="methods[name].activate ? 'text-green-600' : 'text-gray-400'">
+                        {{ methods[name].activate ? messages.api.home.activated : messages.api.home.deactivated }}
+                      </span>
+                    </div>
+                  </div>
+                </template>
+              </div>
+            </section>
           </template>
+        </div>
+
+        <!-- ═══ THÈME ORIGINE ═══ -->
+        <div v-else-if="homeView === 'legacy'" class="ua-origin">
+          <template v-for="method in methods" :key="method.name">
+            <div class="ua-origin-card" :class="{ 'ua-origin-off': !methods[method.name].activate }" style="cursor:default">
+              <span class="ua-origin-badge" :class="methods[method.name].activate ? 'on' : 'off'">
+                {{ methods[method.name].activate ? messages.api.home.activated : messages.api.home.deactivated }}
+              </span>
+              <img class="ua-origin-ic" :src="'images/' + method.name + '.svg'" alt="">
+              <span class="ua-origin-name">{{ method.label || method.name }}</span>
+              <span class="ua-origin-desc">{{ messages.api.home[method.name] }}</span>
+              <label class="ua-origin-toggle relative inline-flex items-center cursor-pointer" :aria-label="methods[method.name].activate ? `Désactiver globalement ${method.label || method.name}` : `Activer globalement ${method.label || method.name}`">
+                <input v-if="methods[method.name].activate" type="checkbox" @click="deactivate" :name="method.name" checked class="sr-only peer">
+                <input v-else type="checkbox" @click="activate" :name="method.name" class="sr-only peer">
+                <span class="w-12 h-6 bg-gray-300 peer-checked:bg-green-600 transition-colors duration-200 inline-block"></span>
+                <span class="absolute top-0.5 left-0.5 w-5 h-5 bg-white transition-transform duration-200 peer-checked:translate-x-6 pointer-events-none"></span>
+              </label>
+            </div>
+          </template>
+        </div>
+
+        <!-- Transports activables (Code par SMS) : commun à tous les thèmes -->
+        <div v-if="methods.random_code" class="bg-white border border-gray-200 border-l-[3px] border-l-ua-blue mt-6">
+          <div class="px-5 py-4">
+            <h5 class="text-xs font-semibold text-ua-navy uppercase tracking-wide mb-1">
+              {{ methods.random_code.label || messages.api.methods.random_code.name }} — Transports activables
+            </h5>
+            <div class="space-y-2.5 mt-3">
+              <!-- SMS -->
+              <div class="flex items-center justify-between gap-3">
+                <span class="text-sm text-gray-700">{{messages.api.transports.sms}}</span>
+                <label class="relative inline-flex items-center cursor-pointer flex-shrink-0">
+                  <input v-if="methods.random_code.transports.includes('sms')" type="checkbox" @click="deactivateTransport('random_code', 'sms')" name="random_code" checked class="sr-only peer" :aria-label="`Désactiver SMS pour ${methods.random_code.label}`">
+                  <input v-else type="checkbox" @click="activateTransport('random_code', 'sms')" name="random_code" class="sr-only peer" :aria-label="`Activer SMS pour ${methods.random_code.label}`">
+                  <span class="w-10 h-5 bg-gray-300 peer-checked:bg-ua-blue transition-colors duration-200 inline-block"></span>
+                  <span class="absolute top-0.5 left-0.5 w-4 h-4 bg-white transition-transform duration-200 peer-checked:translate-x-5 pointer-events-none"></span>
+                </label>
+              </div>
+              <!-- Mail -->
+              <div class="flex items-center justify-between gap-3">
+                <span class="text-sm text-gray-700">{{messages.api.transports.mail}}</span>
+                <label class="relative inline-flex items-center cursor-pointer flex-shrink-0">
+                  <input v-if="methods.random_code.transports.includes('mail')" type="checkbox" @click="deactivateTransport('random_code', 'mail')" name="random_code" checked class="sr-only peer" :aria-label="`Désactiver email pour ${methods.random_code.label}`">
+                  <input v-else type="checkbox" @click="activateTransport('random_code', 'mail')" name="random_code" class="sr-only peer" :aria-label="`Activer email pour ${methods.random_code.label}`">
+                  <span class="w-10 h-5 bg-gray-300 peer-checked:bg-ua-blue transition-colors duration-200 inline-block"></span>
+                  <span class="absolute top-0.5 left-0.5 w-4 h-4 bg-white transition-transform duration-200 peer-checked:translate-x-5 pointer-events-none"></span>
+                </label>
+              </div>
+            </div>
+          </div>
         </div>
 
       </div>

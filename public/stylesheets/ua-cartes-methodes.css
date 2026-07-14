@@ -27,7 +27,7 @@
 .ua-fan-btn:hover{background:#f3f5fa}
 
 .ua-fan-stage{position:relative;height:440px;perspective:1300px;transition:height .55s cubic-bezier(.2,.8,.2,1)}
-.ua-fan-stage.pairs{height:820px}
+.ua-fan-stage.grid{perspective:none}
 .ua-fan{position:absolute;inset:0}
 
 .ua-slot{position:absolute;left:50%;top:50%;width:360px;height:168px;

@@ -1,6 +1,6 @@
 
 script#home-dashboard(type='text/x-template').
-  <div v-if="messages.api" data-tw class="tw-reset min-h-screen bg-gray-100 flex">
+  <div v-if="messages.api" data-tw class="tw-reset h-screen overflow-hidden bg-gray-100 flex">
 
     <!-- Checkbox caché pour toggle sidebar (CSS-only via :has()) -->
     <input type="checkbox" id="sidebar-toggle" class="hidden">
@@ -113,24 +113,21 @@ script#home-dashboard(type='text/x-template').
     </aside>
 
     <!-- Contenu principal -->
-    <div class="flex-1 min-w-0 overflow-y-auto">
+    <div class="flex-1 min-w-0 min-h-0 overflow-y-auto">
       <div class="p-6 lg:p-8 max-w-[1120px] mx-auto">
 
         <!-- En-tête page -->
-        <div class="text-center mb-10">
-          <h2 class="font-display font-bold text-2xl text-ua-navy tracking-tight mb-3">
+        <div class="text-center mb-8">
+          <h2 class="font-display font-bold text-2xl text-ua-navy tracking-tight mb-1">
             {{messages.api.title}}
           </h2>
-          <p class="text-base text-slate-600 leading-normal max-w-3xl mx-auto">
+          <p class="text-base text-slate-600 leading-normal px-2">
             {{messages.api.home.description}}
-          </p>
-          <p class="text-xs text-slate-400 leading-normal max-w-3xl mx-auto mt-3">
-            {{messages.api.home.note}}
           </p>
         </div>
 
-        <!-- SCORE PANEL HERO -->
-        <section class="bg-white rounded-2xl shadow-xl p-7 mb-8 grid md:grid-cols-[140px_1fr] gap-8 items-center">
+        <!-- SCORE PANEL HERO (figé en haut au défilement) -->
+        <section class="sticky top-0 z-20 bg-white rounded-3xl shadow-2xl p-6 mb-6 grid md:grid-cols-[120px_1fr] gap-6 items-center">
 
           <!-- JAUGE : anneau SVG plein, piloté par weightedScore.pct (gaugeOffset) -->
           <div class="score-ring">
@@ -145,9 +142,15 @@ script#home-dashboard(type='text/x-template').
           <!-- NARRATION -->
           <div>
             <div class="score-eyebrow">
-              {{ messages.api.score.eyebrow }}
-              <span :class="weightedScore.objective ? 'eyebrow-ok' : 'eyebrow-warn'">
-                {{ weightedScore.count === 1 ? tr('score.method_activated_singular', { COUNT: weightedScore.count }) : tr('score.method_activated_plural', { COUNT: weightedScore.count }) }}
+              <span class="eyebrow-label">{{ messages.api.score.eyebrow }}</span>
+              <span class="eyebrow-methods">
+                <span :class="weightedScore.objective ? 'eyebrow-ok' : 'eyebrow-warn'">
+                  {{ weightedScore.count === 1 ? tr('score.method_activated_singular', { COUNT: weightedScore.count }) : tr('score.method_activated_plural', { COUNT: weightedScore.count }) }}
+                </span>
+                <span class="eyebrow-sep">/</span>
+                <span class="eyebrow-reco">
+                  {{ weightedScore.recommended }} {{ weightedScore.recommended === 1 ? messages.api.score.recommended_word_singular : messages.api.score.recommended_word_plural }}
+                </span>
               </span>
             </div>
 
@@ -185,65 +188,23 @@ script#home-dashboard(type='text/x-template').
           </div>
         </section>
 
-        <!-- Sélecteur de vue : grille (gestion) / éventail (vitrine) -->
+        <!-- Sélecteur de vue : éventail (vitrine) / hero / origine -->
         <div class="ua-view-switch">
-          <button type="button" @click="setHomeView('grid')" :class="{active: homeView === 'grid'}">{{ messages.api.themes.grid }}</button>
           <button type="button" @click="setHomeView('fan')"  :class="{active: homeView === 'fan'}">{{ messages.api.themes.fan }}</button>
-          <button type="button" @click="setHomeView('bento')" :class="{active: homeView === 'bento'}">{{ messages.api.themes.bento }}</button>
           <button type="button" @click="setHomeView('hero')" :class="{active: homeView === 'hero'}">{{ messages.api.themes.hero }}</button>
+          <button type="button" @click="setHomeView('legacy')" :class="{active: homeView === 'legacy'}">{{ messages.api.themes.legacy }}</button>
         </div>
 
-        <!-- Grille des méthodes : 2 colonnes, cartes rectangulaires -->
-        <div v-if="homeView === 'grid'" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <template v-for="method in methods">
-            <div v-if="method.activate && method.authorize"
-                 class="bg-white border shadow-md flex flex-row items-stretch transition-all duration-200 hover:shadow-xl hover:-translate-y-0.5 hover:border-ua-blue/50 cursor-pointer"
-                 :class="user.methods[method.name]?.active ? 'border-gray-300' : 'border-gray-200 opacity-75 hover:opacity-100'"
-                 @click="clickMethodCard(method.name)">
-
-              <!-- Icône à gauche -->
-              <div class="w-16 flex-shrink-0 flex items-center justify-center"
-                   :class="user.methods[method.name]?.active ? 'bg-ua-navy' : 'bg-gray-100'">
-                <method-icon :name="method.name" :size="'6'" :class="user.methods[method.name]?.active ? 'text-ua-blue' : 'text-gray-400'" />
-              </div>
-
-              <!-- Contenu carte -->
-              <div class="flex-1 p-4 flex items-center justify-between gap-3">
-                <div class="min-w-0">
-                  <h3 class="font-semibold text-ua-navy text-sm leading-tight">{{method.label || method.name}}</h3>
-                  <p class="text-gray-500 text-xs mt-0.5 truncate">{{messages.api.home[method.name]}}</p>
-                </div>
-                <div class="flex items-center gap-3 flex-shrink-0">
-                  <!-- Toggle visuel -->
-                  <span class="relative inline-flex w-9 h-4 items-center transition-colors duration-200"
-                        :class="user.methods[method.name]?.active ? 'bg-ua-blue' : 'bg-gray-300'">
-                    <span class="absolute w-3 h-3 bg-white transition-transform duration-200"
-                          :class="user.methods[method.name]?.active ? 'translate-x-4.5' : 'translate-x-0.5'"></span>
-                  </span>
-                  <!-- Badge -->
-                  <span class="text-xs font-semibold px-2 py-0.5"
-                        :class="user.methods[method.name]?.active
-                          ? 'bg-blue-50 text-ua-navy'
-                          : 'bg-slate-100 text-slate-500'">
-                    {{user.methods[method.name]?.active ? messages.api.home.activated : messages.api.home.deactivated}}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </template>
-        </div>
-
-        <!-- Modèle 2 : éventail vitrine -->
-        <div v-else-if="homeView === 'fan'" class="ua-fan-zone">
+        <!-- Modèle 1 : éventail vitrine -->
+        <div v-if="homeView === 'fan'" class="ua-fan-zone">
 
           <div class="ua-fan-controls">
             <button type="button" class="ua-fan-btn" @click="fanToggleMode">
-              {{ fanMode === 'fan' ? messages.api.views.fan_align_pairs : messages.api.views.fan_back_to_fan }}
+              {{ fanMode === 'fan' ? messages.api.views.fan_align_grid : messages.api.views.fan_show_fan }}
             </button>
           </div>
 
-          <div class="ua-fan-stage" :class="{pairs: fanMode === 'pairs'}"
-               @mouseenter="fanStartIdle" @mouseleave="fanLeave">
+          <div class="ua-fan-stage" :class="{grid: fanMode === 'grid'}" :style="fanStageStyle()">
             <div class="ua-fan">
               <div v-for="(method, i) in visibleMethods" :key="method.name"
                    class="ua-slot" :style="fanSlotStyle(i)">
@@ -266,7 +227,7 @@ script#home-dashboard(type='text/x-template').
             </div>
           </div>
 
-          <div class="ua-fan-nav">
+          <div class="ua-fan-nav" v-if="fanMode === 'fan'">
             <button type="button" @click="fanPrev" :aria-label="messages.api.views.prev">‹</button>
             <span class="ua-fan-dots">
               <button v-for="(method, i) in visibleMethods" :key="'dot-' + method.name"
@@ -276,27 +237,6 @@ script#home-dashboard(type='text/x-template').
             <button type="button" @click="fanNext" :aria-label="messages.api.views.next">›</button>
           </div>
 
-        </div>
-
-        <!-- Modèle 3 : bento (clic = aperçu en modal) -->
-        <div v-else-if="homeView === 'bento'" class="grid grid-cols-2 md:grid-cols-4 gap-3" style="grid-auto-rows: 7rem;">
-          <div v-for="(method, i) in visibleMethods" :key="method.name"
-               class="bg-white border shadow-sm flex flex-col justify-between p-3 cursor-pointer transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 hover:border-ua-blue/50"
-               :class="user.methods[method.name]?.active ? 'border-gray-300' : 'border-gray-200 opacity-75 hover:opacity-100'"
-               :style="bentoSpan(i)"
-               @click="openBento(method)">
-            <div class="flex items-start justify-between">
-              <method-icon :name="method.name" :size="'8'" :class="user.methods[method.name]?.active ? 'text-ua-blue' : 'text-gray-400'" />
-              <svg class="w-4 h-4 text-gray-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15"/></svg>
-            </div>
-            <div>
-              <h3 class="font-semibold text-ua-navy text-sm leading-tight">{{method.label || method.name}}</h3>
-              <span class="inline-block mt-1 text-xs font-semibold px-2 py-0.5"
-                    :class="user.methods[method.name]?.active ? 'bg-blue-50 text-ua-navy' : 'bg-slate-100 text-slate-500'">
-                {{user.methods[method.name]?.active ? messages.api.home.activated : messages.api.home.deactivated}}
-              </span>
-            </div>
-          </div>
         </div>
 
         <!-- THÈME HERO : méthodes en 3 groupes -->
@@ -382,26 +322,17 @@ script#home-dashboard(type='text/x-template').
 
         </div>
 
-        <!-- Modal aperçu (vue bento) -->
-        <div v-if="bentoSelected" class="fixed inset-0 z-50 flex items-center justify-center bg-ua-navy/60 p-4" @click.self="closeBento">
-          <div class="bg-white shadow-xl w-full max-w-md p-6 relative">
-            <button type="button" class="absolute top-3 right-3 text-gray-400 hover:text-ua-navy transition-colors" @click="closeBento" :aria-label="messages.api.views.bento_close">
-              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
-            </button>
-            <div class="flex flex-col items-center text-center">
-              <div class="w-16 h-16 flex items-center justify-center mb-3"
-                   :class="user.methods[bentoSelected.name]?.active ? 'bg-ua-navy' : 'bg-gray-100'">
-                <method-icon :name="bentoSelected.name" :size="'8'" :class="user.methods[bentoSelected.name]?.active ? 'text-ua-blue' : 'text-gray-400'" />
-              </div>
-              <h3 class="font-display font-bold text-xl text-ua-navy uppercase tracking-wide">{{bentoSelected.label || bentoSelected.name}}</h3>
-              <p class="text-gray-500 text-sm mt-1">{{messages.api.home[bentoSelected.name]}}</p>
-              <span class="mt-3 text-xs font-semibold px-2 py-0.5"
-                    :class="user.methods[bentoSelected.name]?.active ? 'bg-blue-50 text-ua-navy' : 'bg-slate-100 text-slate-500'">
-                {{user.methods[bentoSelected.name]?.active ? messages.api.home.activated : messages.api.home.deactivated}}
+        <!-- Modèle 5 : thème d'origine (upstream esup-otp-manager, revisité en cartes) -->
+        <div v-else-if="homeView === 'legacy'" class="ua-origin">
+          <template v-for="method in methods">
+            <button v-if="method.activate && method.authorize" type="button" role="link" class="ua-origin-card" :class="{ 'ua-origin-off': !(user.methods[method.name] && user.methods[method.name].active) }" @click="clickMethodCard(method.name)">
+              <img class="ua-origin-ic" :src="'images/' + method.name + '.svg'" alt="">
+              <span class="ua-origin-desc">{{ messages.api.home[method.name] }}</span>
+              <span class="ua-origin-badge" :class="user.methods[method.name]?.active ? 'on' : 'off'">
+                {{ user.methods[method.name]?.active ? messages.api.home.activated : messages.api.home.deactivated }}
               </span>
-              <button type="button" class="mt-5 w-full bg-ua-blue hover:bg-ua-indigo text-white font-semibold py-2.5 transition-colors" @click="bentoManage">{{ messages.api.views.bento_manage }}</button>
-            </div>
-          </div>
+            </button>
+          </template>
         </div>
 
         <!-- Dock : tutos d'activation par méthode -->
@@ -428,33 +359,30 @@ script#home-dashboard(type='text/x-template').
               </template>
             </nav>
 
-            <!-- Escalade : contact support DSIN -->
-            <div class="mt-6 pt-4 border-t border-gray-200 text-center text-sm text-gray-600">
-              <span>{{messages.api.home.support_intro}}</span>
-              <a class="ua-support-btn" href="mailto:svpcompte@univ-antilles.fr?subject=Assistance%20MFA">{{messages.api.home.support_cta}}</a>
-              <span class="block mt-2 text-xs text-gray-500">
-                <a href="#" class="underline hover:text-ua-blue">{{messages.api.home.support_faq}}</a>
-                <span class="mx-1.5 text-gray-300">·</span>
-                <span>0596 XX XX XX</span>
-              </span>
+            <!-- Escalade : contact support DSIN (bouton -> encart 2 options, accordéon en flux) -->
+            <div class="mt-6 pt-4 border-t border-gray-200 text-center">
+              <button type="button" class="ua-support-btn" @click="supportOpen = !supportOpen" :aria-expanded="supportOpen" aria-controls="ua-support-panel">
+                {{messages.api.home.support.cta}}
+                <svg class="w-4 h-4 transition-transform" :class="{ 'rotate-180': supportOpen }" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/></svg>
+              </button>
+              <div v-if="supportOpen" id="ua-support-panel" class="ua-support-panel">
+                <a class="ua-support-opt" :href="'mailto:' + messages.api.home.support.mail_address + '?subject=' + encodeURIComponent(messages.api.home.support.mail_subject)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75l9.75 6.75 9.75-6.75M2.25 6.75A1.5 1.5 0 013.75 5.25h16.5a1.5 1.5 0 011.5 1.5m-19.5 0v10.5a1.5 1.5 0 001.5 1.5h16.5a1.5 1.5 0 001.5-1.5V6.75"/></svg>
+                  <span class="ua-support-opt-text">
+                    <span class="ua-support-opt-title">{{messages.api.home.support.mail_title}}</span>
+                    <span class="ua-support-opt-sub">{{messages.api.home.support.mail_address}}</span>
+                  </span>
+                </a>
+                <a class="ua-support-opt" :href="messages.api.home.support.ticket_url" target="_blank" rel="noopener noreferrer">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/></svg>
+                  <span class="ua-support-opt-text">
+                    <span class="ua-support-opt-title">{{messages.api.home.support.ticket_title}}</span>
+                    <span class="ua-support-opt-sub">{{messages.api.home.support.ticket_desc}}</span>
+                  </span>
+                </a>
+              </div>
             </div>
           </div>
-
-          <!-- Footer institutionnel : barre claire (ligne haute + sous-ligne crédit) -->
-          <footer class="ua-footer mt-12">
-            <div class="flex flex-wrap items-center justify-between gap-4">
-              <div class="flex items-center gap-2.5">
-                <img class="ua-logo" src="/images/ua-logo.png" alt="Université des Antilles">
-                <span class="text-xs font-semibold text-[#202E56]">Université des Antilles · DSIN</span>
-              </div>
-              <nav class="flex items-center gap-4 text-xs" aria-label="Liens institutionnels">
-                <a href="#" class="ua-footer-link">{{messages.api.footer.legal}}</a>
-                <a href="#" class="ua-footer-link">{{messages.api.footer.accessibility}}</a>
-                <a href="#" class="ua-footer-link">{{messages.api.footer.privacy}}</a>
-              </nav>
-            </div>
-            <span class="text-[11px] text-gray-400">© 2026 · {{messages.api.footer.credit}}</span>
-          </footer>
       </div>
     </div>
   </div>
