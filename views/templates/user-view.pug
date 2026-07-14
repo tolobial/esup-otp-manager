@@ -60,7 +60,7 @@ script#user-view(type='text/x-template').
                      :aria-label="method.label"
                      :checked="user.methods[method.name].active && !user.methods[method.name].askActivation"
                      class="sr-only peer">
-              <span class="w-12 h-6 transition-colors duration-200 inline-block rounded-full"
+              <span class="w-12 h-6 transition-colors duration-200 inline-block rounded-full peer-focus-visible:ring-2 peer-focus-visible:ring-ua-blue peer-focus-visible:ring-offset-2"
                     :class="{
                       'bg-gray-300': !user.methods[method.name].active,
                       'bg-ua-orange': user.methods[method.name].askActivation,
