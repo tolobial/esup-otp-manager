@@ -38,6 +38,19 @@
       "toast_success": "Method deactivated"
     },
 
+    "manager": {
+      "grid": {
+        "title": "Generate a new passcode grid?",
+        "html": "Activating the passcode grid for <strong>%UID%</strong> generates a new grid and permanently invalidates the previous one. If <strong>%UID%</strong> had printed their earlier grid, it will no longer work.<br><br>It is your responsibility to notify them and provide the new grid.",
+        "confirm_button": "Generate new grid"
+      },
+      "deactivate": {
+        "title": "Deactivate this method?",
+        "html": "You are about to deactivate <strong>%LABEL%</strong> for user <strong>%UID%</strong>. This security action will be applied to their account.",
+        "confirm_button": "Deactivate"
+      }
+    },
+
     "score": {
       "eyebrow": "Weighted security score",
       "method_activated_singular": "✓ %COUNT% method enabled",

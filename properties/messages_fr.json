@@ -38,6 +38,19 @@
       "toast_success": "Méthode désactivée"
     },
 
+    "manager": {
+      "grid": {
+        "title": "Générer une nouvelle grille de codes ?",
+        "html": "En activant la grille de codes pour <strong>%UID%</strong>, une nouvelle grille est générée et l'ancienne devient définitivement invalide. Si <strong>%UID%</strong> avait imprimé sa grille précédente, elle ne fonctionnera plus.<br><br>C'est à vous de le prévenir et de lui transmettre la nouvelle grille.",
+        "confirm_button": "Générer la nouvelle grille"
+      },
+      "deactivate": {
+        "title": "Désactiver cette méthode ?",
+        "html": "Vous êtes sur le point de désactiver <strong>%LABEL%</strong> pour l'utilisateur <strong>%UID%</strong>. Cette action de sécurité sera appliquée sur son compte.",
+        "confirm_button": "Désactiver"
+      }
+    },
+
     "score": {
       "eyebrow": "Score de sécurité pondéré",
       "method_activated_singular": "✓ %COUNT% méthode activée",

@@ -120,6 +120,25 @@ function toast({ message, displayLength = 9 /*seconds*/ * 1000, className }) {
     $('.toast').last().attr('role', 'alert');
 }
 
+// Échappe les métacaractères HTML d'une valeur non fiable avant injection dans un
+// contexte HTML (ex. SweetAlert2 `html`). N'est PAS appliqué aux chaînes i18n, qui
+// viennent du repo et contiennent du HTML volontaire.
+function escapeHtml(value) {
+    return String(value)
+        .split('&').join('&amp;')
+        .split('<').join('&lt;')
+        .split('>').join('&gt;')
+        .split('"').join('&quot;')
+        .split("'").join('&#39;');
+}
+
+// Rend une chaîne i18n (HTML de confiance, venant de nos JSON) en texte brut pour
+// window.confirm : les <br> deviennent des sauts de ligne, les autres balises sont
+// retirées. Pas d'échappement ici — confirm() n'a aucun moteur de rendu HTML.
+function htmlToPlain(html) {
+    return html.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]+>/g, '');
+}
+
 /** Vue.JS **/
 
 /** User **/
@@ -850,6 +869,12 @@ const UserDashboard = {
         },
         deactivate: async function(method) {
             if (!(this.user.methods[method].askActivation || window.confirm(this.messages.api.action.confirm_deactivate))) return;
+            return this.doDeactivate(method);
+        },
+        // Appel API de désactivation isolé (corps historique de deactivate, moins le garde
+        // window.confirm). Point d'entrée unique partagé : la vue utilisateur passe par
+        // deactivate (window.confirm), le manager par sa surcharge (SweetAlert2).
+        doDeactivate: async function(method) {
             try {
                 return await fetchApi({
                     method: "PUT",
@@ -979,6 +1004,56 @@ const UserView = {
         ...UserDashboard.methods,
         formatApiUri: function(uri) {
             return '/api/admin/' + this.user.uid + uri;
+        },
+        // Manager : l'activation de la grille génère une NOUVELLE grille et invalide
+        // l'ancienne (cf. standardActivate → setPasscodeGrid). Confirmation orange avant
+        // l'appel. Les autres méthodes sont réversibles et sans effet de bord → délégation
+        // directe au parent, sans confirmation.
+        async activate(method) {
+            if (method === 'passcode_grid') {
+                const m = this.messages.api.manager.grid;
+                const uid = escapeHtml(this.user.uid);
+                if (window.Swal) {
+                    const r = await Swal.fire({
+                        icon: 'warning',
+                        title: m.title,
+                        html: m.html.split('%UID%').join(uid),
+                        showCancelButton: true,
+                        confirmButtonText: m.confirm_button,
+                        cancelButtonText: this.messages.api.action.cancel,
+                        confirmButtonColor: '#CC5717'
+                    });
+                    if (!r.isConfirmed) return;
+                } else if (!window.confirm(htmlToPlain(m.html.split('%UID%').join(this.user.uid)))) {
+                    return;
+                }
+            }
+            return UserDashboard.methods.activate.call(this, method);
+        },
+        // Manager : toute désactivation est un acte de sécurité posé sur le compte d'autrui.
+        // Confirmation crimson nommant la méthode et l'utilisateur ciblé, puis doDeactivate
+        // (même appel API que la vue utilisateur, aucune duplication).
+        async deactivate(method) {
+            const m = this.messages.api.manager.deactivate;
+            const label = escapeHtml(this.methods?.[method]?.label || method);
+            const uid = escapeHtml(this.user.uid);
+            const fill = s => s.split('%LABEL%').join(label).split('%UID%').join(uid);
+            if (window.Swal) {
+                const r = await Swal.fire({
+                    icon: 'question',
+                    title: m.title,
+                    html: fill(m.html),
+                    showCancelButton: true,
+                    confirmButtonText: m.confirm_button,
+                    cancelButtonText: this.messages.api.action.cancel,
+                    confirmButtonColor: '#9B1E21'
+                });
+                if (!r.isConfirmed) return;
+            } else {
+                const plain = htmlToPlain(m.html.split('%LABEL%').join(this.methods?.[method]?.label || method).split('%UID%').join(this.user.uid));
+                if (!window.confirm(plain)) return;
+            }
+            return this.doDeactivate(method);
         },
     },
 };
