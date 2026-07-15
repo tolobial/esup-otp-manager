@@ -2273,6 +2273,9 @@ Vue.createApp({
             $('#' + target.name).parent().addClass('active');
             $('#' + target.name).parent().attr('aria-current', 'page');
             if (document.getElementById("sidenav-overlay")) $('#navButton').click();
+            // Ferme le tiroir de navigation mobile après sélection (CSS-only : on décoche).
+            const drawerToggle = document.getElementById('sidebar-toggle');
+            if (drawerToggle) drawerToggle.checked = false;
             this.getAndSetUser();
         },
 

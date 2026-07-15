@@ -82,3 +82,13 @@
   .ua-slot:hover .ua-inner{transform:scale(1.03)}
   .ua-slot,.ua-inner,.ua-fan-stage{transition-duration:.01ms}
 }
+
+/* --- Mobile : sélecteur pleine largeur, éventail réduit et borné --- */
+@media (max-width:640px){
+  .ua-view-switch{display:flex;width:100%;justify-content:center}
+  .ua-view-switch button{flex:1;padding:8px 6px;font-size:12px}
+  /* Les slots (360px) et leurs transforms en éventail débordent d'un écran étroit :
+     on réduit l'ensemble et on borne le stage pour éviter tout scroll horizontal. */
+  .ua-fan-stage{height:340px;overflow:hidden}
+  .ua-fan{transform:scale(.6);transform-origin:center top}
+}

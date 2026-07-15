@@ -277,27 +277,100 @@ body:has([data-tw]) main > .container {
 }
 
 /*
- * Mode mobile : sidebar collapsée par défaut pour éviter
- * le double-scrollbar horizontal sur petit écran.
- * L'utilisateur navigue via les icônes (avec attributs title).
+ * Mode mobile (< 768px) : la sidebar devient un TIROIR off-canvas.
+ * Réutilise #sidebar-toggle (aucun contrôle desktop ne le coche) :
+ *   décoché  = tiroir hors écran ;
+ *   coché    = tiroir glissé + voile (.ua-scrim) de fermeture.
+ * Le chrome mobile (.ua-mtopbar, .ua-scrim) est masqué ≥ 768px.
  */
 @media (max-width: 767px) {
+  /* ── Barre supérieure : hamburger + logo ── */
+  .ua-mtopbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    flex-shrink: 0;
+    height: 52px;
+    padding: 0 10px;
+    background: var(--color-ua-navy);
+    border-bottom: 1px solid rgba(255,255,255,.10);
+  }
+  .ua-mtopbar-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    color: #fff;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .ua-mtopbar-btn:hover { background: rgba(255,255,255,.08); }
+  .ua-mtopbar-logo { height: 30px; width: auto; object-fit: contain; }
+
+  /* ── Sidebar : tiroir fixe glissant ── */
   [data-tw] .sidebar {
-    width: 3.5rem !important;
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    height: 100% !important;
+    width: 16rem !important;
+    transform: translateX(-100%);
+    transition: transform .28s cubic-bezier(.4,0,.2,1);
+    z-index: 50 !important;
+    box-shadow: 0 0 40px rgba(0,0,0,.4);
   }
-  [data-tw] .sidebar .sidebar-label {
-    display: none !important;
+  [data-tw]:has(#sidebar-toggle:checked) .sidebar {
+    transform: translateX(0);
   }
-  /* Rail toujours étroit sur mobile : logo responsive quel que soit l'état du toggle. */
+  /* En tiroir : toujours déplié (labels visibles, jamais le mode rail étroit). */
+  [data-tw] .sidebar .sidebar-label,
+  [data-tw] .sidebar .lbl,
+  [data-tw] .sidebar .ua-nav-count,
+  [data-tw] .sidebar .ua-nav-arr,
+  [data-tw] .sidebar .ua-nav-back span {
+    opacity: 1 !important;
+    display: inline !important;
+  }
+  [data-tw] .sidebar .ua-nav-item,
+  [data-tw] .sidebar .ua-nav-drill,
+  [data-tw] .sidebar .ua-nav-back {
+    justify-content: flex-start !important;
+  }
   [data-tw] .sidebar .ua-topbar-logo {
-    height: auto !important;
-    width: 100%;
+    height: 48px !important;
+    width: auto !important;
     min-width: 0;
   }
-  [data-tw] .sidebar .toggle-expand,
-  [data-tw] .sidebar .toggle-collapse {
-    display: none !important;
+
+  /* ── Voile : plein écran sous le tiroir, ferme au tap ── */
+  .ua-scrim {
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    background: rgba(15,23,42,.5);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .28s ease, visibility .28s ease;
   }
+  [data-tw]:has(#sidebar-toggle:checked) .ua-scrim {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  /* Tiroir ouvert : on fige le défilement de l'arrière-plan (CSS-only). */
+  body:has([data-tw] #sidebar-toggle:checked) {
+    overflow: hidden;
+  }
+}
+
+/* Chrome mobile masqué sur desktop (double garde avec md:hidden). */
+@media (min-width: 768px) {
+  .ua-mtopbar, .ua-scrim { display: none !important; }
 }
 
 /* ═══════════════════════════════════════════════════════════════════

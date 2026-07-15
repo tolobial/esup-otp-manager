@@ -1,7 +1,17 @@
 script#user-dashboard(type='text/x-template').
-  <div v-if="messages.api && currentmethod" data-tw class="tw-reset min-h-screen bg-gray-100 flex">
+  <div v-if="messages.api && currentmethod" data-tw class="tw-reset min-h-screen bg-gray-100 flex flex-col md:flex-row">
 
     <input type="checkbox" id="sidebar-toggle" class="hidden">
+
+    <!-- Barre supérieure mobile : hamburger + logo (masquée ≥ md) -->
+    <header class="ua-mtopbar md:hidden">
+      <label for="sidebar-toggle" class="ua-mtopbar-btn" role="button" tabindex="0" aria-label="Ouvrir la navigation">
+        <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/></svg>
+      </label>
+      <img src="/images/logo_ua.png" alt="Université des Antilles" class="ua-mtopbar-logo">
+    </header>
+    <!-- Voile de fermeture du tiroir (mobile) -->
+    <label for="sidebar-toggle" class="ua-scrim" aria-hidden="true"></label>
 
     <!-- Sidebar rétractable -->
     <aside class="sidebar flex-shrink-0 bg-ua-navy flex flex-col h-screen sticky top-0 transition-all duration-300 z-30 overflow-hidden">
@@ -114,7 +124,7 @@ script#user-dashboard(type='text/x-template').
     <!-- Zone principale                                -->
     <!-- ═════════════════════════════════════════════ -->
     <div class="flex-1 min-w-0 overflow-y-auto">
-      <div class="p-6 lg:p-8 space-y-6">
+      <div class="p-4 sm:p-6 lg:p-8 space-y-6">
 
         <template v-for="method in methods" :key="method.name">
           <div v-if="method.activate && currentmethod === method.name" autofocus aria-live="assertive" class="space-y-6">
