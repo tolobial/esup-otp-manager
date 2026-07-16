@@ -18,3 +18,4 @@ npm-debug.log
 
 # Windows Zone.Identifier (fichiers fantômes WSL)
 *:Zone.Identifier
+*.orig

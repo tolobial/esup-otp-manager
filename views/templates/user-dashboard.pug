@@ -124,7 +124,7 @@ script#user-dashboard(type='text/x-template').
     <!-- Zone principale                                -->
     <!-- ═════════════════════════════════════════════ -->
     <div class="flex-1 min-w-0 overflow-y-auto">
-      <div class="p-4 sm:p-6 lg:p-8 space-y-6">
+      <div class="p-4 sm:p-6 lg:p-8 space-y-6 max-w-5xl mx-auto">
 
         <template v-for="method in methods" :key="method.name">
           <div v-if="method.activate && currentmethod === method.name" autofocus aria-live="assertive" class="space-y-6">
@@ -197,6 +197,17 @@ script#user-dashboard(type='text/x-template').
                          :user="user"
                          :formatApiUri="formatApiUri"
                          :isManager="false"></component>
+            </div>
+
+            <div>
+              <button type="button"
+                      @click="$root.navigate({ currentTarget: { name: 'home', text: messages.api.menu.home } })"
+                      class="inline-flex items-center gap-2 px-4 py-2 bg-white text-ua-navy border border-ua-navy hover:bg-ua-navy hover:text-white text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ua-navy focus-visible:ring-offset-1">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18"/>
+                </svg>
+                {{ messages.api.menu.home }}
+              </button>
             </div>
 
           </div>
