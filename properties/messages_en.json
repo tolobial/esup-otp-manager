@@ -227,7 +227,20 @@
         },
         "step2": {
           "title": "Pair your device with Esup Auth",
-          "manual_btn": "Show manual activation"
+          "manual_btn": "Show manual activation",
+          "quick_activation": {
+            "title": "Quick activation",
+            "subtitle": "From this phone, in seconds.",
+            "steps": [
+              "Open the <strong>Esup Auth</strong> app",
+              "Tap <strong>+</strong> then <strong>Quick activation</strong>",
+              "Choose <strong>Université des Antilles</strong>",
+              "Sign in with your <strong>usual credentials</strong>"
+            ],
+            "auto_confirm": "This page will validate automatically once the device is paired.",
+            "open_app": "Open in Esup Auth",
+            "other_methods": "Other methods (QR code, manual entry)"
+          }
         }
       },
       "esupnfc": {

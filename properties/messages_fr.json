@@ -227,7 +227,20 @@
         },
         "step2": {
           "title": "Pairez votre appareil avec Esup Auth",
-          "manual_btn": "Afficher l'activation manuelle"
+          "manual_btn": "Afficher l'activation manuelle",
+          "quick_activation": {
+            "title": "Activation rapide",
+            "subtitle": "Depuis ce téléphone, en quelques secondes.",
+            "steps": [
+              "Ouvrez l'application <strong>Esup Auth</strong>",
+              "Touchez <strong>+</strong> puis <strong>Activation rapide</strong>",
+              "Choisissez <strong>Université des Antilles</strong>",
+              "Connectez-vous avec vos <strong>identifiants habituels</strong>"
+            ],
+            "auto_confirm": "Cette page se validera automatiquement une fois l'appareil appairé.",
+            "open_app": "Ouvrir dans Esup Auth",
+            "other_methods": "Autres méthodes (QR code, saisie manuelle)"
+          }
         }
       },
       "esupnfc": {

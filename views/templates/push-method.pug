@@ -74,21 +74,39 @@ script#push-method(type='text/x-template').
           <div class="step-content">
             <h3>{{ messages.api.methods.push.step2.title }}</h3>
 
-            <!-- Pairer : deep link (mobile) OU QR code (desktop) -->
-            <p v-if="user.methods.push.deepLink && infos.mobile"
-               v-html="messages.api.methods.push.deeplink_instructions.replace('%DEEPLINK%', user.methods.push.deepLink)"></p>
-            <template v-else>
+            <!-- Guide « activation rapide » — TOUT mobile / tablette (indépendant du deep link) -->
+            <div class="quick-activation mt-4" v-if="infos.mobile">
+              <h4 class="font-display font-bold text-ua-navy">{{ messages.api.methods.push.step2.quick_activation.title }}</h4>
+              <p class="text-sm text-gray-600 mt-1 mb-4">{{ messages.api.methods.push.step2.quick_activation.subtitle }}</p>
+              <ol class="space-y-3">
+                <li class="flex items-start gap-3" v-for="(step, i) in messages.api.methods.push.step2.quick_activation.steps" :key="i">
+                  <span class="flex-shrink-0 w-7 h-7 flex items-center justify-center bg-ua-blue/15 text-ua-blue text-sm font-bold">{{ i + 1 }}</span>
+                  <span class="text-sm text-gray-700 pt-1" v-html="step"></span>
+                </li>
+              </ol>
+              <div class="bg-ua-blue/10 border-l-4 border-ua-blue p-3 mt-4 text-sm text-gray-700">{{ messages.api.methods.push.step2.quick_activation.auto_confirm }}</div>
+              <!-- Bouton d'ouverture directe de l'app si un deep link est disponible -->
+              <a class="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-ua-navy text-white text-sm font-medium"
+                 v-if="user.methods.push.deepLink && infos.mobile"
+                 :href="user.methods.push.deepLink">{{ messages.api.methods.push.step2.quick_activation.open_app }}</a>
+              <button type="button" class="block mt-4 text-sm text-ua-blue underline" @click="showOtherMethods = !showOtherMethods">{{ messages.api.methods.push.step2.quick_activation.other_methods }}</button>
+            </div>
+
+            <!-- Appairage : QR code — direct sur desktop, replié derrière « autres méthodes » sur mobile -->
+            <div v-if="!infos.mobile || showOtherMethods">
               <p v-html="messages.api.methods.push.qrcode_instructions"></p>
               <div class="push-qrcode mt-3 inline-flex items-center justify-center bg-white border border-gray-200 p-3" v-html="user.methods.push.qrCode"></div>
-            </template>
+            </div>
 
-            <!-- Activation manuelle (repliable) -->
-            <button type="button" class="manual-key-btn" @click="showManual = !showManual">
-              🔧 {{ messages.api.methods.push.step2.manual_btn }}
-            </button>
-            <div class="bg-gray-50 border border-gray-200 p-4 mt-3" v-if="showManual">
-              <div class="text-sm text-gray-700"
-                   v-html='messages.api.methods.push.manual_activation_instructions.join("\n").replace("%UID%", user.uid).replace("%ACTIVATION_CODE%", user.methods.push.activationCode).replace("%API_URL%", user.methods.push.api_url)'></div>
+            <!-- Activation manuelle (repliable) — masquée sur mobile tant que « autres méthodes » reste fermé -->
+            <div v-if="!infos.mobile || showOtherMethods">
+              <button type="button" class="manual-key-btn" @click="showManual = !showManual">
+                🔧 {{ messages.api.methods.push.step2.manual_btn }}
+              </button>
+              <div class="bg-gray-50 border border-gray-200 p-4 mt-3" v-if="showManual">
+                <div class="text-sm text-gray-700"
+                     v-html='messages.api.methods.push.manual_activation_instructions.join("\n").replace("%UID%", user.uid).replace("%ACTIVATION_CODE%", user.methods.push.activationCode).replace("%API_URL%", user.methods.push.api_url)'></div>
+              </div>
             </div>
           </div>
         </div>

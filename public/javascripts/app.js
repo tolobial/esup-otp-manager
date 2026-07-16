@@ -178,6 +178,7 @@ const PushMethod = {
         return {
             'socket': Object,
             showManual: false,
+            showOtherMethods: false,
         };
     },
     watch: {
