@@ -2133,6 +2133,7 @@ Vue.createApp({
             isMacOs: navigator.platform.startsWith("Mac"),
             mobile: /Android/i.test(navigator.userAgent) ? "android" :
                     /iPhone|iPad|iPod/i.test(navigator.userAgent) ? "ios" :
+                    (/Macintosh/i.test(navigator.userAgent) && navigator.maxTouchPoints > 1) ? "ios" :
                     false,
             EsupAuth: { name: "Esup Auth", android: "https://play.google.com/store/apps/details?id=org.esupportail.esupAuth", ios: "https://apps.apple.com/fr/app/esup-auth/id1563904941" },
         },
