@@ -82,7 +82,6 @@
       "weak": "À éviter en méthode principale"
     },
     "themes": {
-      "fan": "Éventail",
       "hero": "Hero",
       "legacy": "Origine"
     },
@@ -92,8 +91,6 @@
       "weak": "Faible"
     },
     "views": {
-      "fan_align_grid": "Aligner par 3",
-      "fan_show_fan": "Voir en éventail",
       "prev": "Précédent",
       "next": "Suivant",
       "bento_manage": "Gérer cette méthode",

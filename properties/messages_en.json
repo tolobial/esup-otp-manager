@@ -82,7 +82,6 @@
       "weak": "Avoid as primary method"
     },
     "themes": {
-      "fan": "Fan",
       "hero": "Hero",
       "legacy": "Original"
     },
@@ -92,8 +91,6 @@
       "weak": "Weak"
     },
     "views": {
-      "fan_align_grid": "Align by 3",
-      "fan_show_fan": "Fan view",
       "prev": "Previous",
       "next": "Next",
       "bento_manage": "Manage this method",
