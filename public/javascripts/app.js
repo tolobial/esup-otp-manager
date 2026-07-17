@@ -290,7 +290,6 @@ const TotpMethod = {
             // Étape 1 conditionnelle : mémorise si l'utilisateur a déjà une app TOTP.
             step1Skipped: (function () { try { return localStorage.getItem('hasInstalledOtpApp') === 'true'; } catch (e) { return false; } })(),
             showManualKey: false,
-            showQr: false,
             currentStep: 1,
         };
     },
