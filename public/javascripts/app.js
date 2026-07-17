@@ -1224,9 +1224,7 @@ const AdminDashboard = {
                     var v = localStorage.getItem('ua-home-view');
                     return allowed.indexOf(v) !== -1 ? v : 'hero';
                 } catch (e) { return 'hero'; }
-            })(),
-            fanActive: 0,
-            fanMode: 'grid'   // 'grid' (par 3, défaut) | 'fan' (éventail). Pas d'auto-animation : page de config.
+            })()
         };
     },
     computed: {
@@ -1243,48 +1241,7 @@ const AdminDashboard = {
         setHomeView: function (v) {
             this.homeView = v;
             try { localStorage.setItem('ua-home-view', v); } catch (e) {}
-            if (v === 'fan') this.fanMode = 'grid';
         },
-        fanColor: function (i) { return ['bleu', 'navy', 'warm'][i % 3]; },
-        fanOff: function (i) {
-            var n = this.visibleMethods.length;
-            var r = i - this.fanActive;
-            var alt = r > 0 ? r - n : r + n;
-            return Math.abs(alt) < Math.abs(r) ? alt : r;
-        },
-        fanStageStyle: function () {
-            if (this.fanMode !== 'grid') return {};
-            var rows = Math.max(1, Math.ceil(this.visibleMethods.length / 3));
-            var rowStep = 168 * 0.9 + 26;
-            return { height: (rows * rowStep + 60) + 'px' };
-        },
-        fanSlotStyle: function (i) {
-            var H = 168, maxOff = 2, spacing = 152, step = 10, depth = 140;
-            if (this.fanMode === 'grid') {
-                var n = this.visibleMethods.length, cols = 3, s = 0.9;
-                var spacingX = 356, rowStepY = H * s + 26;
-                var rows = Math.ceil(n / cols);
-                var r = Math.floor(i / cols), posInRow = i - r * cols;
-                var itemsInRow = Math.min(cols, n - r * cols);
-                var x = (posInRow - (itemsInRow - 1) / 2) * spacingX;
-                var y = (r - (rows - 1) / 2) * rowStepY;
-                return { transform: 'translate(-50%,-50%) translateX(' + x + 'px) translateY(' + y + 'px) scale(' + s + ')', opacity: 1, zIndex: 10, pointerEvents: 'auto' };
-            }
-            var o = this.fanOff(i), a = Math.abs(o), vis = a <= maxOff, lift = o === 0 ? -14 : 0;
-            return {
-                transform: 'translate(-50%,-50%) translateX(' + (o * spacing) + 'px) translateY(' + (a * 8 + lift) + 'px) translateZ(' + (-a * depth) + 'px) rotateZ(' + (o * step) + 'deg) scale(' + (o === 0 ? 1 : 0.9) + ')',
-                opacity: vis ? 1 : 0,
-                zIndex: 100 - a,
-                pointerEvents: vis ? 'auto' : 'none'
-            };
-        },
-        fanGo: function (i) { if (this.fanMode === 'fan') this.fanActive = i; },
-        fanPrev: function () { if (this.fanMode === 'fan') { var n = this.visibleMethods.length; this.fanActive = (this.fanActive - 1 + n) % n; } },
-        fanNext: function () { if (this.fanMode === 'fan') { var n = this.visibleMethods.length; this.fanActive = (this.fanActive + 1) % n; } },
-        fanToggleMode: function () { this.fanMode = (this.fanMode === 'fan') ? 'grid' : 'fan'; },
-        // Clic sur une carte : en éventail on la recentre. Aucune (dés)activation par clic sur la carte
-        // (l'admin bascule uniquement via le switch dédié — évite un toggle global accidentel).
-        onCardClick: function (i) { if (this.fanMode === 'fan') this.fanGo(i); },
 
         activate: function(event) {
             event.target.checked = true;
