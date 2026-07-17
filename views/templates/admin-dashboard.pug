@@ -149,54 +149,8 @@ script#admin-dashboard(type='text/x-template').
           <button type="button" @click="setHomeView('legacy')" :class="{active: homeView === 'legacy'}">{{ messages.api.themes.legacy }}</button>
         </div>
 
-        <!-- ═══ THÈME ÉVENTAIL ═══ -->
-        <div v-if="homeView === 'fan'" class="ua-fan-zone">
-          <div class="ua-fan-controls">
-            <button type="button" class="ua-fan-btn" @click="fanToggleMode">
-              {{ fanMode === 'fan' ? messages.api.views.fan_align_grid : messages.api.views.fan_show_fan }}
-            </button>
-          </div>
-          <div class="ua-fan-stage" :class="{grid: fanMode === 'grid'}" :style="fanStageStyle()">
-            <div class="ua-fan">
-              <div v-for="(method, i) in visibleMethods" :key="method.name"
-                   class="ua-slot" :style="fanSlotStyle(i)">
-                <div class="ua-inner">
-                  <span class="ua-spot"></span>
-                  <div class="ua-card" :class="'g-' + fanColor(i)" @click="onCardClick(i)">
-                    <div class="ua-ic"><method-icon :name="method.name" :size="'8'"></method-icon></div>
-                    <div class="ua-meta">
-                      <h3>{{ method.label || method.name }}</h3>
-                      <p>{{ messages.api.home[method.name] }}</p>
-                    </div>
-                    <div class="flex flex-col items-end gap-1.5 flex-shrink-0">
-                      <label class="relative inline-flex items-center cursor-pointer" @click.stop>
-                        <input v-if="methods[method.name].activate" type="checkbox" @click="deactivate" :name="method.name" checked class="sr-only peer" :aria-label="`Désactiver globalement ${method.label || method.name}`">
-                        <input v-else type="checkbox" @click="activate" :name="method.name" class="sr-only peer" :aria-label="`Activer globalement ${method.label || method.name}`">
-                        <span class="w-12 h-6 bg-white/30 rounded-full peer-checked:bg-white/90 transition-colors duration-200 inline-block peer-focus-visible:ring-2 peer-focus-visible:ring-ua-blue peer-focus-visible:ring-offset-2"></span>
-                        <span class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full peer-checked:bg-ua-navy transition-transform duration-200 peer-checked:translate-x-6 pointer-events-none"></span>
-                      </label>
-                      <span class="ua-badge" :class="{ on: methods[method.name].activate }">
-                        {{ methods[method.name].activate ? messages.api.home.activated : messages.api.home.deactivated }}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="ua-fan-nav" v-if="fanMode === 'fan'">
-            <button type="button" @click="fanPrev" :aria-label="messages.api.views.prev">‹</button>
-            <span class="ua-fan-dots">
-              <button v-for="(method, i) in visibleMethods" :key="'dot-' + method.name"
-                      type="button" :class="{ on: fanOff(i) === 0 }"
-                      @click="fanGo(i)" :aria-label="method.label || method.name"></button>
-            </span>
-            <button type="button" @click="fanNext" :aria-label="messages.api.views.next">›</button>
-          </div>
-        </div>
-
         <!-- ═══ THÈME HERO : 3 groupes ═══ -->
-        <div v-else-if="homeView === 'hero'" class="space-y-8 mt-2">
+        <div v-if="homeView === 'hero'" class="space-y-8 mt-2">
           <template v-for="grp in [
             { key: 'recommended', title: messages.api.groups.recommended, cls: 'section-title-recommended', str: 'strength-high', strLabel: messages.api.method_strength.strong },
             { key: 'complementary', title: messages.api.groups.complementary, cls: '', str: 'strength-medium', strLabel: messages.api.method_strength.medium },
