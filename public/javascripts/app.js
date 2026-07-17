@@ -1705,15 +1705,6 @@ const Home = {
                     return allowed.indexOf(v) !== -1 ? v : 'hero';
                 } catch (e) { return 'hero'; }
             })(),
-            fanActive: 0,
-            fanMode: 'grid',        // 'grid' (icônes alignées par 3, défaut) | 'fan' (éventail animé)
-            fanManualFan: false,    // true si l'éventail a été activé manuellement (ne pas revenir en grille sur activité)
-            _fanIdle: null,
-            _activityHandler: null,
-            _lastAct: 0,
-            fanInterval: 3000,      // vitesse du défilement de l'éventail (ms entre 2 cartes)
-            fanIdleDelay: 180000,   // inactivité avant passage automatique en éventail (3 min)
-            _fanAuto: null,
             knobPct: 0,
             supportOpen: false
         };
@@ -1790,16 +1781,11 @@ const Home = {
         }
     },
     watch: {
-        fanMode: function (m) {
-            if (m === 'fan') this.fanAutoStart();
-            else this.fanAutoStop();
-        },
         'weightedScore.pct'() {
             this.$nextTick(() => this.animateKnob());
         }
     },
-    mounted: function () { this.startIdleWatch(); this.$nextTick(() => this.animateKnob()); },
-    beforeUnmount: function () { this.fanAutoStop(); this.stopIdleWatch(); },
+    mounted: function () { this.$nextTick(() => this.animateKnob()); },
     methods: {
         // Compteur animé du centre de l'anneau (0 → score réel). Le remplissage de
         // l'anneau lui-même est piloté en CSS via gaugeOffset (stroke-dashoffset).
@@ -2002,134 +1988,9 @@ const Home = {
             });
         },
 
-        // --- Vue éventail (vitrine) ---
-        fanReducedMotion: function () {
-            try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; }
-            catch (e) { return false; }
-        },
-        fanAutoStart: function () {
-            this.fanAutoStop();
-            if (this.homeView !== 'fan' || this.fanMode !== 'fan') return;
-            if (this.fanReducedMotion()) return;
-            if (this.visibleMethods.length < 2) return;
-            var self = this;
-            this._fanAuto = setInterval(function () {
-                var n = self.visibleMethods.length;
-                self.fanActive = (self.fanActive + 1) % n;
-            }, this.fanInterval);
-        },
-        fanAutoStop: function () {
-            if (this._fanAuto) { clearInterval(this._fanAuto); this._fanAuto = null; }
-        },
         setHomeView: function (v) {
             this.homeView = v;
             try { localStorage.setItem('ua-home-view', v); } catch (e) {}
-            if (v === 'fan') {
-                // On (re)part toujours sur la grille par 3 ; l'éventail reviendra après inactivité.
-                this.fanMode = 'grid';
-                this.fanManualFan = false;
-                this.fanAutoStop();
-                this.resetIdleTimer();
-            } else {
-                this.fanAutoStop();
-            }
-        },
-        fanColor: function (i) { return ['bleu', 'navy', 'warm'][i % 3]; },
-        fanOff: function (i) {
-            var n = this.visibleMethods.length;
-            var r = i - this.fanActive;
-            var alt = r > 0 ? r - n : r + n;
-            return Math.abs(alt) < Math.abs(r) ? alt : r;
-        },
-        // Hauteur du stage : dynamique en mode grille (selon le nombre de lignes), CSS sinon.
-        fanStageStyle: function () {
-            if (this.fanMode !== 'grid') return {};
-            var rows = Math.max(1, Math.ceil(this.visibleMethods.length / 3));
-            var rowStep = 168 * 0.9 + 26;
-            return { height: (rows * rowStep + 60) + 'px' };
-        },
-        fanSlotStyle: function (i) {
-            var W = 360, H = 168, maxOff = 2, spacing = 152, step = 10, depth = 140;
-            if (this.fanMode === 'grid') {
-                // Icônes alignées par 3, chaque ligne centrée, cartes légèrement réduites.
-                var n = this.visibleMethods.length, cols = 3, s = 0.9;
-                var spacingX = 356, rowStepY = H * s + 26;
-                var rows = Math.ceil(n / cols);
-                var r = Math.floor(i / cols), posInRow = i - r * cols;
-                var itemsInRow = Math.min(cols, n - r * cols);
-                var x = (posInRow - (itemsInRow - 1) / 2) * spacingX;
-                var y = (r - (rows - 1) / 2) * rowStepY;
-                return { transform: 'translate(-50%,-50%) translateX(' + x + 'px) translateY(' + y + 'px) scale(' + s + ')', opacity: 1, zIndex: 10, pointerEvents: 'auto' };
-            }
-            var o = this.fanOff(i), a = Math.abs(o), vis = a <= maxOff, lift = o === 0 ? -14 : 0;
-            return {
-                transform: 'translate(-50%,-50%) translateX(' + (o * spacing) + 'px) translateY(' + (a * 8 + lift) + 'px) translateZ(' + (-a * depth) + 'px) rotateZ(' + (o * step) + 'deg) scale(' + (o === 0 ? 1 : 0.9) + ')',
-                opacity: vis ? 1 : 0,
-                zIndex: 100 - a,
-                pointerEvents: vis ? 'auto' : 'none'
-            };
-        },
-        fanGo: function (i) { if (this.fanMode === 'fan') this.fanActive = i; },
-        fanPrev: function () { if (this.fanMode === 'fan') { var n = this.visibleMethods.length; this.fanActive = (this.fanActive - 1 + n) % n; } },
-        fanNext: function () { if (this.fanMode === 'fan') { var n = this.visibleMethods.length; this.fanActive = (this.fanActive + 1) % n; } },
-        onCardClick: function (i, method) {
-            // Grille (ou carte centrale de l'éventail) => on ouvre la méthode ; sinon on la met au centre.
-            if (this.fanMode !== 'fan' || this.fanOff(i) === 0) this.clickMethodCard(method.name);
-            else this.fanGo(i);
-        },
-        fanToggleMode: function () {
-            if (this.fanMode === 'fan') {
-                this.fanMode = 'grid';
-                this.fanManualFan = false;
-                this.fanAutoStop();
-            } else {
-                this.fanMode = 'fan';
-                this.fanManualFan = true;   // choix explicite : ne pas revenir en grille sur simple activité
-                this.fanAutoStart();
-            }
-            this.resetIdleTimer();
-        },
-
-        // --- Inactivité globale : bascule automatique en éventail après fanIdleDelay ---
-        startIdleWatch: function () {
-            if (this._activityHandler) return;
-            var self = this;
-            this._activityHandler = function () { self.onUserActivity(); };
-            ['mousemove', 'mousedown', 'keydown', 'scroll', 'touchstart'].forEach(function (ev) {
-                window.addEventListener(ev, self._activityHandler, { passive: true });
-            });
-            this.resetIdleTimer();
-        },
-        stopIdleWatch: function () {
-            if (this._activityHandler) {
-                var self = this;
-                ['mousemove', 'mousedown', 'keydown', 'scroll', 'touchstart'].forEach(function (ev) {
-                    window.removeEventListener(ev, self._activityHandler);
-                });
-                this._activityHandler = null;
-            }
-            if (this._fanIdle) { clearTimeout(this._fanIdle); this._fanIdle = null; }
-        },
-        onUserActivity: function () {
-            var now = Date.now();
-            if (this._lastAct && (now - this._lastAct) < 800) return;   // throttle
-            this._lastAct = now;
-            // Si l'éventail s'était activé tout seul (inactivité), on revient à la grille.
-            if (this.homeView === 'fan' && this.fanMode === 'fan' && !this.fanManualFan) {
-                this.fanMode = 'grid';
-                this.fanAutoStop();
-            }
-            this.resetIdleTimer();
-        },
-        resetIdleTimer: function () {
-            if (this._fanIdle) { clearTimeout(this._fanIdle); this._fanIdle = null; }
-            var self = this;
-            this._fanIdle = setTimeout(function () {
-                if (self.homeView === 'fan') {
-                    self.fanManualFan = false;
-                    self.fanMode = 'fan';   // le watcher fanMode déclenche fanAutoStart()
-                }
-            }, this.fanIdleDelay);
         }
     },
     template: '#home-dashboard'
