@@ -19,17 +19,6 @@
   color:#64708f;padding:6px 16px;border-radius:999px;cursor:pointer;transition:.2s}
 .ua-view-switch button.active{background:#fff;color:var(--ua-navy);box-shadow:0 1px 2px rgba(0,0,0,.12)}
 
-/* --- Zone éventail --- */
-.ua-fan-zone{margin-top:8px}
-.ua-fan-controls{display:flex;justify-content:center;margin-bottom:10px}
-.ua-fan-btn{border:1px solid #cfd6e4;background:#fff;color:var(--ua-navy);font:inherit;font-weight:600;
-  font-size:13px;border-radius:999px;padding:8px 16px;cursor:pointer;transition:.2s}
-.ua-fan-btn:hover{background:#f3f5fa}
-
-.ua-fan-stage{position:relative;height:440px;perspective:1300px;transition:height .55s cubic-bezier(.2,.8,.2,1)}
-.ua-fan-stage.grid{perspective:none}
-.ua-fan{position:absolute;inset:0}
-
 .ua-slot{position:absolute;left:50%;top:50%;width:360px;height:168px;
   transition:transform .55s cubic-bezier(.2,.8,.2,1),opacity .5s;will-change:transform}
 .ua-slot:hover{z-index:300 !important}
@@ -67,28 +56,16 @@
   background:rgba(255,255,255,.16);color:#fff}
 .ua-badge.on{background:rgba(90,230,170,.24);color:#d3ffe9}
 
-.ua-fan-nav{display:flex;align-items:center;justify-content:center;gap:16px;margin-top:14px}
-.ua-fan-nav>button{width:38px;height:38px;border-radius:50%;border:1px solid #cfd6e4;background:#fff;
-  color:var(--ua-navy);font-size:20px;line-height:1;cursor:pointer;transition:.2s}
-.ua-fan-nav>button:hover{background:#f3f5fa}
-.ua-fan-dots{display:flex;gap:8px}
-.ua-fan-dots button{width:8px;height:8px;padding:0;border:none;border-radius:50%;background:#c7cede;cursor:pointer;transition:.2s}
-.ua-fan-dots button.on{background:var(--ua-navy)}
-
 @keyframes ua-rotbd{to{--ua-bd:360deg}}
 
 @media (prefers-reduced-motion:reduce){
   .ua-spot{animation:none}
   .ua-slot:hover .ua-inner{transform:scale(1.03)}
-  .ua-slot,.ua-inner,.ua-fan-stage{transition-duration:.01ms}
+  .ua-slot,.ua-inner{transition-duration:.01ms}
 }
 
-/* --- Mobile : sélecteur pleine largeur, éventail réduit et borné --- */
+/* --- Mobile : sélecteur pleine largeur --- */
 @media (max-width:640px){
   .ua-view-switch{display:flex;width:100%;justify-content:center}
   .ua-view-switch button{flex:1;padding:8px 6px;font-size:12px}
-  /* Les slots (360px) et leurs transforms en éventail débordent d'un écran étroit :
-     on réduit l'ensemble et on borne le stage pour éviter tout scroll horizontal. */
-  .ua-fan-stage{height:340px;overflow:hidden}
-  .ua-fan{transform:scale(.6);transform-origin:center top}
 }
