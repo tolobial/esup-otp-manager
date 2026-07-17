@@ -1222,8 +1222,8 @@ const AdminDashboard = {
                 var allowed = ['fan', 'hero', 'legacy'];
                 try {
                     var v = localStorage.getItem('ua-home-view');
-                    return allowed.indexOf(v) !== -1 ? v : 'fan';
-                } catch (e) { return 'fan'; }
+                    return allowed.indexOf(v) !== -1 ? v : 'hero';
+                } catch (e) { return 'hero'; }
             })(),
             fanActive: 0,
             fanMode: 'grid'   // 'grid' (par 3, défaut) | 'fan' (éventail). Pas d'auto-animation : page de config.
@@ -1702,8 +1702,8 @@ const Home = {
                 var allowed = ['fan', 'hero', 'legacy'];
                 try {
                     var v = localStorage.getItem('ua-home-view');
-                    return allowed.indexOf(v) !== -1 ? v : 'fan';
-                } catch (e) { return 'fan'; }
+                    return allowed.indexOf(v) !== -1 ? v : 'hero';
+                } catch (e) { return 'hero'; }
             })(),
             fanActive: 0,
             fanMode: 'grid',        // 'grid' (icônes alignées par 3, défaut) | 'fan' (éventail animé)
