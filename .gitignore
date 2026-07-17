@@ -19,3 +19,6 @@ npm-debug.log
 # Windows Zone.Identifier (fichiers fantômes WSL)
 *:Zone.Identifier
 *.orig
+
+# Configuration locale avec secrets (copier depuis properties/esup.json.example)
+properties/esup.json

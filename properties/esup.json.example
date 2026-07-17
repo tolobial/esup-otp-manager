@@ -3,22 +3,22 @@
     "authentication": "CAS",
     "CAS": {
         "version": "CAS3.0",
-        "casBaseURL": "http://localhost:4000/cas",
-        "serviceBaseURL": "http://localhost:4000/"
+        "casBaseURL": "https://cas.example.fr/cas",
+        "serviceBaseURL": "https://otp-manager.example.fr/"
     },
     "port": "",
-    "api_url": "http://localhost:3000",
-    "api_password": "dev-shared-secret-changeme",
-    "session_secret_key": "dev-session-changeme-a7f3b",
-    "admins": ["devuser"],
-    "admins_attributes": {"memberof": ["cn=esup-otp.admin,ou=groups,dc=univ-ville,dc=fr"]},
+    "api_url": "https://otp-api.example.fr",
+    "api_password": "CHANGE_ME_shared_api_secret",
+    "session_secret_key": "CHANGE_ME_random_session_key",
+    "admins": ["exampleadmin"],
+    "admins_attributes": {"memberof": ["cn=esup-otp.admin,ou=groups,dc=example,dc=fr"]},
     "managers": [],
     "managers_attributes": {"supannentiteaffectation": ["DSI"]},
     "#how_to use users_method": "remove '#' in front of methods. You can add others acls",
     "users_methods" :{
-       "#random_code" : {"deny" : {"edupersonaffiliation" : ["student","alum"],"memberof":["cn=esup-otp.not_random_code,ou=groups,dc=univ-ville,dc=fr"]}},
-       "#random_code_mail" : {"allow" : {"edupersonaffiliation":["student","alum"],"memberof":["cn=esup-otp.random_code_mail,ou=groups,dc=univ-ville,dc=fr"]}},
-       "#bypass" : {"allow" : {"memberof":["cn=esup-otp.bypass,ou=groups,dc=univ-ville,dc=fr"]}}
+       "#random_code" : {"deny" : {"edupersonaffiliation" : ["student","alum"],"memberof":["cn=esup-otp.not_random_code,ou=groups,dc=example,dc=fr"]}},
+       "#random_code_mail" : {"allow" : {"edupersonaffiliation":["student","alum"],"memberof":["cn=esup-otp.random_code_mail,ou=groups,dc=example,dc=fr"]}},
+       "#bypass" : {"allow" : {"memberof":["cn=esup-otp.bypass,ou=groups,dc=example,dc=fr"]}}
     },
     "#how_to transport_regexes": "if defined, users must provide a telephone number or address that matches the corresponding regex",
     "#how_to transport_regexes sms": "`^((0[67](([.]|-| )?[0-9]){8})|((00|[+])(([.]|-| )?[0-9]){7,15}))$` authorizes French mobile numbers (10 digits starting with '06' or '07') or international numbers (7 to 15 digits starting with '+' or '00').",
