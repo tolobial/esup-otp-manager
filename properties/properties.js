@@ -14,4 +14,8 @@ for (const file of await fs.readdir(__dirname)) {
     }
 }
 
+if (!properties.esup) {
+    throw new Error("properties/esup.json manquant — copiez properties/esup.json.example vers properties/esup.json et renseignez vos valeurs.");
+}
+
 export default properties;
