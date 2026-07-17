@@ -290,9 +290,16 @@ const TotpMethod = {
             // Étape 1 conditionnelle : mémorise si l'utilisateur a déjà une app TOTP.
             step1Skipped: (function () { try { return localStorage.getItem('hasInstalledOtpApp') === 'true'; } catch (e) { return false; } })(),
             showManualKey: false,
+            showQr: false,
+            currentStep: 1,
         };
     },
     computed: {
+        // Clé groupée par blocs de 4 pour la lisibilité (affichage seul — la copie reste brute).
+        formattedSecret() {
+            const s = this.user.methods.totp.secret || '';
+            return s.replace(/(.{4})/g, '$1 ').trim();
+        },
         EsupAuth() {
             if (!this.infos.mobile) {
                 return this.infos.esup_auth_download_link;
@@ -326,6 +333,12 @@ const TotpMethod = {
         reopenStep1: function () {
             this.step1Skipped = false;
             try { localStorage.setItem('hasInstalledOtpApp', 'false'); } catch (e) {}
+        },
+        copyKey: function() {
+            try {
+                navigator.clipboard.writeText(this.user.methods.totp.secret);
+                toast({ message: this.messages.api.methods.totp.step2.copy_key, className: 'green contrasted' });
+            } catch (e) {}
         },
         validate: function() {
             const totpCode = this.user.methods.totp.validation_code;

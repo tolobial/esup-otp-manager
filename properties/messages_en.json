@@ -115,10 +115,10 @@
         "enter_code": "Enter the 6-digit code",
         "step1": {
           "title": "Install the application on your phone",
-          "description": "If not already done, download %BRAND_APP% (recommended) or a compatible TOTP application.",
+          "description": "Download the Esup Auth app, the university's official application.",
           "compat_label": "Compatible apps",
-          "compat_list": "Google Authenticator, Microsoft Authenticator, Aegis Authenticator, FreeOTP, Apple « Passwords » app.",
-          "skip_label": "I already have a TOTP application installed",
+          "compat_list": "",
+          "skip_label": "I already have Esup Auth installed",
           "skip_helper": "Check to skip directly to step 2",
           "collapsed_summary": "TOTP application already installed",
           "reopen_btn": "Change my choice"
@@ -128,7 +128,17 @@
           "description": "Open the application you just installed and use its \"<strong>Scan a QR code</strong>\" feature to register your account.",
           "manual_key_label": "If you can't scan, display the manual key.",
           "manual_key_btn": "Show manual key",
-          "manual_key_intro": "<strong>Key</strong> (enter manually in your app if you can't scan):"
+          "manual_key_intro": "<strong>Key</strong> (enter manually in your app if you can't scan):",
+          "open_app": "Open Esup Auth",
+          "download_esupauth": "No Esup Auth yet? Download",
+          "show_qr": "Show QR code (other device)",
+          "copy_key": "Copy key",
+          "mobile_key_label": "Secret key",
+          "mobile_key_hint": "Paste this key into Esup Auth",
+          "mobile_step1_title": "Add the account",
+          "mobile_step2_title": "Confirm with the code",
+          "mobile_continue": "Continue",
+          "mobile_back": "← Back"
         },
         "step3": {
           "title": "Enter the code displayed by the application",

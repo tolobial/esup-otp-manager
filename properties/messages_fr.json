@@ -115,10 +115,10 @@
         "enter_code": "Saisissez le code de 6 chiffres",
         "step1": {
           "title": "Installez l'application sur votre téléphone",
-          "description": "Si ce n'est pas déjà fait, téléchargez %BRAND_APP% (recommandée) ou une application TOTP compatible.",
+          "description": "Téléchargez l'application Esup Auth, l'application officielle de l'université.",
           "compat_label": "Apps compatibles",
-          "compat_list": "Google Authenticator, Microsoft Authenticator, Aegis Authenticator, FreeOTP, l'app Apple « Mots de passe ».",
-          "skip_label": "J'ai déjà une application TOTP installée",
+          "compat_list": "",
+          "skip_label": "J'ai déjà Esup Auth installée",
           "skip_helper": "Coche pour passer directement à l'étape 2",
           "collapsed_summary": "Application TOTP déjà installée",
           "reopen_btn": "Modifier mon choix"
@@ -128,7 +128,17 @@
           "description": "Ouvrez l'application que vous venez d'installer et utilisez sa fonction « <strong>Scanner un QR code</strong> » pour enregistrer votre compte.",
           "manual_key_label": "Si vous ne pouvez pas scanner, affichez la clé manuelle.",
           "manual_key_btn": "Afficher la clé manuelle",
-          "manual_key_intro": "<strong>Clé</strong> (à saisir manuellement dans votre app si vous ne pouvez pas scanner) :"
+          "manual_key_intro": "<strong>Clé</strong> (à saisir manuellement dans votre app si vous ne pouvez pas scanner) :",
+          "open_app": "Ouvrir Esup Auth",
+          "download_esupauth": "Pas encore Esup Auth ? Télécharger",
+          "show_qr": "Afficher le QR code (autre appareil)",
+          "copy_key": "Copier la clé",
+          "mobile_key_label": "Clé secrète",
+          "mobile_key_hint": "Collez cette clé dans Esup Auth",
+          "mobile_step1_title": "Ajoutez le compte",
+          "mobile_step2_title": "Confirmez avec le code",
+          "mobile_continue": "Continuer",
+          "mobile_back": "← Revenir"
         },
         "step3": {
           "title": "Saisissez le code affiché par l'application",
