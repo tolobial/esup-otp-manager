@@ -1217,9 +1217,9 @@ const AdminDashboard = {
     template: '#admin-dashboard',
     data: function () {
         return {
-            // Thème partagé avec la home ('fan' | 'hero' | 'legacy'), relu depuis le même localStorage.
+            // Thème partagé avec la home ('hero' | 'legacy'), relu depuis le même localStorage.
             homeView: (function () {
-                var allowed = ['fan', 'hero', 'legacy'];
+                var allowed = ['hero', 'legacy'];
                 try {
                     var v = localStorage.getItem('ua-home-view');
                     return allowed.indexOf(v) !== -1 ? v : 'hero';
@@ -1697,9 +1697,9 @@ const Home = {
     },
     data: function () {
         return {
-            // 'fan' (vitrine, défaut) | 'hero' | 'legacy' (origine)
+            // 'hero' (défaut) | 'legacy' (origine)
             homeView: (function () {
-                var allowed = ['fan', 'hero', 'legacy'];
+                var allowed = ['hero', 'legacy'];
                 try {
                     var v = localStorage.getItem('ua-home-view');
                     return allowed.indexOf(v) !== -1 ? v : 'hero';

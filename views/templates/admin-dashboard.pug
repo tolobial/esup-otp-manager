@@ -145,7 +145,6 @@ script#admin-dashboard(type='text/x-template').
 
         <!-- Sélecteur de thème (aligné sur la home : éventail / hero / origine) -->
         <div class="ua-view-switch">
-          <button type="button" @click="setHomeView('fan')"    :class="{active: homeView === 'fan'}">{{ messages.api.themes.fan }}</button>
           <button type="button" @click="setHomeView('hero')"   :class="{active: homeView === 'hero'}">{{ messages.api.themes.hero }}</button>
           <button type="button" @click="setHomeView('legacy')" :class="{active: homeView === 'legacy'}">{{ messages.api.themes.legacy }}</button>
         </div>
