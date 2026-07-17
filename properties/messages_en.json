@@ -140,7 +140,11 @@
           "mobile_key_label": "Secret key",
           "mobile_key_hint": "Paste this key into Esup Auth",
           "mobile_step1_title": "Add the account",
-          "mobile_step2_title": "Confirm with the code",
+          "mobile_step2_title": "Activate your TOTP",
+          "mobile_scenario_1": "Open <strong>Esup Auth</strong> and activate TOTP",
+          "mobile_scenario_2": "Copy the <strong>6-digit code</strong>",
+          "mobile_scenario_3": "Come back here and <strong>paste it</strong>",
+          "mobile_manual_toggle": "Manual activation (enter the key)",
           "mobile_continue": "Continue",
           "mobile_back": "← Back"
         },

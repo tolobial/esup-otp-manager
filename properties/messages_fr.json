@@ -140,7 +140,11 @@
           "mobile_key_label": "Clé secrète",
           "mobile_key_hint": "Collez cette clé dans Esup Auth",
           "mobile_step1_title": "Ajoutez le compte",
-          "mobile_step2_title": "Confirmez avec le code",
+          "mobile_step2_title": "Activez votre TOTP",
+          "mobile_scenario_1": "Ouvrez <strong>Esup Auth</strong> et activez le TOTP",
+          "mobile_scenario_2": "Copiez le <strong>code à 6 chiffres</strong>",
+          "mobile_scenario_3": "Revenez ici et <strong>collez-le</strong>",
+          "mobile_manual_toggle": "Activation manuelle (saisir la clé)",
           "mobile_continue": "Continuer",
           "mobile_back": "← Revenir"
         },

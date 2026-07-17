@@ -104,20 +104,26 @@ script#totp-method(type='text/x-template').
                   <p class="text-xs text-gray-500">{{ messages.api.methods.totp.step2.mobile_already_installed }}</p>
                   <button type="button" class="w-full mt-4 px-4 py-3 bg-ua-navy text-white text-sm font-medium" @click="currentStep = 2">{{ messages.api.methods.totp.step2.mobile_continue }}</button>
                 </div>
-                <!-- Étape 2 : clé + Ouvrir + code (retravaillée au Cran 2) -->
+                <!-- Étape 2 : activer le TOTP (scénario + code + repli clé) -->
                 <div v-if="currentStep === 2" class="space-y-4">
-                  <h4 class="font-display font-bold text-ua-navy">{{ messages.api.methods.totp.step2.mobile_step1_title }}</h4>
-                  <div class="text-center border-2 border-gray-200 p-4 space-y-3">
-                    <p class="text-xs font-medium text-gray-500">{{ messages.api.methods.totp.step2.mobile_key_label }}</p>
-                    <p class="font-mono text-base text-ua-navy break-words">{{ formattedSecret }}</p>
-                    <button type="button" class="manual-key-btn" @click="copyKey">📋 {{ messages.api.methods.totp.step2.copy_key }}</button>
-                    <p class="text-xs text-gray-500">{{ messages.api.methods.totp.step2.mobile_key_hint }}</p>
-                  </div>
+                  <h4 class="font-display font-bold text-ua-navy">{{ messages.api.methods.totp.step2.mobile_step2_title }}</h4>
+                  <ol class="space-y-3">
+                    <li class="flex items-start gap-3">
+                      <span class="flex-shrink-0 w-6 h-6 bg-ua-blue/15 text-ua-blue text-xs font-bold flex items-center justify-center">1</span>
+                      <span class="text-sm text-gray-600" v-html="messages.api.methods.totp.step2.mobile_scenario_1"></span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                      <span class="flex-shrink-0 w-6 h-6 bg-ua-blue/15 text-ua-blue text-xs font-bold flex items-center justify-center">2</span>
+                      <span class="text-sm text-gray-600" v-html="messages.api.methods.totp.step2.mobile_scenario_2"></span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                      <span class="flex-shrink-0 w-6 h-6 bg-ua-blue/15 text-ua-blue text-xs font-bold flex items-center justify-center">3</span>
+                      <span class="text-sm text-gray-600" v-html="messages.api.methods.totp.step2.mobile_scenario_3"></span>
+                    </li>
+                  </ol>
                   <a class="inline-flex items-center justify-center gap-2 w-full px-4 py-3 bg-ua-navy text-white text-sm font-medium"
                      v-if="user.methods.totp.deepLink"
                      :href="user.methods.totp.deepLink">{{ messages.api.methods.totp.step2.open_app }}</a>
-                  <a class="mt-2 text-xs text-ua-blue underline block text-center"
-                     :href="infos.EsupAuth[infos.mobile]" target="_blank">{{ messages.api.methods.totp.step2.download_esupauth }}</a>
                   <form @submit.prevent="validate">
                     <input type="text"
                            class="otp-field"
@@ -136,6 +142,14 @@ script#totp-method(type='text/x-template').
                       </svg>
                     </button>
                   </form>
+                  <!-- Repli : activation manuelle par saisie de la clé -->
+                  <button type="button" class="manual-key-btn" @click="showManualKey = !showManualKey">🔑 {{ messages.api.methods.totp.step2.mobile_manual_toggle }}</button>
+                  <div class="text-center border-2 border-gray-200 p-4 space-y-3" v-if="showManualKey">
+                    <p class="text-xs font-medium text-gray-500">{{ messages.api.methods.totp.step2.mobile_key_label }}</p>
+                    <p class="font-mono text-base text-ua-navy break-words">{{ formattedSecret }}</p>
+                    <button type="button" class="manual-key-btn" @click="copyKey">📋 {{ messages.api.methods.totp.step2.copy_key }}</button>
+                    <p class="text-xs text-gray-500">{{ messages.api.methods.totp.step2.mobile_key_hint }}</p>
+                  </div>
                   <button type="button" class="mt-3 text-xs text-ua-blue underline" @click="currentStep = 1">{{ messages.api.methods.totp.step2.mobile_back }}</button>
                 </div>
               </div>
