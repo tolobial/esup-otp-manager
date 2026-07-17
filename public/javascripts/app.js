@@ -291,6 +291,8 @@ const TotpMethod = {
             step1Skipped: (function () { try { return localStorage.getItem('hasInstalledOtpApp') === 'true'; } catch (e) { return false; } })(),
             showManualKey: false,
             currentStep: 1,
+            // Étape 2 mobile : 6 cases de saisie recomposées dans validation_code.
+            codeDigits: ['', '', '', '', '', ''],
         };
     },
     computed: {
@@ -339,6 +341,37 @@ const TotpMethod = {
                 toast({ message: this.messages.api.methods.totp.step2.copy_key, className: 'green contrasted' });
             } catch (e) {}
         },
+        // Saisie d'un chiffre : ne garde que le dernier chiffre, recompose, avance le focus.
+        onDigitInput: function(index, event) {
+            const digit = (event.target.value.match(/\d/g) || []).pop() || '';
+            this.codeDigits[index] = digit;
+            event.target.value = digit;
+            this.user.methods.totp.validation_code = this.codeDigits.join('');
+            if (digit && index < 5) {
+                const next = this.$refs.digits[index + 1];
+                if (next) next.focus();
+            }
+        },
+        // Backspace sur une case vide : recule le focus.
+        onDigitKeydown: function(index, event) {
+            if (event.key === 'Backspace' && !this.codeDigits[index] && index > 0) {
+                const prev = this.$refs.digits[index - 1];
+                if (prev) prev.focus();
+            }
+        },
+        // Collage : extrait jusqu'à 6 chiffres, remplit les cases, focus sur la dernière remplie.
+        onDigitPaste: function(event) {
+            event.preventDefault();
+            const text = ((event.clipboardData || window.clipboardData).getData('text') || '');
+            const digits = (text.match(/\d/g) || []).slice(0, 6);
+            for (let i = 0; i < 6; i++) this.codeDigits[i] = digits[i] || '';
+            this.user.methods.totp.validation_code = this.codeDigits.join('');
+            const lastIndex = Math.max(0, Math.min(digits.length, 6) - 1);
+            this.$nextTick(() => {
+                const target = this.$refs.digits[lastIndex];
+                if (target) target.focus();
+            });
+        },
         validate: function() {
             const totpCode = this.user.methods.totp.validation_code;
             this.user.methods.totp.validation_code = '';
@@ -352,6 +385,7 @@ const TotpMethod = {
                         this.user.methods.totp.askActivation = false;
                         this.user.methods.totp.qrCode = '';
                         this.user.methods.totp.message = '';
+                        this.codeDigits = ['', '', '', '', '', ''];
                         // L'activation a réussi : l'utilisateur a forcément une app TOTP installée.
                         try { localStorage.setItem('hasInstalledOtpApp', 'true'); } catch (e) {}
                         toast({ message: 'Code validé', className: 'green contrasted' });

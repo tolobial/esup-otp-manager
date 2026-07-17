@@ -125,16 +125,15 @@ script#totp-method(type='text/x-template').
                      v-if="user.methods.totp.deepLink"
                      :href="user.methods.totp.deepLink">{{ messages.api.methods.totp.step2.open_app }}</a>
                   <form @submit.prevent="validate">
-                    <input type="text"
-                           class="otp-field"
-                           inputmode="numeric"
-                           v-model="user.methods.totp.validation_code"
-                           id="totpCode-input"
-                           required
-                           maxlength="6"
-                           pattern="[0-9]{6}"
-                           autocomplete="one-time-code"
-                           :placeholder="messages.api.methods.totp.step3.field_placeholder">
+                    <div class="totp-code-cases">
+                      <input v-for="(d, i) in codeDigits" :key="i" ref="digits"
+                             class="totp-code-case" type="text" inputmode="numeric" maxlength="1"
+                             :autocomplete="i === 0 ? 'one-time-code' : 'off'"
+                             :value="codeDigits[i]"
+                             @input="onDigitInput(i, $event)"
+                             @keydown="onDigitKeydown(i, $event)"
+                             @paste="onDigitPaste($event)">
+                    </div>
                     <button type="submit" class="validate-btn">
                       <span>{{ messages.api.methods.totp.step3.validate_btn }}</span>
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">

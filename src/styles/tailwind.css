@@ -1141,6 +1141,24 @@ body:has([data-tw]) main > .container {
   }
   .otp-field:focus { border-color: #00A0DC; outline: none; }
   .otp-field::placeholder { color: #e2e8f0; }
+  /* ── 6 cases de code (étape 2 mobile) — coins nets 2px, style maison UA ── */
+  .totp-code-cases {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+  }
+  .totp-code-case {
+    width: 44px;
+    height: 52px;
+    border: 2px solid #e2e8f0;
+    font-family: 'Courier New', monospace;
+    font-size: 24px;
+    font-weight: 700;
+    text-align: center;
+    color: #202E56;
+    transition: border-color 0.2s;
+  }
+  .totp-code-case:focus { border-color: #00A0DC; outline: none; }
   .validate-btn {
     width: 100%;
     background: #16a34a;
